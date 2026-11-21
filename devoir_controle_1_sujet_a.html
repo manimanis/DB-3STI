@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devoir de Contrôle n°1 — Bases de Données : Séances 1 à 5 (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a class="btn-back" href="index.html">← Sommaire</a>
+      <span class="toolbar-title">3e Info (STI) — DC1 (Sujet A) : Takwira Arena (1h — /20)</span>
+      <a class="btn-variant" href="devoir_controle_1_sujet_b.html">Variante Sujet B (VoltRide) ⇄</a>
+      <a class="btn-sql" href="devoir_controle_1_sujet_a_takwira.sql" download>📥 Script takwira_db.sql</a>
+    </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; minutage</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Devoir de Contrôle n°1 — Durée : 1 heure</span>
+      </div>
+      <h1>Bases de Données : Modélisation, LDD et Manipulation (LMD)</h1>
+      <p class="subtitle">Programme évalué : Séances 1 à 5 (Entités/attributs, modèle relationnel, CREATE, ALTER, INSERT, UPDATE, DELETE et intégrité).</p>
+    </header>
+
+    <!-- Cartouche élève -->
+    <div class="student-box">
+      <div><strong>Nom &amp; Prénom :</strong> ......................................................</div>
+      <div><strong>Classe :</strong> 3e Info ......</div>
+      <div class="note-box">Note : .......... / 20</div>
+    </div>
+
+    <!-- Barème détaillé (prof) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Barème détaillé (20 points) et minutage conseillé (60 min)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Exercice</th>
+            <th>Durée</th>
+            <th>Détail du barème</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Exercice 1 — Connaissances &amp; Diagnostic</strong></td>
+            <td>10 min</td>
+            <td>Q1 : Vrai/Faux justifié (2 pts) + Q2 : Correction schéma (2 pts)</td>
+            <td><strong>4 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 2 — Modélisation (Takwira Arena)</strong></td>
+            <td>15 min</td>
+            <td>Q1 (1 pt) + Q2 (2,5 pts) + Q3 (1 pt) + Q4 (0,5 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 3 — LDD SQL (CREATE / ALTER)</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1,5 pt) + Q2 (2,5 pts) + Q3 (2 pts)</td>
+            <td><strong>6 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 4 — LMD SQL &amp; Intégrité</strong></td>
+            <td>15 min</td>
+            <td>Q1 (1,5 pt) + Q2 (1 pt) + Q3 (1 pt) + Q4 (0,5 pt) + Q5 (1 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;"><strong>TOTAL GÉNÉRAL</strong></td>
+            <td><strong>20 pts</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- EXERCICE 1 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 1 : Connaissances et Diagnostic de Schéma</span>
+        <span class="badge-pts">4 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          <strong>Vrai ou Faux :</strong> Cochez la bonne réponse et justifiez brièvement en cas de réponse « Faux ». <span class="q-pts">(2 pts — 0,5 pt × 4)</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Affirmation</th>
+                <th style="width: 115px;">Réponse</th>
+                <th style="width: 34%;">Justification (si Faux)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>a)</strong> Une table peut contenir plusieurs colonnes <code>UNIQUE</code>, mais une seule <code>PRIMARY KEY</code>.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>b)</strong> L'instruction <code>DELETE FROM Equipe;</code> supprime définitivement la structure de la table <code>Equipe</code>.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>c)</strong> Il est recommandé de stocker à la fois <code>dateNaiss</code> et <code>age</code> dans une table <code>Joueur</code>.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>d)</strong> Une clé étrangère de type <code>INT</code> peut référencer une clé primaire de type <code>VARCHAR(10)</code>.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+
+        <li>
+          <strong>Correction d'un schéma erroné :</strong> Dans un tournoi, un <strong>Joueur</strong> appartient à une seule <strong>Équipe</strong>, et une <strong>Équipe</strong> regroupe plusieurs joueurs. Un élève a proposé : <span class="q-pts">(2 pts)</span>
+          <div class="schema-list">
+            <strong>Joueur</strong> (<span class="pk">#idJ</span>, nomComplet, tel)<br>
+            <strong>Equipe</strong> (<span class="pk">#idEq</span>, nomEq, <span class="fk">idJ#</span>)
+          </div>
+          Identifiez les <strong>2 erreurs de conception</strong> commises dans ce schéma, puis réécrivez le schéma relationnel corrigé.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 1 (4 pts)</span>
+        <p><strong>1. Vrai / Faux (2 pts) :</strong><br>
+          • <strong>a) Vrai</strong> (0,5 pt).<br>
+          • <strong>b) Faux</strong> — <code>DELETE</code> vide uniquement les enregistrements (lignes) ; c'est <code>DROP TABLE Equipe;</code> qui détruit la structure (0,5 pt).<br>
+          • <strong>c) Faux</strong> — <code>age</code> est un attribut calculé (dérivé de <code>dateNaiss</code>) qui deviendrait obsolète (0,5 pt).<br>
+          • <strong>d) Faux</strong> — La clé étrangère et la clé primaire référencée doivent avoir exactement le même type de données (0,5 pt).
+        </p>
+        <p style="margin-bottom:0;"><strong>2. Diagnostic et correction (2 pts) :</strong><br>
+          • <strong>Erreur 1 (Atomicité — 0,5 pt) :</strong> <code>nomComplet</code> est un attribut composé → à éclater en <code>nom</code> et <code>prenom</code>.<br>
+          • <strong>Erreur 2 (Sens de la FK — 0,5 pt) :</strong> Dans un lien <code>1-N</code> (<code>Equipe</code> → <code>Joueur</code>), la clé étrangère doit migrer côté <code>N</code> (dans <code>Joueur</code>, pas dans <code>Equipe</code>).<br>
+          • <strong>Schéma corrigé (1 pt) :</strong> <code>Equipe(#idEq, nomEq)</code> et <code>Joueur(#idJ, nom, prenom, tel, idEq#)</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- EXERCICE 2 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 2 : Modélisation — Complexe « Takwira Arena »</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <div class="context-box">
+        <div class="diagram-wrap">
+  <svg viewBox="0 0 760 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de takwira_db">
+    <defs>
+      <marker id="arr-dc1a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      </marker>
+    </defs>
+
+    <!-- Table Terrain -->
+    <g transform="translate(20, 15)">
+      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="#eff6ff"/>
+      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Terrain</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># codeTer (VARCHAR 5)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomTer (VARCHAR 30)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">typeGazon (CHECK Synt./Hyb.)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
+    </g>
+
+    <!-- Table Reservation -->
+    <g transform="translate(285, 15)">
+      <rect x="0" y="0" width="190" height="125" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="190" height="26" rx="6" fill="#f0fdfa"/>
+      <text x="95" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Reservation</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># idRes (INT AUTO)</text>
+      <text x="10" y="62" font-size="8.5" fill="#334155">dateRes (DATE), heureDeb</text>
+      <text x="10" y="80" font-size="8.5" fill="#334155">dureeH (CHECK BETWEEN 1 AND 3)</text>
+      <text x="10" y="98" font-size="9" font-weight="700" fill="#1d4ed8">codeTer# (FK) ➔</text>
+      <text x="10" y="116" font-size="9" font-weight="700" fill="#7c3aed">idEq# (FK) ➔</text>
+    </g>
+
+    <!-- Table Equipe -->
+    <g transform="translate(560, 15)">
+      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="#f5f3ff"/>
+      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Equipe</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># idEq (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomEq (VARCHAR 30 UNIQUE)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">telCapitaine (VARCHAR 15)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR 30)</text>
+    </g>
+
+    <!-- Liens FK -->
+    <path d="M 285 98 C 240 98, 240 44, 205 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1a)"/>
+    <path d="M 475 116 C 515 116, 515 44, 555 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1a)"/>
+
+    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">takwira_db : La table Reservation relie un Terrain loué à l'Équipe qui l'a réservé.</text>
+  </svg>
+  <div class="diagram-caption">Figure DC1A.1 — Schéma Relationnel de la base Takwira Arena (Terrain, Reservation, Equipe).</div>
+</div>
+Le complexe de terrains de mini-foot <strong>Takwira Arena</strong> souhaite créer une base de données nommée <code>takwira_db</code> pour gérer ses réservations :
+        <ul style="margin:6px 0 0; padding-left:20px;">
+          <li>Chaque <strong>Terrain</strong> est identifié par un code (<code>codeTer</code>, ex. <code>T01</code>), possède un nom (<code>nomTer</code>), un type de gazon (<code>typeGazon</code> : <em>Synthétique</em> ou <em>Hybride</em>) et un tarif horaire en dinars (<code>tarifH</code>).</li>
+          <li>Chaque <strong>Équipe</strong> possède un numéro auto-incrémenté (<code>idEq</code>), un nom (<code>nomEq</code>), le téléphone de son capitaine (<code>telCap</code>) et sa ville (<code>ville</code>).</li>
+          <li>Chaque <strong>Réservation</strong> est identifiée par un numéro auto-incrémenté (<code>numRes</code>), possède une date (<code>dateRes</code>), une heure de début entière (<code>heureDeb</code>, ex. <code>18</code>) et une durée en heures (<code>dureeH</code>). Un terrain accueille <em>plusieurs</em> réservations, mais chaque réservation concerne <em>un seul</em> terrain. Une équipe effectue <em>plusieurs</em> réservations, mais chaque réservation appartient à <em>une seule</em> équipe.</li>
+        </ul>
+      </div>
+
+      <ol class="questions">
+        <li>Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Terrain</strong> et <strong>Réservation</strong>, puis entre <strong>Équipe</strong> et <strong>Réservation</strong>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Terrain</code>, <code>Equipe</code>, <code>Reservation</code>) en indiquant les clés primaires (<code>#pk</code>) et les clés étrangères (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>Indiquez dans quel ordre il faut <strong>créer</strong> ces 3 tables en SQL, puis dans quel ordre il faudrait les <strong>supprimer</strong> avec <code>DROP TABLE</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>Pourquoi choisit-on le type <code>VARCHAR</code> plutôt que <code>INT</code> pour la colonne <code>telCap</code> ? <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 2 (5 pts)</span>
+        <p><strong>1. Types de liens (1 pt) :</strong> <code>Terrain</code> — <code>Reservation</code> : <strong>1-N</strong> (0,5 pt) | <code>Equipe</code> — <code>Reservation</code> : <strong>1-N</strong> (0,5 pt).</p>
+        <p><strong>2. Modèle relationnel (2,5 pts) :</strong></p>
+        <div class="schema-list">
+          <strong>Terrain</strong> (<span class="pk">#codeTer</span>, nomTer, typeGazon, tarifH)<br>
+          <strong>Equipe</strong> (<span class="pk">#idEq</span>, nomEq, telCap, ville)<br>
+          <strong>Reservation</strong> (<span class="pk">#numRes</span>, dateRes, heureDeb, dureeH, <span class="fk">codeTer#</span>, <span class="fk">idEq#</span>)
+        </div>
+        <p><strong>3. Ordre (1 pt) :</strong> Création : <code>Terrain</code> et <code>Equipe</code> d'abord, puis <code>Reservation</code> (0,5 pt). Suppression : <code>Reservation</code> d'abord, puis <code>Terrain</code> et <code>Equipe</code> (0,5 pt).</p>
+        <p style="margin-bottom:0;"><strong>4. Type de <code>telCap</code> (0,5 pt) :</strong> On ne fait pas de calculs arithmétiques sur un numéro de téléphone, et <code>INT</code> supprimerait les zéros initiaux ou interdirait le préfixe <code>+216</code>.</p>
+      </div>
+    </section>
+
+    <!-- EXERCICE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Exercice 3 : Langage de Définition de Données (LDD)</span>
+        <span class="badge-pts">6 points</span>
+      </h2>
+
+      <p>On suppose que la base <code>takwira_db</code> et la table <code>Equipe(idEq INT AUTO_INCREMENT PRIMARY KEY, nomEq VARCHAR(40) NOT NULL, telCap VARCHAR(15) NOT NULL, ville VARCHAR(30) NOT NULL)</code> sont déjà créées.</p>
+
+      <ol class="questions">
+        <li>
+          Écrivez la requête SQL de création de la table <code>Terrain</code> respectant les règles suivantes : <span class="q-pts">(1,5 pt)</span>
+          <ul>
+            <li><code>codeTer</code> : chaîne de 5 caractères max, clé primaire ;</li>
+            <li><code>nomTer</code> : chaîne de 40 caractères max, obligatoire ;</li>
+            <li><code>typeGazon</code> : liste fermée parmi <code>'Synthétique'</code> et <code>'Hybride'</code>, obligatoire ;</li>
+            <li><code>tarifH</code> : nombre décimal (7 chiffres dont 3 après la virgule), obligatoire et <strong>strictement positif</strong>.</li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          Écrivez la requête SQL de création de la table <code>Reservation</code> : <span class="q-pts">(2,5 pts)</span>
+          <ul>
+            <li><code>numRes</code> : entier auto-incrémenté, clé primaire ;</li>
+            <li><code>dateRes</code> : date obligatoire ; <code>heureDeb</code> : entier obligatoire ;</li>
+            <li><code>dureeH</code> : entier obligatoire, valeur par défaut <code>1</code>, compris entre <code>1</code> et <code>3</code> inclus ;</li>
+            <li><code>codeTer</code> : clé étrangère vers <code>Terrain(codeTer)</code> avec <code>ON DELETE RESTRICT</code> ;</li>
+            <li><code>idEq</code> : clé étrangère vers <code>Equipe(idEq)</code> avec <code>ON DELETE CASCADE</code>.</li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          Écrivez les <strong>3 requêtes <code>ALTER TABLE</code></strong> permettant d'effectuer les évolutions suivantes : <span class="q-pts">(2 pts)</span>
+          <ul>
+            <li><strong>a)</strong> Ajouter à la table <code>Equipe</code> une colonne <code>emailCap</code> de type <code>VARCHAR(80)</code>, facultative et <strong>unique</strong>. <span class="q-pts">(1 pt)</span></li>
+            <li><strong>b)</strong> Agrandir la colonne <code>nomTer</code> de la table <code>Terrain</code> à <code>VARCHAR(60)</code> (toujours obligatoire). <span class="q-pts">(0,5 pt)</span></li>
+            <li><strong>c)</strong> Renommer la colonne <code>telCap</code> de la table <code>Equipe</code> en <code>telephone</code> (<code>VARCHAR(20) NOT NULL</code>). <span class="q-pts">(0,5 pt)</span></li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 3 : LDD (6 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Création de Terrain (1,5 pt)</span>
+<span class="kw">CREATE TABLE</span> Terrain (
+    codeTer   <span class="ty">VARCHAR(5)</span>,
+    nomTer    <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    typeGazon <span class="ty">ENUM('Synthétique', 'Hybride')</span> <span class="kw">NOT NULL</span>,
+    tarifH    <span class="ty">DECIMAL(7,3)</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_terrain <span class="kw">PRIMARY KEY</span> (codeTer),
+    <span class="kw">CONSTRAINT</span> chk_tarif  <span class="kw">CHECK</span> (tarifH &gt; 0)
+);
+
+<span class="cm">-- 2. Création de Reservation (2,5 pts)</span>
+<span class="kw">CREATE TABLE</span> Reservation (
+    numRes   <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    dateRes  <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+    heureDeb <span class="ty">INT</span>  <span class="kw">NOT NULL</span>,
+    dureeH   <span class="ty">INT</span>  <span class="kw">NOT NULL DEFAULT</span> 1,
+    codeTer  <span class="ty">VARCHAR(5)</span> <span class="kw">NOT NULL</span>,
+    idEq     <span class="ty">INT</span>        <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_reservation <span class="kw">PRIMARY KEY</span> (numRes),
+    <span class="kw">CONSTRAINT</span> chk_duree      <span class="kw">CHECK</span> (dureeH <span class="kw">BETWEEN</span> 1 <span class="kw">AND</span> 3),
+    <span class="kw">CONSTRAINT</span> fk_res_terrain <span class="kw">FOREIGN KEY</span> (codeTer)
+        <span class="kw">REFERENCES</span> Terrain(codeTer) <span class="kw">ON DELETE RESTRICT</span>,
+    <span class="kw">CONSTRAINT</span> fk_res_equipe  <span class="kw">FOREIGN KEY</span> (idEq)
+        <span class="kw">REFERENCES</span> Equipe(idEq) <span class="kw">ON DELETE CASCADE</span>
+);
+
+<span class="cm">-- 3. Évolutions ALTER TABLE (2 pts)</span>
+<span class="kw">ALTER TABLE</span> Equipe  <span class="kw">ADD</span> emailCap <span class="ty">VARCHAR(80)</span> <span class="kw">NULL UNIQUE</span>;
+<span class="kw">ALTER TABLE</span> Terrain <span class="kw">MODIFY</span> nomTer <span class="ty">VARCHAR(60)</span> <span class="kw">NOT NULL</span>;
+<span class="kw">ALTER TABLE</span> Equipe  <span class="kw">CHANGE</span> telCap telephone <span class="ty">VARCHAR(20)</span> <span class="kw">NOT NULL</span>;</pre>
+      </div>
+    </section>
+
+    <!-- EXERCICE 4 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 4 : Manipulation des Données (LMD) et Intégrité</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          <strong>Insertion multiple :</strong> Insérez en <strong>une seule requête</strong> les deux terrains suivants dans la table <code>Terrain</code> : <span class="q-pts">(1,5 pt)</span>
+          <ul>
+            <li><code>T01</code>, <code>Terrain Carthage</code>, <code>Synthétique</code>, <code>60.000 DT</code></li>
+            <li><code>T02</code>, <code>Terrain Hannibal</code>, <code>Hybride</code>, <code>80.000 DT</code></li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Insertion simple :</strong> Insérez dans la table <code>Equipe</code> l'équipe <code>'Aigles Sousse'</code>, téléphone <code>'22334455'</code>, ville <code>'Sousse'</code>, sans adresse e-mail (<code>emailCap</code> non renseigné). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Mise à jour :</strong> Augmentez de <code>10.000 DT</code> le tarif horaire (<code>tarifH</code>) de tous les terrains dont le type de gazon est <code>'Hybride'</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Suppression ciblée :</strong> Supprimez de la table <code>Reservation</code> la réservation portant le numéro <code>15</code>. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Analyse d'intégrité :</strong> Expliquez précisément la réaction du SGBDR pour chacune des deux commandes ci-dessous : <span class="q-pts">(1 pt — 0,5 pt × 2)</span>
+          <ul>
+            <li><strong>a)</strong> <code>DELETE FROM Equipe WHERE idEq = 1;</code> (sachant que l'équipe n°1 possède 3 réservations enregistrées).</li>
+            <li><strong>b)</strong> <code>INSERT INTO Reservation (dateRes, heureDeb, dureeH, codeTer, idEq) VALUES ('2026-12-01', 19, 2, 'T99', 1);</code> (sachant que le terrain <code>'T99'</code> n'existe pas dans <code>Terrain</code>).</li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 4 : LMD et Intégrité (5 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Insertion multiple dans Terrain (1,5 pt)</span>
+<span class="kw">INSERT INTO</span> Terrain (codeTer, nomTer, typeGazon, tarifH) <span class="kw">VALUES</span>
+(<span class="str">'T01'</span>, <span class="str">'Terrain Carthage'</span>, <span class="str">'Synthétique'</span>, 60.000),
+(<span class="str">'T02'</span>, <span class="str">'Terrain Hannibal'</span>, <span class="str">'Hybride'</span>,     80.000);
+
+<span class="cm">-- 2. Insertion simple dans Equipe (1 pt)</span>
+<span class="kw">INSERT INTO</span> Equipe (nomEq, telephone, ville, emailCap)
+<span class="kw">VALUES</span> (<span class="str">'Aigles Sousse'</span>, <span class="str">'22334455'</span>, <span class="str">'Sousse'</span>, <span class="kw">NULL</span>);
+
+<span class="cm">-- 3. Mise à jour conditionnelle (1 pt)</span>
+<span class="kw">UPDATE</span> Terrain
+<span class="kw">SET</span> tarifH = tarifH + 10
+<span class="kw">WHERE</span> typeGazon = <span class="str">'Hybride'</span>;
+
+<span class="cm">-- 4. Suppression ciblée (0,5 pt)</span>
+<span class="kw">DELETE FROM</span> Reservation
+<span class="kw">WHERE</span> numRes = 15;</pre>
+        <p style="margin-bottom:0;"><strong>5. Analyse d'intégrité (1 pt) :</strong><br>
+          • <strong>a)</strong> L'équipe n°1 est supprimée <strong>ainsi que automatiquement ses 3 réservations</strong> dans <code>Reservation</code>, grâce à la clause <code>ON DELETE CASCADE</code> définie sur <code>fk_res_equipe</code> (0,5 pt).<br>
+          • <strong>b)</strong> L'insertion est <strong>refusée</strong> pour violation d'<strong>intégrité référentielle</strong> : la clé étrangère <code>codeTer = 'T99'</code> ne correspond à aucune clé primaire existante dans la table mère <code>Terrain</code> (0,5 pt).
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

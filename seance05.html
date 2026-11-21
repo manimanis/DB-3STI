@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 5 — LMD SQL : INSERT, UPDATE, DELETE et Intégrité (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance04.html">← S4</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 5 : LMD SQL (2h)</div>
+        <a class="btn-nav" href="seance06.html">S6 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 5 (2 heures)</span>
+      </div>
+      <h1>LMD SQL : Insertion, Mise à Jour, Suppression et Intégrité Référentielle</h1>
+      <p class="subtitle">Objectifs : Peupler une base avec INSERT INTO (simple et multiple), modifier et supprimer des données avec UPDATE et DELETE en maîtrisant la clause WHERE et les règles d'intégrité.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Ordre logique)</strong></td>
+            <td>Faire trouver l'ordre d'insertion et de suppression entre les 4 tables de <em>TechStore</em>.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h35</td>
+            <td>20 min</td>
+            <td><strong>2. Synthèse LMD</strong></td>
+            <td>Formaliser <code>INSERT INTO</code> (simple/multiple), <code>UPDATE ... SET ... WHERE</code>, <code>DELETE FROM ... WHERE</code> et le danger d'omettre <code>WHERE</code>.</td>
+          </tr>
+          <tr>
+            <td>0h35 – 1h15</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé sur TechStore</strong></td>
+            <td>Peupler entièrement <code>boutique_info</code>, réaliser des mises à jour ciblées (tarifs, stocks, e-mails) et tester l'oubli du <code>WHERE</code> sur une table brouillon.</td>
+          </tr>
+          <tr>
+            <td>1h15 – 1h35</td>
+            <td>20 min</td>
+            <td><strong>4. Labo d'erreurs volontaires</strong></td>
+            <td>Provoquer et analyser 4 erreurs d'intégrité (FK inexistante, <code>CHECK</code>, <code>ON DELETE RESTRICT</code> et <code>ON DELETE CASCADE</code>).</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Rédiger 5 requêtes LMD sur un scénario de gestion de stock.</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Ancrer les réflexes de sécurité (<code>WHERE</code>, ordre d'insertion, chaînes et dates entre apostrophes).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Par quelle table commencer ?</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        Notre base <code>boutique_info</code> (<strong>TechStore</strong>) est désormais construite et sécurisée (séances 3 et 4), mais ses 4 tables sont encore <strong>vides</strong>. Nous passons aujourd'hui au <strong>LMD</strong> (<em>Langage de Manipulation de Données</em>) pour y ajouter, modifier et supprimer des enregistrements.
+      </p>
+      <div class="context-box">
+        <strong>Question d'ouverture :</strong>
+        <ol style="margin:6px 0 0; padding-left:20px;">
+          <li>Peut-on insérer immédiatement la commande n°1 du client n°1 dans la table <code>Commande</code> avant d'avoir rempli la table <code>Client</code> ? Pourquoi ?</li>
+          <li>Indiquez dans quel ordre il faut <strong>insérer</strong> les données dans les 4 tables : <code>Client</code>, <code>Produit</code>, <code>Commande</code>, <code>LigneCommande</code>.</li>
+          <li>Indiquez dans quel ordre il faudrait les <strong>vider</strong> avec <code>DELETE</code>.</li>
+        </ol>
+      </div>
+      <div class="solution">
+        <span class="solution-label">Corrigé — Règle d'ordre (Mères ↔ Filles)</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Insertion :</strong> Toujours les <strong>tables mères avant les tables filles</strong> → <code>Client</code> et <code>Produit</code> d'abord, puis <code>Commande</code>, et enfin <code>LigneCommande</code>.</li>
+          <li><strong>Suppression :</strong> Exactement l'<strong>ordre inverse</strong> (filles avant mères) → <code>LigneCommande</code> → <code>Commande</code> → <code>Client</code> et <code>Produit</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : Les 3 instructions de manipulation (LMD)</span>
+        <span class="badge-time">20 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <div class="diagram-wrap">
+  <svg viewBox="0 0 760 155" width="100%" height="155" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ordre d'insertion et de suppression LMD">
+    <!-- Panneau Gauche : INSERT -->
+    <rect x="15" y="10" width="350" height="135" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="190" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">📥 Ordre d'INSERTION (Mères ➔ Filles)</text>
+    
+    <g transform="translate(30, 38)">
+      <!-- Niveau 1 -->
+      <rect x="10" y="0" width="115" height="24" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
+      <text x="67" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">1. Client / Produit</text>
+      <text x="140" y="16" font-size="8" fill="#475569">(Tables mères sans FK)</text>
+
+      <line x1="67" y1="26" x2="67" y2="36" stroke="#1d4ed8" stroke-width="1.5"/>
+      <polygon points="67,38 64,32 70,32" fill="#1d4ed8"/>
+
+      <!-- Niveau 2 -->
+      <rect x="10" y="38" width="115" height="24" rx="4" fill="#ffffff" stroke="#0f766e"/>
+      <text x="67" y="54" text-anchor="middle" font-size="9" font-weight="700" fill="#0f766e">2. Commande</text>
+      <text x="140" y="54" font-size="8" fill="#475569">(Nécessite idClt existant)</text>
+
+      <line x1="67" y1="64" x2="67" y2="74" stroke="#0f766e" stroke-width="1.5"/>
+      <polygon points="67,76 64,70 70,70" fill="#0f766e"/>
+
+      <!-- Niveau 3 -->
+      <rect x="10" y="76" width="115" height="24" rx="4" fill="#ffffff" stroke="#b45309"/>
+      <text x="67" y="92" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">3. LigneCommande</text>
+      <text x="140" y="92" font-size="8" fill="#475569">(Nécessite numCmd + refProd)</text>
+    </g>
+
+    <!-- Panneau Droit : DELETE -->
+    <rect x="395" y="10" width="350" height="135" rx="8" fill="#fef2f2" stroke="#b91c1c" stroke-width="1.5"/>
+    <text x="570" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">🗑️ Ordre de SUPPRESSION (Filles ➔ Mères)</text>
+
+    <g transform="translate(410, 38)">
+      <!-- Niveau 1 -->
+      <rect x="10" y="0" width="115" height="24" rx="4" fill="#ffffff" stroke="#b45309"/>
+      <text x="67" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">1. LigneCommande</text>
+      <text x="140" y="16" font-size="8" fill="#475569">(Dégager les lignes filles d'abord)</text>
+
+      <line x1="67" y1="26" x2="67" y2="36" stroke="#b91c1c" stroke-width="1.5"/>
+      <polygon points="67,38 64,32 70,32" fill="#b91c1c"/>
+
+      <!-- Niveau 2 -->
+      <rect x="10" y="38" width="115" height="24" rx="4" fill="#ffffff" stroke="#0f766e"/>
+      <text x="67" y="54" text-anchor="middle" font-size="9" font-weight="700" fill="#0f766e">2. Commande</text>
+      <text x="140" y="54" font-size="8" fill="#475569">(Puis supprimer la commande)</text>
+
+      <line x1="67" y1="64" x2="67" y2="74" stroke="#b91c1c" stroke-width="1.5"/>
+      <polygon points="67,76 64,70 70,70" fill="#b91c1c"/>
+
+      <!-- Niveau 3 -->
+      <rect x="10" y="76" width="115" height="24" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
+      <text x="67" y="92" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">3. Client / Produit</text>
+      <text x="140" y="92" font-size="8" fill="#475569">(Mères libérées de toute référence)</text>
+    </g>
+  </svg>
+  <div class="diagram-caption">Figure 5.1 — Ordre d'intégrité LMD : insertion descendante (mères d'abord) et suppression ascendante (filles d'abord).</div>
+</div>
+<h3 style="margin-top:0;">A. Insérer des enregistrements : INSERT INTO</h3>
+        <pre class="sql-block"><span class="cm">-- 1. Insertion simple (recommandé : préciser la liste des colonnes)</span>
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr)
+<span class="kw">VALUES</span> (<span class="str">'Ben Salem'</span>, <span class="str">'Sami'</span>, <span class="str">'Sousse'</span>, <span class="str">'22451200'</span>, <span class="str">'2025-09-12'</span>);
+
+<span class="cm">-- 2. Insertion multiple (plusieurs lignes en une seule requête)</span>
+<span class="kw">INSERT INTO</span> Produit (refProd, designation, categorie, prixUnit, qteStock)
+<span class="kw">VALUES</span>
+  (<span class="str">'P01'</span>, <span class="str">'PC Portable Lenovo ThinkPad E15'</span>, <span class="str">'Ordinateur'</span>, 2450.000, 8),
+  (<span class="str">'P02'</span>, <span class="str">'PC Portable Dell Inspiron 15'</span>,    <span class="str">'Ordinateur'</span>, 1890.000, 5);</pre>
+        <ul class="vocab-list">
+          <li>Les chaînes de caractères et les dates (format <code>'AAAA-MM-JJ'</code>) s'écrivent entre <strong>apostrophes simples</strong> <code>'...'</code>. Les nombres s'écrivent <strong>sans apostrophes</strong> (avec un point décimal <code>.</code>).</li>
+          <li>On peut omettre une colonne <code>AUTO_INCREMENT</code> (elle se remplit seule), une colonne avec <code>DEFAULT</code>, ou une colonne facultative (ou lui passer explicitement <code>NULL</code> sans apostrophes).</li>
+        </ul>
+
+        <h3>B. Modifier des enregistrements : UPDATE</h3>
+        <pre class="sql-block"><span class="kw">UPDATE</span> NomTable
+<span class="kw">SET</span> col1 = nouvelle_valeur1, col2 = nouvelle_valeur2
+<span class="kw">WHERE</span> condition;</pre>
+
+        <h3>C. Supprimer des enregistrements : DELETE</h3>
+        <pre class="sql-block"><span class="kw">DELETE FROM</span> NomTable
+<span class="kw">WHERE</span> condition;</pre>
+
+        <div class="danger-box">
+          <strong>PIÈGE CRITIQUE — L'oubli de la clause WHERE :</strong><br>
+          • Un <code>UPDATE Produit SET prixUnit = 100;</code> sans <code>WHERE</code> écrase le prix de <strong>TOUS les produits</strong> de la table !<br>
+          • Un <code>DELETE FROM Client;</code> sans <code>WHERE</code> <strong>vide intégralement la table</strong> !<br>
+          <em>Réflexe professionnel :</em> Toujours vérifier la condition avec un <code>SELECT * FROM Table WHERE ...;</code> avant d'exécuter un <code>UPDATE</code> ou un <code>DELETE</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : Peuplement et mises à jour de « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <p>Dans phpMyAdmin (base <code>boutique_info</code>), exécutez les étapes ci-dessous. <em>Ce jeu de données sera conservé pour les séances 6 à 9.</em></p>
+
+      <ol class="questions">
+        <li>
+          <strong>Peupler la table <code>Client</code> (insertion simple puis multiple) :</strong>
+          <ul>
+            <li>Insérez d'abord le premier client par une insertion simple : <code>Ben Salem</code>, <code>Sami</code>, <code>Sousse</code>, <code>22451200</code>, <code>2025-09-12</code>.</li>
+            <li>Insérez ensuite les 5 autres clients en une seule requête d'<strong>insertion multiple</strong> :
+              <table>
+                <thead>
+                  <tr><th>nom</th><th>prenom</th><th>ville</th><th>tel</th><th>dateInscr</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Trabelsi</td><td>Ines</td><td>Tunis</td><td>55890123</td><td>2025-10-03</td></tr>
+                  <tr><td>Khelifi</td><td>Mehdi</td><td>Sfax</td><td>98741258</td><td>2025-11-20</td></tr>
+                  <tr><td>Mansouri</td><td>Aya</td><td>Sousse</td><td><em>NULL</em></td><td>2026-01-15</td></tr>
+                  <tr><td>Jaziri</td><td>Yassine</td><td>Monastir</td><td>29654321</td><td>2026-02-08</td></tr>
+                  <tr><td>Bouazizi</td><td>Nour</td><td>Tunis</td><td>50112233</td><td>2026-03-10</td></tr>
+                </tbody>
+              </table>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>Peupler la table <code>Produit</code> (insertion multiple des 8 articles) :</strong>
+          <table>
+            <thead>
+              <tr><th>refProd</th><th>designation</th><th>categorie</th><th>prixUnit</th><th>qteStock</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>P01</td><td>PC Portable Lenovo ThinkPad E15</td><td>Ordinateur</td><td>2450.000</td><td>8</td></tr>
+              <tr><td>P02</td><td>PC Portable Dell Inspiron 15</td><td>Ordinateur</td><td>1890.000</td><td>5</td></tr>
+              <tr><td>P03</td><td>Souris sans fil Logitech M185</td><td>Accessoire</td><td>45.500</td><td>35</td></tr>
+              <tr><td>P04</td><td>Clavier mécanique RGB</td><td>Accessoire</td><td>165.000</td><td>14</td></tr>
+              <tr><td>P05</td><td>Disque SSD NVMe 1 To</td><td>Stockage</td><td>230.000</td><td>20</td></tr>
+              <tr><td>P06</td><td>Clé USB 3.2 128 Go</td><td>Stockage</td><td>38.000</td><td>0</td></tr>
+              <tr><td>P07</td><td>Écran 24 pouces Full HD IPS</td><td>Périphérique</td><td>480.000</td><td>10</td></tr>
+              <tr><td>P08</td><td>Imprimante Jet d encre Wi-Fi</td><td>Périphérique</td><td>520.000</td><td>4</td></tr>
+            </tbody>
+          </table>
+        </li>
+        <li>
+          <strong>Peupler les tables filles <code>Commande</code> et <code>LigneCommande</code> :</strong>
+          <ul>
+            <li>6 commandes <code>(dateCmd, idClt)</code> : <code>('2026-01-20', 1)</code>, <code>('2026-02-05', 2)</code>, <code>('2026-02-14', 1)</code>, <code>('2026-03-02', 3)</code>, <code>('2026-03-18', 4)</code>, <code>('2026-04-04', 5)</code>.</li>
+            <li>13 lignes <code>(numCmd, refProd, qteCmd)</code> : <code>(1,'P01',1)</code>, <code>(1,'P03',2)</code>, <code>(2,'P02',1)</code>, <code>(2,'P05',1)</code>, <code>(2,'P07',2)</code>, <code>(3,'P04',1)</code>, <code>(3,'P05',2)</code>, <code>(4,'P08',1)</code>, <code>(4,'P03',3)</code>, <code>(5,'P01',1)</code>, <code>(5,'P07',1)</code>, <code>(6,'P04',2)</code>, <code>(6,'P03',1)</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Mises à jour ciblées (<code>UPDATE</code>) :</strong>
+          <ul>
+            <li>Renseignez l'e-mail de <code>Sami Ben Salem</code> (<code>idClt = 1</code>) : <code>sami.bensalem@mail.tn</code>.</li>
+            <li>Réapprovisionnez le produit <code>P06</code> de <code>25</code> unités, puis remettez-le à <code>0</code> après vérification (pour garder un produit en rupture pour la séance 6).</li>
+            <li>Simulez une augmentation de <code>10%</code> sur tous les produits de la catégorie <code>'Accessoire'</code>, observez les nouveaux prix, puis revenez aux prix initiaux (<code>45.500</code> pour <code>P03</code> et <code>165.000</code> pour <code>P04</code>).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Expérience sans risque sur l'oubli du <code>WHERE</code> :</strong>
+          <ul>
+            <li>Créez une copie de secours de la table <code>Produit</code> : <code>CREATE TABLE Produit_Test AS SELECT * FROM Produit;</code></li>
+            <li>Exécutez <code>UPDATE Produit_Test SET prixUnit = 99.000;</code> (sans <code>WHERE</code>) puis affichez son contenu : que constatez-vous ?</li>
+            <li>Exécutez <code>DELETE FROM Produit_Test;</code> (sans <code>WHERE</code>) puis vérifiez le nombre de lignes. Supprimez enfin la table brouillon : <code>DROP TABLE Produit_Test;</code>.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Script LMD complet (boutique_info)</span>
+        <pre class="sql-block"><span class="kw">USE</span> boutique_info;
+
+<span class="cm">-- 1. Peuplement de Client (simple puis multiple)</span>
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr)
+<span class="kw">VALUES</span> (<span class="str">'Ben Salem'</span>, <span class="str">'Sami'</span>, <span class="str">'Sousse'</span>, <span class="str">'22451200'</span>, <span class="str">'2025-09-12'</span>);
+
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr) <span class="kw">VALUES</span>
+(<span class="str">'Trabelsi'</span>, <span class="str">'Ines'</span>,    <span class="str">'Tunis'</span>,    <span class="str">'55890123'</span>, <span class="str">'2025-10-03'</span>),
+(<span class="str">'Khelifi'</span>,  <span class="str">'Mehdi'</span>,   <span class="str">'Sfax'</span>,     <span class="str">'98741258'</span>, <span class="str">'2025-11-20'</span>),
+(<span class="str">'Mansouri'</span>, <span class="str">'Aya'</span>,     <span class="str">'Sousse'</span>,   <span class="kw">NULL</span>,       <span class="str">'2026-01-15'</span>),
+(<span class="str">'Jaziri'</span>,   <span class="str">'Yassine'</span>, <span class="str">'Monastir'</span>, <span class="str">'29654321'</span>, <span class="str">'2026-02-08'</span>),
+(<span class="str">'Bouazizi'</span>, <span class="str">'Nour'</span>,    <span class="str">'Tunis'</span>,    <span class="str">'50112233'</span>, <span class="str">'2026-03-10'</span>);
+
+<span class="cm">-- 2. Peuplement de Produit</span>
+<span class="kw">INSERT INTO</span> Produit (refProd, designation, categorie, prixUnit, qteStock) <span class="kw">VALUES</span>
+(<span class="str">'P01'</span>, <span class="str">'PC Portable Lenovo ThinkPad E15'</span>, <span class="str">'Ordinateur'</span>,   2450.000,  8),
+(<span class="str">'P02'</span>, <span class="str">'PC Portable Dell Inspiron 15'</span>,    <span class="str">'Ordinateur'</span>,   1890.000,  5),
+(<span class="str">'P03'</span>, <span class="str">'Souris sans fil Logitech M185'</span>,   <span class="str">'Accessoire'</span>,     45.500, 35),
+(<span class="str">'P04'</span>, <span class="str">'Clavier mécanique RGB'</span>,           <span class="str">'Accessoire'</span>,    165.000, 14),
+(<span class="str">'P05'</span>, <span class="str">'Disque SSD NVMe 1 To'</span>,            <span class="str">'Stockage'</span>,      230.000, 20),
+(<span class="str">'P06'</span>, <span class="str">'Clé USB 3.2 128 Go'</span>,              <span class="str">'Stockage'</span>,       38.000,  0),
+(<span class="str">'P07'</span>, <span class="str">'Écran 24 pouces Full HD IPS'</span>,     <span class="str">'Périphérique'</span>,  480.000, 10),
+(<span class="str">'P08'</span>, <span class="str">'Imprimante Jet d encre Wi-Fi'</span>,    <span class="str">'Périphérique'</span>,  520.000,  4);
+
+<span class="cm">-- 3. Peuplement de Commande puis LigneCommande</span>
+<span class="kw">INSERT INTO</span> Commande (dateCmd, idClt) <span class="kw">VALUES</span>
+(<span class="str">'2026-01-20'</span>, 1), (<span class="str">'2026-02-05'</span>, 2), (<span class="str">'2026-02-14'</span>, 1),
+(<span class="str">'2026-03-02'</span>, 3), (<span class="str">'2026-03-18'</span>, 4), (<span class="str">'2026-04-04'</span>, 5);
+
+<span class="kw">INSERT INTO</span> LigneCommande (numCmd, refProd, qteCmd) <span class="kw">VALUES</span>
+(1, <span class="str">'P01'</span>, 1), (1, <span class="str">'P03'</span>, 2), (2, <span class="str">'P02'</span>, 1), (2, <span class="str">'P05'</span>, 1), (2, <span class="str">'P07'</span>, 2),
+(3, <span class="str">'P04'</span>, 1), (3, <span class="str">'P05'</span>, 2), (4, <span class="str">'P08'</span>, 1), (4, <span class="str">'P03'</span>, 3), (5, <span class="str">'P01'</span>, 1),
+(5, <span class="str">'P07'</span>, 1), (6, <span class="str">'P04'</span>, 2), (6, <span class="str">'P03'</span>, 1);
+
+<span class="cm">-- 4. Mises à jour ciblées</span>
+<span class="kw">UPDATE</span> Client  <span class="kw">SET</span> email = <span class="str">'sami.bensalem@mail.tn'</span> <span class="kw">WHERE</span> idClt = 1;
+<span class="kw">UPDATE</span> Produit <span class="kw">SET</span> qteStock = qteStock + 25 <span class="kw">WHERE</span> refProd = <span class="str">'P06'</span>;
+<span class="kw">UPDATE</span> Produit <span class="kw">SET</span> qteStock = 0 <span class="kw">WHERE</span> refProd = <span class="str">'P06'</span>;
+
+<span class="kw">UPDATE</span> Produit <span class="kw">SET</span> prixUnit = prixUnit * 1.10 <span class="kw">WHERE</span> categorie = <span class="str">'Accessoire'</span>;
+<span class="kw">UPDATE</span> Produit <span class="kw">SET</span> prixUnit = 45.500  <span class="kw">WHERE</span> refProd = <span class="str">'P03'</span>;
+<span class="kw">UPDATE</span> Produit <span class="kw">SET</span> prixUnit = 165.000 <span class="kw">WHERE</span> refProd = <span class="str">'P04'</span>;
+
+<span class="cm">-- 5. Test sans risque de l'oubli du WHERE</span>
+<span class="kw">CREATE TABLE</span> Produit_Test <span class="kw">AS SELECT</span> * <span class="kw">FROM</span> Produit;
+<span class="kw">UPDATE</span> Produit_Test <span class="kw">SET</span> prixUnit = 99.000; <span class="cm">-- Tous les 8 produits passent à 99 DT !</span>
+<span class="kw">DELETE FROM</span> Produit_Test;                  <span class="cm">-- Toutes les lignes disparaissent !</span>
+<span class="kw">DROP TABLE</span> Produit_Test;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Laboratoire : Provoquer et comprendre les erreurs d'intégrité</span>
+        <span class="badge-time">20 min — Sur machine</span>
+      </h2>
+
+      <p>Testez volontairement chacune des 4 requêtes suivantes dans phpMyAdmin, notez la réaction du SGBDR et expliquez quelle contrainte a protégé la base :</p>
+
+      <div class="trap-card">
+        <h3>Test 1 — Clé étrangère inexistante à l'insertion</h3>
+        <pre class="sql-block"><span class="kw">INSERT INTO</span> Commande (dateCmd, idClt) <span class="kw">VALUES</span> (<span class="str">'2026-05-01'</span>, 99);</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Explication — Test 1</span>
+          <strong>Refusé (Erreur FK) :</strong> Le client <code>idClt = 99</code> n'existe pas dans la table mère <code>Client</code>. La contrainte <code>fk_cmd_client</code> bloque l'insertion.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Test 2 — Violation d'une contrainte CHECK</h3>
+        <pre class="sql-block"><span class="kw">INSERT INTO</span> Produit (refProd, designation, categorie, prixUnit, qteStock)
+<span class="kw">VALUES</span> (<span class="str">'P99'</span>, <span class="str">'Câble HDMI'</span>, <span class="str">'Accessoire'</span>, -15.000, 10);</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Explication — Test 2</span>
+          <strong>Refusé (Erreur CHECK) :</strong> La contrainte <code>chk_prix</code> impose <code>prixUnit &gt; 0</code>. Une valeur négative (<code>-15.000</code>) est immédiatement rejetée.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Test 3 — Suppression bloquée (ON DELETE RESTRICT)</h3>
+        <pre class="sql-block"><span class="kw">DELETE FROM</span> Client <span class="kw">WHERE</span> idClt = 1;</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Explication — Test 3</span>
+          <strong>Refusé (RESTRICT) :</strong> Le client <code>1</code> (Sami) possède les commandes <code>1</code> et <code>3</code> dans <code>Commande</code>. Grâce à <code>ON DELETE RESTRICT</code>, sa suppression est interdite. <em>(En revanche, supprimer le client <code>6</code> — Nour — qui n'a aucune commande, fonctionnerait.)</em>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Test 4 — Suppression automatique (ON DELETE CASCADE)</h3>
+        <pre class="sql-block"><span class="cm">-- On crée une commande test n°7 avec 1 ligne, puis on la supprime</span>
+<span class="kw">INSERT INTO</span> Commande (numCmd, dateCmd, idClt) <span class="kw">VALUES</span> (7, <span class="str">'2026-05-10'</span>, 6);
+<span class="kw">INSERT INTO</span> LigneCommande (numCmd, refProd, qteCmd) <span class="kw">VALUES</span> (7, <span class="str">'P03'</span>, 2);
+
+<span class="kw">DELETE FROM</span> Commande <span class="kw">WHERE</span> numCmd = 7;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> LigneCommande <span class="kw">WHERE</span> numCmd = 7;</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Explication — Test 4</span>
+          <strong>Accepté + Cascade :</strong> La suppression de la commande <code>7</code> réussit et le <code>SELECT</code> renvoie <strong>0 ligne</strong> : la ligne <code>(7, 'P03', 2)</code> dans <code>LigneCommande</code> a été effacée automatiquement grâce à <code>ON DELETE CASCADE</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Scénario de gestion quotidienne</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Écrivez les <strong>5 requêtes SQL</strong> correspondant aux opérations suivantes sur <code>boutique_info</code> (sur feuille, sans modifier votre jeu de données final) :</p>
+      <ol class="questions">
+        <li>Ajouter un nouveau client : <code>Karim Mansour</code>, habitant à <code>Nabeul</code>, sans numéro de téléphone, inscrit le <code>2026-05-12</code>.</li>
+        <li>Mettre à jour la ville et le téléphone de la cliente <code>Aya Mansouri</code> (<code>idClt = 4</code>) : nouvelle ville <code>'Monastir'</code> et nouveau téléphone <code>'52102030'</code>.</li>
+        <li>Appliquer une remise de <code>50.000 DT</code> sur le prix de tous les produits de la catégorie <code>'Ordinateur'</code> dont le prix dépasse <code>2000.000 DT</code>.</li>
+        <li>Supprimer de la table <code>Produit</code> tous les articles de catégorie <code>'Stockage'</code> qui sont en rupture de stock (<code>qteStock = 0</code>) et n'ont jamais été commandés.</li>
+        <li>Enregistrer une commande pour le client <code>6</code> à la date du <code>2026-05-15</code> (en supposant qu'elle reçoit le numéro <code>8</code>), puis y ajouter <code>3</code> exemplaires du produit <code>'P05'</code>.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes LMD en autonomie</span>
+        <pre class="sql-block"><span class="cm">-- 1. Nouveau client sans téléphone</span>
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr)
+<span class="kw">VALUES</span> (<span class="str">'Mansour'</span>, <span class="str">'Karim'</span>, <span class="str">'Nabeul'</span>, <span class="kw">NULL</span>, <span class="str">'2026-05-12'</span>);
+
+<span class="cm">-- 2. Mise à jour de 2 colonnes en une seule requête</span>
+<span class="kw">UPDATE</span> Client
+<span class="kw">SET</span> ville = <span class="str">'Monastir'</span>, tel = <span class="str">'52102030'</span>
+<span class="kw">WHERE</span> idClt = 4;
+
+<span class="cm">-- 3. Remise conditionnelle (double critère dans WHERE)</span>
+<span class="kw">UPDATE</span> Produit
+<span class="kw">SET</span> prixUnit = prixUnit - 50
+<span class="kw">WHERE</span> categorie = <span class="str">'Ordinateur'</span> <span class="kw">AND</span> prixUnit &gt; 2000;
+
+<span class="cm">-- 4. Suppression ciblée</span>
+<span class="kw">DELETE FROM</span> Produit
+<span class="kw">WHERE</span> categorie = <span class="str">'Stockage'</span> <span class="kw">AND</span> qteStock = 0;
+
+<span class="cm">-- 5. Insertion dans Commande puis dans LigneCommande</span>
+<span class="kw">INSERT INTO</span> Commande (numCmd, dateCmd, idClt) <span class="kw">VALUES</span> (8, <span class="str">'2026-05-15'</span>, 6);
+<span class="kw">INSERT INTO</span> LigneCommande (numCmd, refProd, qteCmd) <span class="kw">VALUES</span> (8, <span class="str">'P05'</span>, 3);</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Danger :</strong> Que se passe-t-il si l'on exécute <code>DELETE FROM Produit;</code> sans clause <code>WHERE</code> ?
+        <div class="quiz-answer">Réponse : Le SGBDR tente de supprimer TOUS les enregistrements de la table Produit (ici bloqué uniquement si des lignes sont référencées par LigneCommande avec RESTRICT).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Syntaxe :</strong> Quelle est l'erreur dans la requête <code>INSERT INTO Client (nom, tel) VALUES ('Ali', 'NULL');</code> ?
+        <div class="quiz-answer">Réponse : 'NULL' entre apostrophes insère le texte littéral "NULL" (4 lettres) au lieu d'une valeur absente. Il faut écrire NULL sans apostrophes.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Différence LDD / LMD :</strong> Quelle est la différence entre <code>DELETE FROM Produit;</code> et <code>DROP TABLE Produit;</code> ?
+        <div class="quiz-answer">Réponse : DELETE (LMD) supprime uniquement les lignes (la structure de la table reste vide et utilisable). DROP TABLE (LDD) détruit définitivement la table et sa structure.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Syntaxe UPDATE :</strong> Dans <code>UPDATE Client SET ville = 'Sfax' AND tel = '20112233' WHERE idClt = 2;</code>, quel symbole est faux ?
+        <div class="quiz-answer">Réponse : Dans la clause SET, on sépare les colonnes par une virgule (,) et jamais par AND : SET ville = 'Sfax', tel = '20112233'.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Format de date :</strong> Comment écrit-on le 5 février 2026 dans une requête <code>INSERT INTO</code> sous MariaDB / MySQL ?
+        <div class="quiz-answer">Réponse : '2026-02-05' (format ISO AAAA-MM-JJ entre apostrophes simples).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

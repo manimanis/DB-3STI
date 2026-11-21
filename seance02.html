@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 2 — Modèle Relationnel : Liens 1-N, N-N, Clés PK et FK (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance01.html">← S1</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 2 : Modèle Relationnel (2h)</div>
+        <a class="btn-nav" href="seance03.html">S3 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 2 (2 heures)</span>
+      </div>
+      <h1>Liens entre Entités (1-N, N-N) et Passage au Modèle Relationnel</h1>
+      <p class="subtitle">Objectifs : Identifier les liens entre entités, transformer un problème en schéma relationnel (tables, clés primaires et étrangères) et garantir l'intégrité référentielle.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Anomalies)</strong></td>
+            <td>Montrer les limites d'un tableau unique redondant sur <em>Pixel Zone</em> pour justifier l'éclatement en tables reliées.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h45</td>
+            <td>30 min</td>
+            <td><strong>2. Découverte (<em>Pixel Zone</em>)</strong></td>
+            <td>Identifier les liens <code>1-N</code> et <code>N-N</code> entre <code>Joueur</code>, <code>Poste</code>, <code>Session</code> et <code>Jeu</code>, puis écrire les tables.</td>
+          </tr>
+          <tr>
+            <td>0h45 – 1h00</td>
+            <td>15 min</td>
+            <td><strong>3. Trace écrite</strong></td>
+            <td>Vocabulaire du modèle relationnel (PK, FK, table d'association) et règles de passage.</td>
+          </tr>
+          <tr>
+            <td>1h00 – 1h20</td>
+            <td>20 min</td>
+            <td><strong>4. Chasse aux erreurs</strong></td>
+            <td>Corriger des clés étrangères mal placées, une relation N-N non décomposée et une violation d'intégrité référentielle.</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h45</td>
+            <td>25 min</td>
+            <td><strong>5. Application (Fil Rouge)</strong></td>
+            <td>Concevoir en autonomie le schéma complet de <em>TechStore</em> (<code>boutique_info</code>) utilisé dès la séance 3.</td>
+          </tr>
+          <tr>
+            <td>1h45 – 2h00</td>
+            <td>15 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Vérifier la maîtrise des clés et des liens avant la fin de séance.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Pourquoi ne pas tout mettre dans un seul tableau ?</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+      <p>
+        Avant d'utiliser un SGBD, le gérant de <strong>Pixel Zone</strong> enregistrait chaque partie jouée dans une seule feuille Excel :
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>numSess</th>
+            <th>dateSess</th>
+            <th>dureeH</th>
+            <th>numInscr</th>
+            <th>pseudo</th>
+            <th>tel</th>
+            <th>codePoste</th>
+            <th>typePoste</th>
+            <th>tarifH</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>201</td>
+            <td>2026-11-10</td>
+            <td>2</td>
+            <td>101</td>
+            <td>Ghost_TN</td>
+            <td>22114455</td>
+            <td>P01</td>
+            <td>PC Gamer RTX</td>
+            <td>8.000</td>
+          </tr>
+          <tr>
+            <td>202</td>
+            <td>2026-11-10</td>
+            <td>1</td>
+            <td>102</td>
+            <td>Nova_99</td>
+            <td>55889900</td>
+            <td>P02</td>
+            <td>PlayStation 5</td>
+            <td>10.000</td>
+          </tr>
+          <tr>
+            <td>203</td>
+            <td>2026-11-12</td>
+            <td>3</td>
+            <td>101</td>
+            <td>Ghost_TN</td>
+            <td>22114400</td>
+            <td>P02</td>
+            <td>PlayStation 5</td>
+            <td>10.000</td>
+          </tr>
+          <tr>
+            <td>204</td>
+            <td>2026-11-15</td>
+            <td>1</td>
+            <td>101</td>
+            <td>Ghost_TN</td>
+            <td>22114455</td>
+            <td>P03</td>
+            <td>Casque VR</td>
+            <td>15.000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ol class="questions">
+        <li>Quel problème constatez-vous sur le numéro de téléphone de <code>Ghost_TN</code> ?</li>
+        <li>Si le gérant supprime la session <code>204</code> (annulée), quelle information sur la salle est définitivement perdue ?</li>
+        <li>Comment stocker ces informations séparément tout en sachant <em>quel joueur</em> a joué sur <em>quel poste</em> ?</li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Limites du tableau unique</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Redondance &amp; incohérence :</strong> Les infos de <code>Ghost_TN</code> sont répétées 3 fois avec deux téléphones différents (<code>22114455</code> et <code>22114400</code>).</li>
+          <li><strong>Anomalie de suppression :</strong> Effacer la session <code>204</code> fait disparaître l'unique trace du poste <code>P03</code> (Casque VR) et de son tarif.</li>
+          <li><strong>Solution relationnelle :</strong> Séparer les données en plusieurs <strong>tables</strong> distinctes et les <strong>relier grâce à leurs identifiants</strong> (clés primaires et clés étrangères).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Activité de découverte : Relier les entités de « Pixel Zone »</span>
+        <span class="badge-time">30 min</span>
+      </h2>
+
+      <p>En séance 1, nous avons identifié trois entités : <strong>Joueur</strong> (<code>numInscr</code>), <strong>Poste</strong> (<code>codePoste</code>) et <strong>Jeu</strong> (<code>codeJeu</code>). Le gérant ajoute maintenant les règles de gestion suivantes :</p>
+
+      <div class="context-box">
+        <ul style="margin:0; padding-left:20px;">
+          <li><strong>Règle 1 (Sessions) :</strong> Une <strong>Session</strong> de jeu est identifiée par un numéro (<code>numSess</code>), possède une date (<code>dateSess</code>) et une durée en heures (<code>dureeH</code>). Un <strong>Joueur</strong> peut effectuer <em>plusieurs</em> sessions, mais chaque session est réservée par <em>un seul</em> joueur.</li>
+          <li><strong>Règle 2 (Affectation) :</strong> Un <strong>Poste</strong> accueille <em>plusieurs</em> sessions au fil du temps, mais chaque session se déroule sur <em>un seul</em> poste.</li>
+          <li><strong>Règle 3 (Jeux installés) :</strong> Un <strong>Poste</strong> peut contenir <em>plusieurs</em> jeux installés, et un même <strong>Jeu</strong> peut être installé sur <em>plusieurs</em> postes. Pour chaque installation, le gérant veut mémoriser la date d'installation (<code>dateInstall</code>).</li>
+        </ul>
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Analyser les liens :</strong> Indiquez le type de lien (<code>1-N</code> ou <code>N-N</code>) pour chacune des trois relations :
+          <ul>
+            <li>Entre <strong>Joueur</strong> et <strong>Session</strong> : __________________</li>
+            <li>Entre <strong>Poste</strong> et <strong>Session</strong> : __________________</li>
+            <li>Entre <strong>Poste</strong> et <strong>Jeu</strong> : __________________</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Placer les clés étrangères (liens 1-N) :</strong> Pour savoir quel joueur a fait la session <code>201</code>, faut-il ajouter <code>numSess</code> dans la table <strong>Joueur</strong>, ou <code>numInscr</code> dans la table <strong>Session</strong> ? Justifiez. Faites de même pour le lien entre <strong>Poste</strong> et <strong>Session</strong>.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Gérer le lien N-N :</strong> Peut-on simplement ajouter une colonne <code>codeJeu</code> dans la table <strong>Poste</strong> si un PC contient 15 jeux ? Quelle solution permet de stocker toutes les installations et leur <code>dateInstall</code> ?
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Écrire le schéma relationnel :</strong> Donnez la représentation textuelle complète des <strong>5 tables</strong> de la base <em>Pixel Zone</em> en notant <code>#clePrimaire</code> et <code>cleEtrangere#</code>.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Modèle relationnel Pixel Zone</span>
+        <p><strong>1. Types de liens :</strong> Joueur–Session (<code>1-N</code>) ; Poste–Session (<code>1-N</code>) ; Poste–Jeu (<code>N-N</code>).</p>
+        <p><strong>2. Placement des clés étrangères (1-N) :</strong> On place toujours la clé du côté <code>1</code> dans la table du côté <code>N</code>. Un joueur pouvant avoir des dizaines de sessions, on ne peut pas mettre <code>numSess</code> dans <code>Joueur</code> (sinon on violerait l'atomicité). On ajoute donc <code>numInscr#</code> et <code>codePoste#</code> dans <code>Session</code>.</p>
+        <p><strong>3. Décomposition du lien N-N :</strong> Impossible de mettre 15 codes de jeux dans une seule cellule de <code>Poste</code>. On crée une <strong>table d'association</strong> <code>Installation</code> contenant les deux clés étrangères (formant ensemble la clé primaire composée) ainsi que l'attribut porté <code>dateInstall</code>.</p>
+        <p><strong>4. Représentation textuelle des 5 tables :</strong></p>
+        <div class="schema-list">
+          <strong>Joueur</strong> (<span class="pk">#numInscr</span>, pseudo, dateNaiss, tel)<br>
+          <strong>Poste</strong> (<span class="pk">#codePoste</span>, typePoste, tarifH, etat)<br>
+          <strong>Jeu</strong> (<span class="pk">#codeJeu</span>, titre, genre, ageMin)<br>
+          <strong>Session</strong> (<span class="pk">#numSess</span>, dateSess, dureeH, <span class="fk">numInscr#</span>, <span class="fk">codePoste#</span>)<br>
+          <strong>Installation</strong> (<span class="pk">#codePoste#</span>, <span class="pk">#codeJeu#</span>, dateInstall)
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. Synthèse : Le Modèle Relationnel et ses Règles</span>
+        <span class="badge-time">15 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Correspondance du vocabulaire</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Niveau conceptuel (Séance 1)</th>
+              <th>Niveau relationnel (Tables SQL)</th>
+              <th>Exemple (Pixel Zone)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Entité</td>
+              <td><strong>Table</strong> (ou Relation)</td>
+              <td><code>Joueur</code>, <code>Poste</code></td>
+            </tr>
+            <tr>
+              <td>Attribut</td>
+              <td><strong>Champ</strong> (ou Colonne)</td>
+              <td><code>pseudo</code>, <code>tarifH</code></td>
+            </tr>
+            <tr>
+              <td>Occurrence</td>
+              <td><strong>Enregistrement</strong> (Ligne / Tuple)</td>
+              <td><code>(101, 'Ghost_TN', '2009-04-12', '22114455')</code></td>
+            </tr>
+            <tr>
+              <td>Identifiant</td>
+              <td><strong>Clé primaire (PK)</strong> — notée <code>#champ</code> ou <u>soulignée</u></td>
+              <td><code>#numInscr</code>, <code>#codePoste</code></td>
+            </tr>
+            <tr>
+              <td>Lien vers une autre table</td>
+              <td><strong>Clé étrangère (FK)</strong> — notée <code>champ#</code></td>
+              <td><code>numInscr#</code> dans <code>Session</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>B. Les deux règles d'or de passage au modèle relationnel</h3>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 165" width="100%" height="165" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Règles de passage Entité-Association vers Modèle Relationnel">
+    <!-- Panneau Règle 1 : Cardinalité 1-N -->
+    <rect x="10" y="8" width="360" height="150" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="190" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">RÈGLE 1 : Cardinalité (1,1) — (1,N) ➔ Migration de Clé</text>
+    <text x="190" y="42" text-anchor="middle" font-size="8.5" fill="#475569">La clé primaire de la table mère migre comme clé étrangère (#) côté (1,1)</text>
+    
+    <!-- Schéma E/A 1-N -->
+    <rect x="22" y="54" width="75" height="34" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="59" y="71" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Client</text>
+    <text x="59" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8">#idClt</text>
+
+    <line x1="97" y1="71" x2="135" y2="71" stroke="#64748b" stroke-width="1.5"/>
+    <text x="116" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,N</text>
+
+    <ellipse cx="160" cy="71" rx="25" ry="16" fill="#fffbeb" stroke="#b45309"/>
+    <text x="160" y="74" text-anchor="middle" font-size="8" font-weight="600" fill="#b45309">Passer</text>
+
+    <line x1="185" y1="71" x2="223" y2="71" stroke="#64748b" stroke-width="1.5"/>
+    <text x="204" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,1</text>
+
+    <rect x="223" y="54" width="85" height="34" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="265" y="71" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Commande</text>
+    <text x="265" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8">#numCmd</text>
+
+    <!-- Résultat Relationnel 1-N -->
+    <rect x="22" y="98" width="336" height="46" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="32" y="117" font-size="9.5" font-weight="700" fill="#1e293b">Commande ( <tspan text-decoration="underline" fill="#1d4ed8">numCmd</tspan>, dateCmd, <tspan fill="#0f766e" font-weight="700">idClt#</tspan> )</text>
+    <text x="32" y="133" font-size="8" fill="#0f766e">↳ idClt# est la Clé Étrangère pointant vers Client(idClt)</text>
+
+    <!-- Panneau Règle 2 : Cardinalité N-N -->
+    <rect x="390" y="8" width="360" height="150" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+    <text x="570" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">RÈGLE 2 : Cardinalité (1,N) — (1,N) ➔ Table d'Association</text>
+    <text x="570" y="42" text-anchor="middle" font-size="8.5" fill="#475569">L'association devient une NOUVELLE TABLE avec clé composite (#, #)</text>
+
+    <!-- Schéma E/A N-N -->
+    <rect x="402" y="54" width="80" height="34" rx="4" fill="#ffffff" stroke="#0f766e"/>
+    <text x="442" y="71" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f766e">Commande</text>
+    <text x="442" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e">#numCmd</text>
+
+    <line x1="482" y1="71" x2="515" y2="71" stroke="#64748b" stroke-width="1.5"/>
+    <text x="498" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,N</text>
+
+    <ellipse cx="540" cy="71" rx="25" ry="16" fill="#fffbeb" stroke="#b45309"/>
+    <text x="540" y="74" text-anchor="middle" font-size="8" font-weight="600" fill="#b45309">Contenir</text>
+
+    <line x1="565" y1="71" x2="598" y2="71" stroke="#64748b" stroke-width="1.5"/>
+    <text x="581" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,N</text>
+
+    <rect x="598" y="54" width="75" height="34" rx="4" fill="#ffffff" stroke="#0f766e"/>
+    <text x="635" y="71" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f766e">Produit</text>
+    <text x="635" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e">#refProd</text>
+
+    <!-- Résultat Relationnel N-N -->
+    <rect x="402" y="98" width="336" height="46" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="412" y="117" font-size="9.5" font-weight="700" fill="#1e293b">LigneCommande ( <tspan text-decoration="underline" fill="#b91c1c">numCmd#, refProd#</tspan>, qteCmd )</text>
+    <text x="412" y="133" font-size="8" fill="#b45309">↳ Clé Primaire Composite composée des 2 Clés Étrangères</text>
+  </svg>
+  <div class="diagram-caption">Figure 2.1 — Les 2 règles d'or de transformation du modèle Entité-Association en Schéma Relationnel.</div>
+</div>
+
+        <ul class="vocab-list">
+          <li><strong>Lien <code>1-N</code> (Un-à-Plusieurs) :</strong> La clé primaire de la table côté <strong>1</strong> (table <em>mère</em>) migre comme <strong>clé étrangère</strong> dans la table côté <strong>N</strong> (table <em>fille</em>).</li>
+          <li><strong>Lien <code>N-N</code> (Plusieurs-à-Plusieurs) :</strong> On crée une nouvelle <strong>table d'association</strong> dont la clé primaire est <strong>composée</strong> des clés primaires des deux tables reliées (qui sont aussi clés étrangères), accompagnée des éventuels attributs propres au lien.</li>
+        </ul>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma des règles de passage 1-N et N-N">
+            <!-- Bloc 1-N -->
+            <text x="175" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8">Règle 1-N : Migration de la clé (1 → N)</text>
+            <rect x="20" y="38" width="130" height="58" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="85" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Joueur (Mère)</text>
+            <line x1="20" y1="65" x2="150" y2="65" stroke="#bfdbfe"/>
+            <text x="85" y="83" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numInscr</text>
+
+            <line x1="150" y1="67" x2="215" y2="67" stroke="#0f766e" stroke-width="2"/>
+            <polygon points="215,67 207,62 207,72" fill="#0f766e"/>
+            <text x="160" y="58" font-size="11" font-weight="700" fill="#0f766e">1</text>
+            <text x="195" y="58" font-size="11" font-weight="700" fill="#0f766e">N</text>
+
+            <rect x="218" y="38" width="142" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+            <text x="289" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Session (Fille)</text>
+            <line x1="218" y1="65" x2="360" y2="65" stroke="#99f6e4"/>
+            <text x="289" y="82" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numSess</text>
+            <text x="289" y="99" text-anchor="middle" font-size="11" font-family="Consolas, monospace" font-weight="700" fill="#0f766e">numInscr#</text>
+
+            <!-- Séparateur -->
+            <line x1="385" y1="15" x2="385" y2="155" stroke="#cbd5e1" stroke-dasharray="4,4"/>
+
+            <!-- Bloc N-N -->
+            <text x="575" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8">Règle N-N : Table d'association</text>
+            <rect x="405" y="38" width="95" height="54" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="452" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Poste</text>
+            <line x1="405" y1="64" x2="500" y2="64" stroke="#bfdbfe"/>
+            <text x="452" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#codePoste</text>
+
+            <rect x="650" y="38" width="95" height="54" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="697" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Jeu</text>
+            <line x1="650" y1="64" x2="745" y2="64" stroke="#bfdbfe"/>
+            <text x="697" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#codeJeu</text>
+
+            <line x1="500" y1="65" x2="528" y2="112" stroke="#0f766e" stroke-width="1.8"/>
+            <line x1="650" y1="65" x2="622" y2="112" stroke="#0f766e" stroke-width="1.8"/>
+
+            <rect x="502" y="92" width="146" height="68" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+            <text x="575" y="110" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1e293b">Installation</text>
+            <line x1="502" y1="116" x2="648" y2="116" stroke="#99f6e4"/>
+            <text x="575" y="132" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" font-weight="700" fill="#1d4ed8" text-decoration="underline">#codePoste#, #codeJeu#</text>
+            <text x="575" y="149" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#334155">dateInstall</text>
+          </svg>
+        </div>
+
+        <h3>C. Les 3 contraintes d'intégrité</h3>
+        <ul class="vocab-list">
+          <li><strong>Intégrité de domaine :</strong> Chaque valeur saisie doit respecter le type et les bornes autorisées (ex. : <code>dureeH &gt; 0</code>).</li>
+          <li><strong>Intégrité d'entité :</strong> Toute table possède une clé primaire <strong>unique</strong> et <strong>non nulle</strong>.</li>
+          <li><strong>Intégrité référentielle :</strong> Toute valeur d'une clé étrangère doit obligatoirement exister dans la clé primaire de la table mère (impossible d'enregistrer une session pour un joueur <code>999</code> qui n'existe pas dans <code>Joueur</code>).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase">
+      <h2>
+        <span>4. Atelier « Chasse aux erreurs » : Diagnostiquer un schéma</span>
+        <span class="badge-time">20 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Erreur 1 — Sens de la clé étrangère inversé</h3>
+        <p>Dans un lycée, un <strong>Élève</strong> appartient à une seule <strong>Classe</strong>, et une <strong>Classe</strong> contient plusieurs élèves. Un étudiant propose :</p>
+        <div class="schema-list">
+          <strong>Classe</strong> (<span class="pk">#codeCl</span>, niveau, <span class="fk">numEleve#</span>)<br>
+          <strong>Eleve</strong> (<span class="pk">#numEleve</span>, nom, prenom)
+        </div>
+        <p><strong>Question :</strong> Pourquoi cette conception bloque-t-elle dès le deuxième élève d'une classe ? Proposez la correction.</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Erreur 1</span>
+          La clé étrangère a été placée du mauvais côté (côté <code>1</code> au lieu du côté <code>N</code>). Une ligne de <code>Classe</code> ne peut stocker qu'un seul <code>numEleve</code>. Correction :<br>
+          <code>Classe(#codeCl, niveau)</code> et <code>Eleve(#numEleve, nom, prenom, codeCl#)</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Erreur 2 — Violation d'intégrité référentielle</h3>
+        <p>On dispose de la table mère <code>Joueur</code> contenant uniquement les numéros <code>101</code>, <code>102</code> et <code>103</code>, et de la table fille <code>Session</code> ci-dessous. Repérez les <strong>2 anomalies</strong> d'intégrité :</p>
+        <table>
+          <thead>
+            <tr>
+              <th>#numSess</th>
+              <th>dateSess</th>
+              <th>dureeH</th>
+              <th>numInscr#</th>
+              <th>codePoste#</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>301</td>
+              <td>2026-11-18</td>
+              <td>2</td>
+              <td>101</td>
+              <td>P01</td>
+            </tr>
+            <tr>
+              <td>302</td>
+              <td>2026-11-18</td>
+              <td>1</td>
+              <td>109</td>
+              <td>P02</td>
+            </tr>
+            <tr>
+              <td>301</td>
+              <td>2026-11-19</td>
+              <td>3</td>
+              <td>102</td>
+              <td>P01</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Erreur 2</span>
+          <ul style="margin:0; padding-left:18px;">
+            <li><strong>Ligne 2 (<code>numInscr = 109</code>) :</strong> Violation d'<strong>intégrité référentielle</strong> (le joueur <code>109</code> n'existe pas dans la table mère <code>Joueur</code>).</li>
+            <li><strong>Ligne 3 (<code>numSess = 301</code>) :</strong> Violation d'<strong>intégrité d'entité</strong> (doublon sur la clé primaire <code>301</code> déjà utilisée en ligne 1).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Erreur 3 — Oubli de table d'association</h3>
+        <p>Dans une clinique, un <strong>Médecin</strong> soigne plusieurs <strong>Patients</strong> et un <strong>Patient</strong> peut consulter plusieurs <strong>Médecins</strong> à différentes dates. Peut-on relier directement ces deux tables sans créer de troisième table ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Erreur 3</span>
+          <strong>Non.</strong> C'est une relation <code>N-N</code>. Il faut créer une table d'association, par exemple : <code>Consultation(#idMed#, #idPat#, #dateCons, diagnostic)</code> (ou avec un identifiant propre <code>#numCons</code> si un patient peut voir le même médecin plusieurs fois).
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase page-break">
+      <h2>
+        <span>5. Application en autonomie : Conception du Fil Rouge « TechStore »</span>
+        <span class="badge-time">25 min (15 min binôme + 10 min correction)</span>
+      </h2>
+
+      <p><em>Note : Cette base de données servira de fil rouge pour tous nos travaux pratiques SQL des séances 3 à 9.</em></p>
+
+      <div class="context-box">
+        La boutique de matériel informatique <strong>TechStore</strong> souhaite informatiser la gestion de ses ventes selon les règles suivantes :
+        <ul style="margin:6px 0 0; padding-left:20px;">
+          <li>Chaque <strong>Client</strong> est identifié par un numéro (<code>idClt</code>) et possède un nom, un prénom, une ville, un téléphone (facultatif) et une date d'inscription (<code>dateInscr</code>).</li>
+          <li>Chaque <strong>Produit</strong> possède une référence unique (<code>refProd</code>), une désignation, une catégorie, un prix unitaire (<code>prixUnit</code>) et une quantité en stock (<code>qteStock</code>).</li>
+          <li>Une <strong>Commande</strong> est identifiée par un numéro (<code>numCmd</code>) et comporte une date (<code>dateCmd</code>). Un client peut passer <em>plusieurs</em> commandes, mais chaque commande appartient à <em>un seul</em> client.</li>
+          <li>Une <strong>Commande</strong> peut porter sur <em>plusieurs</em> produits, et un même <strong>Produit</strong> peut figurer dans <em>plusieurs</em> commandes. Pour chaque produit commandé dans une commande, on doit enregistrer la quantité commandée (<code>qteCmd</code>).</li>
+        </ul>
+      </div>
+
+      <ol class="questions">
+        <li>Identifiez les <strong>3 entités</strong> de base et leurs identifiants.</li>
+        <li>Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Client</strong> et <strong>Commande</strong>, puis entre <strong>Commande</strong> et <strong>Produit</strong>.</li>
+        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>4 tables</strong> du modèle relationnel (en nommant la table d'association <code>LigneCommande</code>).</li>
+        <li>Dans quel ordre faudra-t-il créer ces tables en SQL à la séance 3 pour respecter l'intégrité référentielle ?</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Schéma du Fil Rouge TechStore (boutique_info)</span>
+        <p><strong>1. Entités de base :</strong> <code>Client</code> (<code>idClt</code>), <code>Produit</code> (<code>refProd</code>), <code>Commande</code> (<code>numCmd</code>).</p>
+        <p><strong>2. Liens :</strong> <code>Client</code> — <code>Commande</code> : <strong>1-N</strong> | <code>Commande</code> — <code>Produit</code> : <strong>N-N</strong> (avec attribut porté <code>qteCmd</code>).</p>
+        <p><strong>3. Modèle relationnel (4 tables) :</strong></p>
+        <div class="schema-list">
+          <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr)<br>
+          <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
+          <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>)<br>
+          <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+        </div>
+        <p style="margin-bottom:0;"><strong>4. Ordre de création / peuplement :</strong> D'abord les tables mères indépendantes (<code>Client</code> et <code>Produit</code>), puis <code>Commande</code> (qui référence <code>Client</code>), et enfin <code>LigneCommande</code> (qui référence <code>Commande</code> et <code>Produit</code>).</p>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Vrai ou Faux :</strong> « Dans une relation 1-N, la clé étrangère est toujours placée dans la table du côté 1. »
+        <div class="quiz-answer">Réponse : Faux — Elle migre toujours du côté 1 vers la table du côté N (table fille).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Vrai ou Faux :</strong> « Une clé étrangère peut apparaître plusieurs fois avec la même valeur dans une table fille. »
+        <div class="quiz-answer">Réponse : Vrai — Par exemple, un même client (idClt = 1) peut apparaître dans plusieurs lignes de la table Commande.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Structure :</strong> Dans la table <code>LigneCommande(#numCmd#, #refProd#, qteCmd)</code>, pourquoi la clé primaire est-elle composée de deux champs ?
+        <div class="quiz-answer">Réponse : Parce qu'une même commande contient plusieurs produits différents, et un même produit apparaît dans plusieurs commandes. Seul le couple (numCmd, refProd) identifie une ligne de manière unique.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Intégrité :</strong> Peut-on supprimer un <code>Client</code> de la base s'il possède encore des commandes enregistrées dans la table <code>Commande</code> ?
+        <div class="quiz-answer">Réponse : Non (par défaut en mode RESTRICT), car cela laisserait des commandes « orphelines » pointant vers un client inexistant (violation de l'intégrité référentielle).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Vocabulaire :</strong> Quel terme du modèle relationnel correspond à une « ligne » d'une table ?
+        <div class="quiz-answer">Réponse : Un enregistrement (ou tuple).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

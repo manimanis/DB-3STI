@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 6 — LMD Interrogation simple : SELECT, WHERE, LIKE, ORDER BY (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance05.html">← S5</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 6 : Interrogation simple SELECT (2h)</div>
+        <a class="btn-nav" href="seance07.html">S7 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 6 (2 heures)</span>
+      </div>
+      <h1>LMD — Interrogation simple (SELECT 1/2) : Filtrage, Motifs et Tri</h1>
+      <p class="subtitle">Objectifs : Extraire des données précises d'une table grâce à SELECT, DISTINCT, AS, WHERE, aux opérateurs logiques et spéciaux (BETWEEN, IN, LIKE, IS NULL), ainsi qu'à ORDER BY et LIMIT.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Projection vs Sélection)</strong></td>
+            <td>Partir des filtres d'un site e-commerce pour distinguer le choix des colonnes (projection) du filtrage des lignes (sélection).</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Synthèse SELECT</strong></td>
+            <td>Formaliser l'ordre des clauses, <code>DISTINCT</code>, <code>AS</code>, les opérateurs logiques, <code>BETWEEN</code>, <code>IN</code>, <code>LIKE</code> (<code>%</code>, <code>_</code>), <code>IS NULL</code>, <code>ORDER BY</code> et <code>LIMIT</code>.</td>
+          </tr>
+          <tr>
+            <td>0h40 – 1h20</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé (12 requêtes)</strong></td>
+            <td>Exécuter 12 requêtes graduelles sur <code>boutique_info</code> (tables <code>Produit</code> et <code>Client</code>) dans phpMyAdmin.</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h35</td>
+            <td>15 min</td>
+            <td><strong>4. Chasse aux pièges SELECT</strong></td>
+            <td>Corriger 3 erreurs fréquentes : <code>= NULL</code> au lieu de <code>IS NULL</code>, priorité <code>AND</code>/<code>OR</code>, et mauvais ordre des clauses.</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Rédiger 4 requêtes sur papier à partir des tables <code>Client</code> et <code>Commande</code>.</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Vérifier la maîtrise des jokers <code>LIKE</code>, du <code>NULL</code> et du tri combiné.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Comment fonctionne la barre de recherche d'un site e-commerce ?</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        Notre base <code>boutique_info</code> est maintenant remplie. Lorsqu'un visiteur du site <strong>TechStore</strong> coche « Catégorie : Accessoire », saisit « Prix entre 50 et 200 DT » et clique sur « Trier par prix croissant », le site envoie en coulisses une requête <code>SELECT</code> au SGBDR.
+      </p>
+      <div class="context-box">
+        <strong>Deux opérations fondamentales à distinguer :</strong>
+        <ul style="margin:6px 0 0; padding-left:20px;">
+          <li><strong>La projection (verticale) :</strong> Choisir uniquement les <em>colonnes</em> à afficher (clause <code>SELECT</code>).</li>
+          <li><strong>La sélection (horizontale) :</strong> Filtrer uniquement les <em>lignes</em> qui respectent une condition (clause <code>WHERE</code>).</li>
+        </ul>
+      </div>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Traduction de l'IHM vers la requête SQL</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Correspondance composant web ↔ Clause SQL :</strong>
+            <ul>
+              <li><em>Colonnes visibles (Nom, Prix, Image) :</em> <code>SELECT refProd, designation, prixUnit</code> (Projection).</li>
+              <li><em>Filtre catégorie (« Accessoire ») :</em> <code>WHERE categorie = 'Accessoire'</code> (Sélection).</li>
+              <li><em>Filtre intervalle de prix (50 à 200 DT) :</em> <code>AND prixUnit BETWEEN 50 AND 200</code>.</li>
+              <li><em>Menu de tri (« Prix croissant ») :</em> <code>ORDER BY prixUnit ASC</code>.</li>
+            </ul>
+          </li>
+          <li><strong>Requête SQL complète résultante :</strong>
+            <pre class="sql-block" style="margin:6px 0;"><span class="kw">SELECT</span> refProd, designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> categorie = <span class="str">'Accessoire'</span>
+  <span class="kw">AND</span> prixUnit <span class="kw">BETWEEN</span> 50 <span class="kw">AND</span> 200
+<span class="kw">ORDER BY</span> prixUnit <span class="kw">ASC</span>;</pre>
+          </li>
+          <li><strong>Bilan méthodologique :</strong> Toute recherche web sur base de données repose sur ce triptyque : <strong>QUOI afficher</strong> (<code>SELECT</code>), <strong>OÙ chercher</strong> (<code>FROM</code>) et <strong>QUELS critères</strong> (<code>WHERE</code>).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : Structure et opérateurs d'une requête SELECT</span>
+        <span class="badge-time">25 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <div class="diagram-wrap">
+  <svg viewBox="0 0 760 165" width="100%" height="165" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Géométrie d'une requête SQL : Projection verticale et Sélection horizontale">
+    <!-- Table Source Globale -->
+    <g transform="translate(20, 18)">
+      <text x="135" y="-5" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1e293b">Table source : Produit</text>
+      
+      <!-- Rectangle table -->
+      <rect x="0" y="5" width="270" height="115" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+      
+      <!-- Colonnes projetées (SELECT) en surbrillance bleue -->
+      <rect x="0" y="5" width="65" height="115" fill="#eff6ff" fill-opacity="0.8"/>
+      <rect x="65" y="5" width="110" height="115" fill="#eff6ff" fill-opacity="0.8"/>
+      
+      <!-- En-têtes -->
+      <line x1="0" y1="26" x2="270" y2="26" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="32" y="19" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1d4ed8">refProd</text>
+      <text x="120" y="19" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1d4ed8">designation</text>
+      <text x="195" y="19" text-anchor="middle" font-size="8" fill="#64748b">prix</text>
+      <text x="245" y="19" text-anchor="middle" font-size="8" fill="#64748b">catégorie</text>
+
+      <!-- Ligne 1 -->
+      <text x="32" y="42" text-anchor="middle" font-size="8" fill="#334155">P10</text>
+      <text x="120" y="42" text-anchor="middle" font-size="8" fill="#334155">Souris sans fil</text>
+      <text x="195" y="42" text-anchor="middle" font-size="8" fill="#334155">45.00</text>
+      <text x="245" y="42" text-anchor="middle" font-size="8" fill="#334155">Périphérique</text>
+
+      <!-- Ligne 2 : sélectionnée (WHERE) en surbrillance ambre -->
+      <rect x="0" y="48" width="270" height="22" fill="#fef3c7" fill-opacity="0.6"/>
+      <text x="32" y="63" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">P20</text>
+      <text x="120" y="63" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">Disque SSD 1To</text>
+      <text x="195" y="63" text-anchor="middle" font-size="8" fill="#334155">180.00</text>
+      <text x="245" y="63" text-anchor="middle" font-size="8" fill="#334155">Stockage</text>
+
+      <!-- Ligne 3 -->
+      <text x="32" y="85" text-anchor="middle" font-size="8" fill="#334155">P30</text>
+      <text x="120" y="85" text-anchor="middle" font-size="8" fill="#334155">Clavier Méca</text>
+      <text x="195" y="85" text-anchor="middle" font-size="8" fill="#334155">120.00</text>
+      <text x="245" y="85" text-anchor="middle" font-size="8" fill="#334155">Périphérique</text>
+
+      <!-- Ligne 4 : sélectionnée -->
+      <rect x="0" y="93" width="270" height="22" fill="#fef3c7" fill-opacity="0.6"/>
+      <text x="32" y="108" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">P40</text>
+      <text x="120" y="108" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">Clé USB 64Go</text>
+      <text x="195" y="108" text-anchor="middle" font-size="8" fill="#334155">35.00</text>
+      <text x="245" y="108" text-anchor="middle" font-size="8" fill="#334155">Stockage</text>
+    </g>
+
+    <!-- Explications des 2 axes -->
+    <g transform="translate(310, 22)">
+      <!-- Axe Vertical : SELECT -->
+      <rect x="0" y="0" width="165" height="44" rx="6" fill="#eff6ff" stroke="#1d4ed8"/>
+      <text x="82" y="18" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8">⬇ PROJECTION (SELECT)</text>
+      <text x="82" y="33" text-anchor="middle" font-size="8" fill="#1e40af">Choix des colonnes utiles</text>
+
+      <!-- Axe Horizontal : WHERE -->
+      <rect x="0" y="58" width="165" height="44" rx="6" fill="#fffbeb" stroke="#b45309"/>
+      <text x="82" y="76" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b45309">➔ SÉLECTION (WHERE)</text>
+      <text x="82" y="91" text-anchor="middle" font-size="8" fill="#92400e">Filtrage des lignes valides</text>
+    </g>
+
+    <!-- Résultat final à droite -->
+    <g transform="translate(500, 18)">
+      <text x="115" y="-5" text-anchor="middle" font-size="10.5" font-weight="700" fill="#15803d">✔ Résultat à l'intersection</text>
+      <rect x="0" y="5" width="230" height="85" rx="5" fill="#f0fdf4" stroke="#15803d" stroke-width="1.8"/>
+      
+      <!-- En-têtes -->
+      <line x1="0" y1="26" x2="230" y2="26" stroke="#86efac" stroke-width="1.5"/>
+      <text x="45" y="19" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">refProd</text>
+      <text x="150" y="19" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">designation</text>
+
+      <!-- Ligne 1 -->
+      <text x="45" y="48" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1e293b">P20</text>
+      <text x="150" y="48" text-anchor="middle" font-size="8.5" fill="#1e293b">Disque SSD 1To</text>
+      
+      <!-- Ligne 2 -->
+      <line x1="0" y1="58" x2="230" y2="58" stroke="#dcfce7"/>
+      <text x="45" y="74" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1e293b">P40</text>
+      <text x="150" y="74" text-anchor="middle" font-size="8.5" fill="#1e293b">Clé USB 64Go</text>
+    </g>
+
+    <text x="380" y="152" text-anchor="middle" font-size="9" fill="#475569">SELECT refProd, designation FROM Produit WHERE categorie = 'Stockage';</text>
+  </svg>
+  <div class="diagram-caption">Figure 6.1 — Géométrie SQL : intersection de la projection verticale (SELECT) et de la sélection horizontale (WHERE).</div>
+</div>
+<h3 style="margin-top:0;">A. Syntaxe générale et ordre strict des clauses</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> [<span class="kw">DISTINCT</span>] col1 [<span class="kw">AS</span> alias1], col2 ...
+<span class="kw">FROM</span> NomTable
+[<span class="kw">WHERE</span> condition]
+[<span class="kw">ORDER BY</span> col_tri1 [<span class="kw">ASC</span> | <span class="kw">DESC</span>], col_tri2 [<span class="kw">ASC</span> | <span class="kw">DESC</span>]]
+[<span class="kw">LIMIT</span> nombre];</pre>
+        <ul class="vocab-list">
+          <li><code>*</code> remplace la liste de toutes les colonnes de la table.</li>
+          <li><code>DISTINCT</code> supprime les lignes en doublon dans le résultat affiché.</li>
+          <li><code>AS</code> renomme temporairement une colonne à l'affichage (ex. : <code>prixUnit AS Prix_DT</code>).</li>
+          <li><code>ORDER BY</code> trie par défaut par ordre croissant (<code>ASC</code>). Utilisez <code>DESC</code> pour l'ordre décroissant.</li>
+          <li><code>LIMIT n</code> restreint le résultat aux <em>n</em> premières lignes (très utile avec <code>ORDER BY</code> pour un « Top 3 »).</li>
+        </ul>
+
+        <h3>B. Opérateurs utilisables dans la clause WHERE</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th>Opérateurs</th>
+              <th>Exemple et signification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Comparaison</strong></td>
+              <td><code>=</code>, <code>&lt;&gt;</code> (ou <code>!=</code>), <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td>
+              <td><code>prixUnit &lt;= 500</code> (prix inférieur ou égal à 500)</td>
+            </tr>
+            <tr>
+              <td><strong>Logiques</strong></td>
+              <td><code>AND</code>, <code>OR</code>, <code>NOT</code></td>
+              <td><code>ville = 'Sousse' AND tel IS NOT NULL</code><br><em>Attention :</em> <code>AND</code> est prioritaire sur <code>OR</code> — utilisez des parenthèses <code>(...)</code> !</td>
+            </tr>
+            <tr>
+              <td><strong>Intervalle</strong></td>
+              <td><code>BETWEEN v1 AND v2</code><br><code>NOT BETWEEN ...</code></td>
+              <td><code>prixUnit BETWEEN 100 AND 500</code><br>Bornes <strong>incluses</strong> (équivalent à <code>&gt;= 100 AND &lt;= 500</code>). Fonctionne aussi sur les dates.</td>
+            </tr>
+            <tr>
+              <td><strong>Liste de valeurs</strong></td>
+              <td><code>IN (v1, v2, ...)</code><br><code>NOT IN (...)</code></td>
+              <td><code>ville IN ('Sousse', 'Tunis')</code><br>Plus court que <code>ville = 'Sousse' OR ville = 'Tunis'</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Motif texte</strong></td>
+              <td><code>LIKE 'motif'</code><br><code>NOT LIKE 'motif'</code></td>
+              <td><code>%</code> = 0, 1 ou plusieurs caractères quelconques.<br><code>_</code> = exactement <strong>1 seul</strong> caractère quelconque.<br>Ex. : <code>'PC%'</code> (commence par PC), <code>'%USB%'</code> (contient USB), <code>'____'</code> (4 lettres exactes).</td>
+            </tr>
+            <tr>
+              <td><strong>Valeur absente</strong></td>
+              <td><code>IS NULL</code><br><code>IS NOT NULL</code></td>
+              <td><code>tel IS NULL</code> (téléphone non renseigné).<br><strong>Jamais</strong> <code>tel = NULL</code> !</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : 12 requêtes graduelles sur « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <p>Rappel des tables interrogées aujourd'hui :</p>
+      <div class="schema-list">
+        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)
+      </div>
+
+      <p>Dans phpMyAdmin (base <code>boutique_info</code>, onglet <strong>SQL</strong>), écrivez et testez les <strong>12 requêtes</strong> suivantes en vérifiant à chaque fois le nombre de lignes obtenues :</p>
+
+      <ol class="questions">
+        <li><strong>Affichage complet :</strong> Afficher toutes les colonnes de tous les produits.</li>
+        <li><strong>Projection et alias :</strong> Afficher la référence, la désignation (alias <code>Article</code>) et le prix unitaire (alias <code>Prix_DT</code>) de tous les produits.</li>
+        <li><strong>Doublons (<code>DISTINCT</code>) :</strong> Afficher la liste des villes (sans répétition) où résident les clients.</li>
+        <li><strong>Sélection simple :</strong> Afficher la référence et la désignation des produits en rupture de stock (<code>qteStock = 0</code>).</li>
+        <li><strong>Opérateur <code>AND</code> :</strong> Afficher les produits de la catégorie <code>'Accessoire'</code> dont le stock est supérieur ou égal à <code>15</code>.</li>
+        <li><strong>Intervalle (<code>BETWEEN</code>) :</strong> Afficher les produits dont le prix unitaire est compris entre <code>100</code> et <code>500</code> DT inclus.</li>
+        <li><strong>Liste (<code>IN</code>) :</strong> Afficher le nom, le prénom et la ville des clients habitant à <code>'Sousse'</code>, <code>'Tunis'</code> ou <code>'Monastir'</code>.</li>
+        <li><strong>Motif <code>LIKE</code> avec <code>%</code> :</strong> Afficher tous les produits dont la désignation commence par <code>'PC Portable'</code>.</li>
+        <li><strong>Motif <code>LIKE</code> avec <code>_</code> :</strong> Afficher le nom et le prénom des clients dont le prénom comporte <strong>exactement 4 caractères</strong>.</li>
+        <li><strong>Valeur absente (<code>IS NULL</code>) :</strong> Afficher les clients dont le numéro de téléphone n'est pas renseigné.</li>
+        <li><strong>Tri combiné (<code>ORDER BY</code>) :</strong> Afficher la catégorie, la désignation et le prix de tous les produits, triés par catégorie (ordre alphabétique A→Z) puis par prix décroissant.</li>
+        <li><strong>Palmarès (<code>ORDER BY</code> + <code>LIMIT</code>) :</strong> Afficher la désignation et le prix des <strong>3 produits les plus chers</strong> de la boutique.</li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Les 12 requêtes SELECT sur boutique_info</span>
+        <pre class="sql-block"><span class="cm">-- 1. Tous les produits (8 lignes)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> Produit;
+
+<span class="cm">-- 2. Projection avec alias (8 lignes)</span>
+<span class="kw">SELECT</span> refProd, designation <span class="kw">AS</span> Article, prixUnit <span class="kw">AS</span> Prix_DT
+<span class="kw">FROM</span> Produit;
+
+<span class="cm">-- 3. Villes distinctes des clients (4 lignes : Sousse, Tunis, Sfax, Monastir)</span>
+<span class="kw">SELECT DISTINCT</span> ville <span class="kw">FROM</span> Client;
+
+<span class="cm">-- 4. Produits en rupture de stock (1 ligne : P06)</span>
+<span class="kw">SELECT</span> refProd, designation
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> qteStock = 0;
+
+<span class="cm">-- 5. Accessoires avec stock >= 15 (1 ligne : P03)</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> categorie = <span class="str">'Accessoire'</span> <span class="kw">AND</span> qteStock &gt;= 15;
+
+<span class="cm">-- 6. Prix entre 100 et 500 DT inclus (3 lignes : P04, P05, P07)</span>
+<span class="kw">SELECT</span> refProd, designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> prixUnit <span class="kw">BETWEEN</span> 100 <span class="kw">AND</span> 500;
+
+<span class="cm">-- 7. Clients de Sousse, Tunis ou Monastir (5 lignes)</span>
+<span class="kw">SELECT</span> nom, prenom, ville
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> ville <span class="kw">IN</span> (<span class="str">'Sousse'</span>, <span class="str">'Tunis'</span>, <span class="str">'Monastir'</span>);
+
+<span class="cm">-- 8. Désignation commençant par 'PC Portable' (2 lignes : P01, P02)</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> designation <span class="kw">LIKE</span> <span class="str">'PC Portable%'</span>;
+
+<span class="cm">-- 9. Prénom d'exactement 4 caractères (3 lignes : Sami, Ines, Nour)</span>
+<span class="kw">SELECT</span> nom, prenom
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> prenom <span class="kw">LIKE</span> <span class="str">'____'</span>;
+
+<span class="cm">-- 10. Clients sans téléphone (1 ligne : Aya Mansouri)</span>
+<span class="kw">SELECT</span> idClt, nom, prenom
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> tel <span class="kw">IS NULL</span>;
+
+<span class="cm">-- 11. Tri par catégorie croissante puis prix décroissant (8 lignes)</span>
+<span class="kw">SELECT</span> categorie, designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">ORDER BY</span> categorie <span class="kw">ASC</span>, prixUnit <span class="kw">DESC</span>;
+
+<span class="cm">-- 12. Top 3 des produits les plus chers (P01: 2450, P02: 1890, P08: 520)</span>
+<span class="kw">SELECT</span> designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">ORDER BY</span> prixUnit <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> 3;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux pièges SELECT »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Piège 1 — Comparer avec NULL</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève cherche les clients qui n'ont pas de téléphone</span>
+<span class="kw">SELECT</span> nom, prenom <span class="kw">FROM</span> Client <span class="kw">WHERE</span> tel = <span class="kw">NULL</span>;</pre>
+        <p><strong>Question :</strong> Cette requête ne renvoie aucune erreur, mais retourne <strong>0 ligne</strong> alors qu'Aya n'a pas de téléphone. Pourquoi ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 1</span>
+          En SQL, <code>NULL</code> signifie « valeur inconnue » : on ne peut jamais la tester avec <code>=</code> ou <code>&lt;&gt;</code> (car <code>NULL = NULL</code> vaut <em>Inconnu</em>, pas Vrai). Il faut obligatoirement écrire <code>WHERE tel IS NULL</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 2 — Priorité entre AND et OR</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut les produits de catégorie 'Ordinateur' ou 'Périphérique' à moins de 500 DT</span>
+<span class="kw">SELECT</span> designation, categorie, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> categorie = <span class="str">'Ordinateur'</span> <span class="kw">OR</span> categorie = <span class="str">'Périphérique'</span> <span class="kw">AND</span> prixUnit &lt; 500;</pre>
+        <p><strong>Question :</strong> Pourquoi les PC portables à <code>2450 DT</code> et <code>1890 DT</code> apparaissent-ils quand même dans le résultat ? Corrigez la requête.</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 2</span>
+          <code>AND</code> étant prioritaire sur <code>OR</code>, SQL lit : <code>categorie = 'Ordinateur' OR (categorie = 'Périphérique' AND prixUnit &lt; 500)</code>. Il faut entourer le <code>OR</code> de parenthèses :<br>
+          <code>WHERE (categorie = 'Ordinateur' OR categorie = 'Périphérique') AND prixUnit &lt; 500</code><br>
+          <em>(Ou encore plus proprement : <code>WHERE categorie IN ('Ordinateur', 'Périphérique') AND prixUnit &lt; 500</code>.)</em>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 3 — Ordre des clauses</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">ORDER BY</span> prixUnit <span class="kw">DESC</span>
+<span class="kw">WHERE</span> qteStock &gt; 0;</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 3</span>
+          Erreur de syntaxe : <code>WHERE</code> doit toujours être placé <strong>avant</strong> <code>ORDER BY</code> (ordre fixe : <code>SELECT</code> → <code>FROM</code> → <code>WHERE</code> → <code>ORDER BY</code> → <code>LIMIT</code>).
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Requêtes sur « Client » et « Commande »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Écrivez sur feuille les <strong>4 requêtes SQL</strong> correspondant aux demandes suivantes (sur <code>Client</code> et <code>Commande(#numCmd, dateCmd, idClt#)</code>) :</p>
+      <ol class="questions">
+        <li>Afficher les numéros et dates des commandes passées entre le <code>1er février 2026</code> et le <code>31 mars 2026</code> inclus, triées de la plus récente à la plus ancienne.</li>
+        <li>Afficher le nom, le prénom et la ville des clients qui n'habitent <strong>ni</strong> à <code>'Tunis'</code> <strong>ni</strong> à <code>'Sfax'</code>.</li>
+        <li>Afficher tous les produits dont la désignation contient le mot <code>'USB'</code> ou <code>'SSD'</code>, et qui sont disponibles en stock (<code>qteStock &gt; 0</code>).</li>
+        <li>Afficher le nom, le prénom et la date d'inscription des <strong>2 clients les plus anciens</strong> (premiers inscrits) disposant d'un numéro de téléphone.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes en autonomie</span>
+        <pre class="sql-block"><span class="cm">-- 1. Commandes de février et mars 2026, de la plus récente à la plus ancienne</span>
+<span class="kw">SELECT</span> numCmd, dateCmd
+<span class="kw">FROM</span> Commande
+<span class="kw">WHERE</span> dateCmd <span class="kw">BETWEEN</span> <span class="str">'2026-02-01'</span> <span class="kw">AND</span> <span class="str">'2026-03-31'</span>
+<span class="kw">ORDER BY</span> dateCmd <span class="kw">DESC</span>;
+
+<span class="cm">-- 2. Clients hors Tunis et Sfax</span>
+<span class="kw">SELECT</span> nom, prenom, ville
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> ville <span class="kw">NOT IN</span> (<span class="str">'Tunis'</span>, <span class="str">'Sfax'</span>);
+
+<span class="cm">-- 3. Produits contenant USB ou SSD et en stock (attention aux parenthèses !)</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> (designation <span class="kw">LIKE</span> <span class="str">'%USB%'</span> <span class="kw">OR</span> designation <span class="kw">LIKE</span> <span class="str">'%SSD%'</span>)
+  <span class="kw">AND</span> qteStock &gt; 0;
+
+<span class="cm">-- 4. Les 2 clients les plus anciens ayant un téléphone</span>
+<span class="kw">SELECT</span> nom, prenom, dateInscr
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> tel <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> dateInscr <span class="kw">ASC</span>
+<span class="kw">LIMIT</span> 2;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Joker LIKE :</strong> Quelle est la différence entre <code>LIKE 'A%'</code> et <code>LIKE 'A_'</code> ?
+        <div class="quiz-answer">Réponse : 'A%' correspond à toute chaîne commençant par A (quelle que soit sa longueur : "A", "Aya", "Amine"), alors que 'A_' ne correspond qu'aux chaînes de 2 caractères exacts commençant par A (ex. "Al").</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Bornes :</strong> Dans <code>WHERE prixUnit BETWEEN 100 AND 500</code>, un produit coûtant exactement <code>500 DT</code> est-il affiché ?
+        <div class="quiz-answer">Réponse : Oui — l'opérateur BETWEEN inclut toujours ses deux bornes (100 et 500).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Effet d'une requête :</strong> La clause <code>ORDER BY prixUnit DESC</code> modifie-t-elle physiquement l'ordre des lignes enregistrées dans la table <code>Produit</code> ?
+        <div class="quiz-answer">Réponse : Non — une requête SELECT ne modifie jamais les données stockées ; elle trie uniquement le résultat affiché.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Raccourci :</strong> Comment réécrire plus proprement <code>WHERE categorie = 'Ordinateur' OR categorie = 'Stockage' OR categorie = 'Accessoire'</code> ?
+        <div class="quiz-answer">Réponse : WHERE categorie IN ('Ordinateur', 'Stockage', 'Accessoire').</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Alias :</strong> Si je veux donner un alias contenant un espace (ex. <code>Prix Unitaire</code>), que dois-je ajouter autour de l'alias ?
+        <div class="quiz-answer">Réponse : Des apostrophes ou guillemets (ex. AS 'Prix Unitaire'), ou remplacer l'espace par un underscore (AS Prix_Unitaire).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

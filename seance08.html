@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 8 — Regroupements SQL : GROUP BY, HAVING et WHERE vs HAVING (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance07.html">← S7</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 8 : Regroupements GROUP BY & HAVING (2h)</div>
+        <a class="btn-nav" href="seance09.html">S9 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 8 (2 heures)</span>
+      </div>
+      <h1>Regroupements et Filtrage de Groupes : GROUP BY et HAVING</h1>
+      <p class="subtitle">Objectifs : Calculer des statistiques par sous-ensemble avec GROUP BY, filtrer les résultats agrégés avec HAVING et distinguer rigoureusement WHERE et HAVING.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Des statistiques globales aux groupes)</strong></td>
+            <td>Montrer la limite de <code>COUNT(*)</code> global et illustrer le découpage d'une table en paquets par critère.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Synthèse de cours</strong></td>
+            <td>Formaliser <code>GROUP BY</code>, <code>HAVING</code>, l'ordre complet des clauses, le pipeline d'exécution et le tableau comparatif <code>WHERE</code> vs <code>HAVING</code>.</td>
+          </tr>
+          <tr>
+            <td>0h40 – 1h20</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé (10 requêtes)</strong></td>
+            <td>Exécuter 10 requêtes graduelles sur <code>boutique_info</code> (du <code>GROUP BY</code> simple jusqu'à la combinaison <code>WHERE + GROUP BY + HAVING + ORDER BY</code>).</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h35</td>
+            <td>15 min</td>
+            <td><strong>4. Chasse aux pièges</strong></td>
+            <td>Corriger 3 erreurs classiques : agrégation dans <code>WHERE</code>, colonne orpheline hors <code>GROUP BY</code>, mauvais placement d'un filtre simple.</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Rédiger 4 requêtes sur papier couvrant <code>Client</code>, <code>Produit</code> et <code>LigneCommande</code>.</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Vérifier la maîtrise de <code>WHERE</code> vs <code>HAVING</code> et introduire le besoin des jointures (séance 9).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Passer d'un total global à des statistiques par groupe</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        En séance 7, la requête <code>SELECT COUNT(*), AVG(prixUnit) FROM Produit;</code> nous donnait le nombre total d'articles (<code>8</code>) et le prix moyen de toute la boutique (<code>727.313 DT</code>).
+      </p>
+      <div class="context-box">
+        <strong>Nouveau besoin du gérant de TechStore :</strong>
+        <ul style="margin:6px 0 0; padding-left:20px;">
+          <li>« Je ne veux plus un seul prix moyen global : je veux le <strong>prix moyen et le stock total pour CHAQUE catégorie</strong> (<em>Ordinateur</em>, <em>Accessoire</em>, <em>Stockage</em>, <em>Périphérique</em>). »</li>
+          <li>« Ensuite, je veux afficher <strong>uniquement les catégories</strong> dont le prix moyen dépasse <code>200 DT</code>. »</li>
+        </ul>
+      </div>
+      <p><strong>Principe :</strong> Au lieu d'écrire 4 requêtes séparées avec 4 <code>WHERE categorie = ...</code> différents, SQL permet de découper automatiquement la table en <strong>groupes</strong> grâce à <code>GROUP BY</code>, puis de filtrer ces groupes avec <code>HAVING</code>.</p>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Démarche de construction GROUP BY &amp; HAVING</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Étape 1 — Découpage par catégorie (<code>GROUP BY</code>) :</strong>
+            <pre class="sql-block" style="margin:6px 0;"><span class="kw">SELECT</span> categorie, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Articles, <span class="fn">AVG</span>(prixUnit) <span class="kw">AS</span> Prix_Moyen
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie;</pre>
+            <em>Effet :</em> SQL regroupe les 8 articles en 4 sous-ensembles (<em>Ordinateur</em>, <em>Accessoire</em>, <em>Stockage</em>, <em>Périphérique</em>) et calcule la moyenne au sein de chaque groupe.
+          </li>
+          <li><strong>Étape 2 — Pourquoi <code>WHERE AVG(prixUnit) &gt; 200</code> provoque une ERREUR ?</strong>
+            Parce que le filtre <code>WHERE</code> s'exécute <strong>ligne par ligne avant</strong> que les groupes ne soient formés et calculés. Le SGBD ne connaît pas encore la moyenne !
+          </li>
+          <li><strong>Étape 3 — Règle d'or de distinction :</strong>
+            <ul>
+              <li><strong><code>WHERE</code></strong> filtre les <strong>lignes individuelles</strong> avant regroupement (ex. : <code>WHERE qteStock &gt; 0</code>).</li>
+              <li><strong><code>HAVING</code></strong> filtre les <strong>groupes après agrégation</strong> (ex. : <code>HAVING AVG(prixUnit) &gt; 200</code>).</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : GROUP BY, HAVING et Distinction WHERE / HAVING</span>
+        <span class="badge-time">25 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Ordre d'écriture complet d'une requête SELECT</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> col_groupe, <span class="fn">FONCTION_AGREG</span>(col) <span class="kw">AS</span> alias
+<span class="kw">FROM</span> NomTable
+[<span class="kw">WHERE</span> condition_sur_les_lignes]
+<span class="kw">GROUP BY</span> col_groupe
+[<span class="kw">HAVING</span> condition_sur_les_groupes]
+[<span class="kw">ORDER BY</span> ...]
+[<span class="kw">LIMIT</span> ...];</pre>
+
+        <h3>B. Pipeline d'exécution logique du SGBDR</h3>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 760 95" width="100%" height="95" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ordre d'exécution logique FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY">
+            <rect x="8" y="20" width="95" height="46" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="55" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1d4ed8">1. FROM</text>
+            <text x="55" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Table source</text>
+
+            <line x1="103" y1="43" x2="128" y2="43" stroke="#64748b" stroke-width="1.8"/>
+            <polygon points="128,43 121,39 121,47" fill="#64748b"/>
+
+            <rect x="130" y="20" width="110" height="46" rx="6" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+            <text x="185" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b45309">2. WHERE</text>
+            <text x="185" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Filtre les LIGNES</text>
+
+            <line x1="240" y1="43" x2="265" y2="43" stroke="#64748b" stroke-width="1.8"/>
+            <polygon points="265,43 258,39 258,47" fill="#64748b"/>
+
+            <rect x="267" y="20" width="115" height="46" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+            <text x="324" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">3. GROUP BY</text>
+            <text x="324" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Forme les paquets</text>
+
+            <line x1="382" y1="43" x2="407" y2="43" stroke="#64748b" stroke-width="1.8"/>
+            <polygon points="407,43 400,39 400,47" fill="#64748b"/>
+
+            <rect x="409" y="20" width="118" height="46" rx="6" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+            <text x="468" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803d">4. HAVING</text>
+            <text x="468" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Filtre les GROUPES</text>
+
+            <line x1="527" y1="43" x2="552" y2="43" stroke="#64748b" stroke-width="1.8"/>
+            <polygon points="552,43 545,39 545,47" fill="#64748b"/>
+
+            <rect x="554" y="20" width="90" height="46" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="599" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1d4ed8">5. SELECT</text>
+            <text x="599" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Affichage</text>
+
+            <line x1="644" y1="43" x2="664" y2="43" stroke="#64748b" stroke-width="1.8"/>
+            <polygon points="664,43 657,39 657,47" fill="#64748b"/>
+
+            <rect x="666" y="20" width="88" height="46" rx="6" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+            <text x="710" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1e293b">6. ORDER BY</text>
+            <text x="710" y="56" text-anchor="middle" font-size="9.5" fill="#475569">Tri final</text>
+          </svg>
+        </div>
+
+        <h3>C. Règle d'or du GROUP BY</h3>
+        <p style="margin-top:0;">Dans la clause <code>SELECT</code>, toute colonne qui n'est <strong>pas</strong> à l'intérieur d'une fonction d'agrégation (<code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>) <strong>doit obligatoirement figurer dans la clause <code>GROUP BY</code></strong>.</p>
+
+        <h3>D. Distinction stricte : WHERE vs HAVING</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Critère</th>
+              <th>Clause <code>WHERE</code></th>
+              <th>Clause <code>HAVING</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Moment d'exécution</strong></td>
+              <td><strong>Avant</strong> le regroupement (<code>GROUP BY</code>).</td>
+              <td><strong>Après</strong> le regroupement et le calcul des agrégations.</td>
+            </tr>
+            <tr>
+              <td><strong>Élément filtré</strong></td>
+              <td>Filtre les <strong>lignes individuelles</strong> de la table.</td>
+              <td>Filtre les <strong>groupes entiers</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Fonctions d'agrégation</strong></td>
+              <td><strong>Interdites</strong> (<code>WHERE COUNT(*) &gt; 2</code> → Erreur).</td>
+              <td><strong>Autorisées</strong> (<code>HAVING COUNT(*) &gt;= 2</code>).</td>
+            </tr>
+            <tr>
+              <td><strong>Exemple</strong></td>
+              <td><code>WHERE qteStock &gt; 0</code> (élimine les produits en rupture avant de compter).</td>
+              <td><code>HAVING AVG(prixUnit) &gt; 200</code> (garde uniquement les catégories chères).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : 10 requêtes de regroupement sur « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <div class="schema-list">
+        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
+        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+      </div>
+
+      <p>Dans phpMyAdmin (base <code>boutique_info</code>), écrivez et testez les <strong>10 requêtes</strong> suivantes en vérifiant chaque résultat :</p>
+
+      <ol class="questions">
+        <li><strong>Clients par ville :</strong> Afficher pour chaque ville le nombre de clients qui y résident (alias <code>Nb_Clients</code>), trié par nombre décroissant.</li>
+        <li><strong>Statistiques de prix par catégorie :</strong> Afficher pour chaque catégorie de <code>Produit</code> : le nombre d'articles, le prix minimum, le prix maximum et le prix moyen arrondi à 2 décimales.</li>
+        <li><strong>Stock et valeur par catégorie :</strong> Afficher pour chaque catégorie le nombre total d'unités en stock (<code>Total_Stock</code>) et la valeur financière du stock (<code>SUM(prixUnit * qteStock)</code>, alias <code>Valeur_DT</code>), triés par valeur décroissante.</li>
+        <li><strong>Commandes par client :</strong> À partir de la table <code>Commande</code>, afficher chaque <code>idClt</code> et son nombre de commandes (<code>Nb_Cmd</code>), trié du plus actif au moins actif.</li>
+        <li><strong>Activité mensuelle :</strong> Afficher pour chaque mois de l'année <code>2026</code> (<code>MONTH(dateCmd)</code>) le nombre de commandes enregistrées, trié par mois croissant.</li>
+        <li><strong>Filtrage de groupes (<code>HAVING</code> sur <code>Client</code>) :</strong> Afficher uniquement les villes qui comptent <strong>au moins 2 clients</strong> (avec leur effectif).</li>
+        <li><strong>Filtrage de groupes (<code>HAVING</code> sur <code>Produit</code>) :</strong> Afficher les catégories dont le prix moyen dépasse strictement <code>200 DT</code>.</li>
+        <li><strong>Produits les plus commandés (<code>HAVING</code> sur <code>LigneCommande</code>) :</strong> Afficher chaque référence produit (<code>refProd</code>) et la quantité totale commandée (<code>SUM(qteCmd)</code>), uniquement pour les produits dont la quantité totale commandée est supérieure ou égale à <code>3</code>.</li>
+        <li><strong>Combinaison <code>WHERE</code> + <code>GROUP BY</code> + <code>HAVING</code> :</strong> En ne tenant compte <strong>que des produits disponibles en stock</strong> (<code>qteStock &gt; 0</code>), afficher les catégories qui disposent d'<strong>au moins 2 articles disponibles</strong>. <em>(Observez quelle catégorie disparaît et pourquoi !)</em></li>
+        <li><strong>Double condition dans <code>HAVING</code> :</strong> À partir de <code>LigneCommande</code>, afficher les numéros de commande (<code>numCmd</code>), le nombre de produits distincts commandés et le total d'unités (<code>SUM(qteCmd)</code>), uniquement pour les commandes comptant <strong>au moins 2 articles</strong> et <strong>au moins 4 unités au total</strong>.</li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Les 10 requêtes GROUP BY / HAVING</span>
+        <pre class="sql-block"><span class="cm">-- 1. Nombre de clients par ville (Sousse: 2, Tunis: 2, Sfax: 1, Monastir: 1)</span>
+<span class="kw">SELECT</span> ville, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Clients
+<span class="kw">FROM</span> Client
+<span class="kw">GROUP BY</span> ville
+<span class="kw">ORDER BY</span> Nb_Clients <span class="kw">DESC</span>;
+
+<span class="cm">-- 2. Statistiques de prix par catégorie (4 lignes)</span>
+<span class="kw">SELECT</span> categorie,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Produits,
+       <span class="fn">MIN</span>(prixUnit) <span class="kw">AS</span> Prix_Min,
+       <span class="fn">MAX</span>(prixUnit) <span class="kw">AS</span> Prix_Max,
+       <span class="fn">ROUND</span>(<span class="fn">AVG</span>(prixUnit), 2) <span class="kw">AS</span> Prix_Moyen
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie;
+
+<span class="cm">-- 3. Stock et valeur financière par catégorie (Ordinateur en tête : 29050 DT)</span>
+<span class="kw">SELECT</span> categorie,
+       <span class="fn">SUM</span>(qteStock) <span class="kw">AS</span> Total_Stock,
+       <span class="fn">SUM</span>(prixUnit * qteStock) <span class="kw">AS</span> Valeur_DT
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie
+<span class="kw">ORDER BY</span> Valeur_DT <span class="kw">DESC</span>;
+
+<span class="cm">-- 4. Nombre de commandes par idClt (idClt=1 en tête avec 2 commandes)</span>
+<span class="kw">SELECT</span> idClt, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Cmd
+<span class="kw">FROM</span> Commande
+<span class="kw">GROUP BY</span> idClt
+<span class="kw">ORDER BY</span> Nb_Cmd <span class="kw">DESC</span>;
+
+<span class="cm">-- 5. Nombre de commandes par mois en 2026 (Mois 1: 1, Mois 2: 2, Mois 3: 2, Mois 4: 1)</span>
+<span class="kw">SELECT</span> <span class="fn">MONTH</span>(dateCmd) <span class="kw">AS</span> Mois, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Cmd
+<span class="kw">FROM</span> Commande
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dateCmd) = 2026
+<span class="kw">GROUP BY</span> <span class="fn">MONTH</span>(dateCmd)
+<span class="kw">ORDER BY</span> Mois <span class="kw">ASC</span>;
+
+<span class="cm">-- 6. Villes avec au moins 2 clients (Sousse: 2, Tunis: 2)</span>
+<span class="kw">SELECT</span> ville, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Clients
+<span class="kw">FROM</span> Client
+<span class="kw">GROUP BY</span> ville
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2;
+
+<span class="cm">-- 7. Catégories dont le prix moyen > 200 DT (Ordinateur: 2170, Périphérique: 500)</span>
+<span class="kw">SELECT</span> categorie, <span class="fn">ROUND</span>(<span class="fn">AVG</span>(prixUnit), 2) <span class="kw">AS</span> Prix_Moyen
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(prixUnit) &gt; 200;
+
+<span class="cm">-- 8. Produits commandés au moins 3 unités au total (P03: 6, P04: 3, P05: 3, P07: 3)</span>
+<span class="kw">SELECT</span> refProd, <span class="fn">SUM</span>(qteCmd) <span class="kw">AS</span> Qte_Totale
+<span class="kw">FROM</span> LigneCommande
+<span class="kw">GROUP BY</span> refProd
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(qteCmd) &gt;= 3
+<span class="kw">ORDER BY</span> Qte_Totale <span class="kw">DESC</span>;
+
+<span class="cm">-- 9. Catégories avec >= 2 articles en stock (Stockage disparaît car P06 a qteStock=0 !)</span>
+<span class="kw">SELECT</span> categorie, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Dispo
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> qteStock &gt; 0
+<span class="kw">GROUP BY</span> categorie
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2;
+
+<span class="cm">-- 10. Commandes avec >= 2 articles et >= 4 unités (numCmd 2: 3 art/4 u ; numCmd 4: 2 art/4 u)</span>
+<span class="kw">SELECT</span> numCmd,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Articles,
+       <span class="fn">SUM</span>(qteCmd) <span class="kw">AS</span> Total_Unites
+<span class="kw">FROM</span> LigneCommande
+<span class="kw">GROUP BY</span> numCmd
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2 <span class="kw">AND</span> <span class="fn">SUM</span>(qteCmd) &gt;= 4;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux pièges GROUP BY / HAVING »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Piège 1 — Agrégation placée dans WHERE</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève cherche les clients ayant passé au moins 2 commandes</span>
+<span class="kw">SELECT</span> idClt, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Cmd
+<span class="kw">FROM</span> Commande
+<span class="kw">WHERE</span> <span class="fn">COUNT</span>(*) &gt;= 2
+<span class="kw">GROUP BY</span> idClt;</pre>
+        <p><strong>Question :</strong> Pourquoi cette requête provoque-t-elle une erreur ? Corrigez-la.</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 1</span>
+          <code>WHERE</code> s'exécute <em>avant</em> <code>GROUP BY</code> et interdit les fonctions d'agrégation. Il faut déplacer la condition après <code>GROUP BY</code> dans une clause <code>HAVING</code> :<br>
+          <code>SELECT idClt, COUNT(*) AS Nb_Cmd FROM Commande GROUP BY idClt HAVING COUNT(*) &gt;= 2;</code>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 2 — Colonne non agrégée absente du GROUP BY</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> categorie, designation, <span class="fn">AVG</span>(prixUnit)
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie;</pre>
+        <p><strong>Question :</strong> Quel est le problème logique de cette requête (pourquoi SQL ne sait pas quelle <code>designation</code> afficher pour la catégorie <code>'Ordinateur'</code>) ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 2</span>
+          La catégorie <code>'Ordinateur'</code> regroupe <strong>2 produits différents</strong> (ThinkPad et Dell). On ne peut pas afficher deux désignations dans une seule cellule ! Il faut retirer <code>designation</code> du <code>SELECT</code> (règle d'or du <code>GROUP BY</code>).
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 3 — Utiliser HAVING à la place de WHERE pour une condition simple</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut le stock total par catégorie, sauf pour les produits à moins de 50 DT</span>
+<span class="kw">SELECT</span> categorie, <span class="fn">SUM</span>(qteStock)
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie
+<span class="kw">HAVING</span> prixUnit &gt;= 50;</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 3</span>
+          <code>prixUnit &gt;= 50</code> porte sur chaque <strong>ligne individuelle</strong> (avant regroupement), pas sur un groupe : elle doit impérativement aller dans <code>WHERE</code> :<br>
+          <code>SELECT categorie, SUM(qteStock) FROM Produit WHERE prixUnit &gt;= 50 GROUP BY categorie;</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : 4 requêtes de synthèse</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Écrivez sur feuille les <strong>4 requêtes SQL</strong> répondant aux demandes suivantes sur <code>boutique_info</code> :</p>
+      <ol class="questions">
+        <li>Afficher le nombre de clients inscrits pour chaque année (<code>YEAR(dateInscr)</code>), trié par année croissante.</li>
+        <li>À partir de <code>LigneCommande</code>, afficher les numéros de commande (<code>numCmd</code>) comportant <strong>strictement plus de 2 articles différents</strong>.</li>
+        <li>Afficher les catégories de produits dont la valeur totale du stock (<code>SUM(prixUnit * qteStock)</code>) est comprise entre <code>4000</code> et <code>10000</code> DT inclus.</li>
+        <li>En ne comptant <strong>que les clients disposant d'un numéro de téléphone</strong>, afficher les villes qui comptent <strong>au moins 2 clients joignables</strong>.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes en autonomie</span>
+        <pre class="sql-block"><span class="cm">-- 1. Clients inscrits par année (2025: 3, 2026: 3)</span>
+<span class="kw">SELECT</span> <span class="fn">YEAR</span>(dateInscr) <span class="kw">AS</span> Annee, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Inscrits
+<span class="kw">FROM</span> Client
+<span class="kw">GROUP BY</span> <span class="fn">YEAR</span>(dateInscr)
+<span class="kw">ORDER BY</span> Annee <span class="kw">ASC</span>;
+
+<span class="cm">-- 2. Commandes contenant strictement plus de 2 articles (numCmd = 2 avec 3 articles)</span>
+<span class="kw">SELECT</span> numCmd, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Articles
+<span class="kw">FROM</span> LigneCommande
+<span class="kw">GROUP BY</span> numCmd
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 2;
+
+<span class="cm">-- 3. Catégories dont la valeur de stock est entre 4000 et 10000 DT (Stockage: 4600, Périphérique: 6880)</span>
+<span class="kw">SELECT</span> categorie, <span class="fn">SUM</span>(prixUnit * qteStock) <span class="kw">AS</span> Valeur_Stock
+<span class="kw">FROM</span> Produit
+<span class="kw">GROUP BY</span> categorie
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(prixUnit * qteStock) <span class="kw">BETWEEN</span> 4000 <span class="kw">AND</span> 10000;
+
+<span class="cm">-- 4. Villes avec >= 2 clients joignables par téléphone (Uniquement Tunis: 2 ; Sousse tombe à 1 car Aya a tel=NULL)</span>
+<span class="kw">SELECT</span> ville, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Joignables
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> tel <span class="kw">IS NOT NULL</span>
+<span class="kw">GROUP BY</span> ville
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Règle clé :</strong> En une phrase, quelle est la différence entre <code>WHERE</code> et <code>HAVING</code> ?
+        <div class="quiz-answer">Réponse : WHERE filtre les lignes individuelles AVANT le regroupement (GROUP BY), tandis que HAVING filtre les groupes APRÈS le calcul des fonctions d'agrégation.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Vrai ou Faux :</strong> « On peut utiliser une clause <code>WHERE</code> et une clause <code>HAVING</code> dans la même requête <code>SELECT</code>. »
+        <div class="quiz-answer">Réponse : Vrai — WHERE élimine d'abord les lignes non désirées, puis GROUP BY regroupe les lignes restantes, puis HAVING filtre les groupes obtenus.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Ordre syntaxique :</strong> Classez ces 5 clauses dans l'ordre exact d'écriture SQL : <code>HAVING</code>, <code>FROM</code>, <code>ORDER BY</code>, <code>WHERE</code>, <code>GROUP BY</code>.
+        <div class="quiz-answer">Réponse : (SELECT) → FROM → WHERE → GROUP BY → HAVING → ORDER BY.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Raisonnement :</strong> Si la table <code>Produit</code> contient 4 catégories différentes, combien de lignes au maximum peut renvoyer une requête contenant <code>GROUP BY categorie</code> ?
+        <div class="quiz-answer">Réponse : Au maximum 4 lignes (une ligne par groupe distinct, ou moins si WHERE ou HAVING en élimine).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Transition vers la séance 9 :</strong> Dans le TP (requête 4), nous avons affiché le nombre de commandes par <code>idClt</code>. Pourquoi n'avons-nous pas encore pu afficher le <strong>nom et le prénom du client</strong> à côté ?
+        <div class="quiz-answer">Réponse : Parce que nom et prenom sont dans la table Client, alors que les commandes sont dans la table Commande : il faudra relier les deux tables grâce aux jointures (objet de la séance 9 !).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

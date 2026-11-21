@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 9 — Requêtes Multi-tables : Jointures implicites via WHERE (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance08.html">← S8</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 9 : Requêtes Multi-tables et Jointures (2h)</div>
+        <a class="btn-nav" href="seance10.html">S10 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 9 (2 heures)</span>
+      </div>
+      <h1>Requêtes Multi-tables : Produit Cartésien et Jointures Implicites via WHERE</h1>
+      <p class="subtitle">Objectifs : Relier 2, 3 ou 4 tables par jointure implicite (WHERE T1.pk = T2.fk), utiliser des alias de tables pour lever les ambiguïtés et combiner les jointures avec GROUP BY et HAVING.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Expérience (Produit cartésien)</strong></td>
+            <td>Exécuter <code>SELECT * FROM Client, Commande;</code> sans <code>WHERE</code> pour constater les 36 lignes absurdes (6 × 6) et justifier la condition de jointure.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Synthèse de cours</strong></td>
+            <td>Formaliser la jointure implicite (<code>FROM T1, T2 WHERE T1.pk = T2.fk</code>), les alias de tables, le préfixage des colonnes et la règle des <em>N − 1</em> conditions.</td>
+          </tr>
+          <tr>
+            <td>0h40 – 1h20</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé (10 requêtes)</strong></td>
+            <td>Croiser 2, 3 puis 4 tables sur <code>boutique_info</code> (factures, chiffre d'affaires par client, par catégorie et par ville avec <code>GROUP BY</code> / <code>HAVING</code>).</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h35</td>
+            <td>15 min</td>
+            <td><strong>4. Chasse aux pièges</strong></td>
+            <td>Corriger 3 erreurs classiques : oubli d'une condition de jointure sur 3 tables, colonne ambiguë et disparition des clients sans commande.</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Rédiger 4 requêtes multi-tables sur papier pour préparer l'évaluation de la séance 10.</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Vérifier la règle des <em>N − 1</em> jointures, les alias et l'ordre des clauses avant le devoir de synthèse.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Expérience d'accroche : Le piège du produit cartésien</span>
+        <span class="badge-time">15 min — Manipulation guidée</span>
+      </h2>
+      <p>
+        En séance 2, nous avons éclaté nos données en 4 tables pour éviter la redondance. Mais aujourd'hui, le gérant de <strong>TechStore</strong> veut afficher le <strong>numéro et la date de chaque commande</strong> accompagnés du <strong>nom et du prénom du client</strong> qui l'a passée. Ces informations se trouvent dans deux tables différentes : <code>Client</code> (6 lignes) et <code>Commande</code> (6 lignes).
+      </p>
+
+      <div class="context-box">
+        <strong>Test rapide dans phpMyAdmin (base <code>boutique_info</code>) :</strong>
+        <ol style="margin:6px 0 0; padding-left:20px;">
+          <li>Exécutez d'abord : <code>SELECT numCmd, dateCmd, nom, prenom FROM Client, Commande;</code></li>
+          <li>Observez le nombre de lignes renvoyées : pourquoi y a-t-il <strong>36 lignes</strong> alors qu'il n'existe que 6 commandes ?</li>
+          <li>Ajoutez maintenant la condition de correspondance : <code>WHERE Client.idClt = Commande.idClt</code>. Combien de lignes obtenez-vous ?</li>
+        </ol>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Explication — Produit cartésien vs Jointure</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Sans condition de jointure (Produit cartésien) :</strong> SQL associe <em>chaque</em> client à <em>toutes</em> les commandes de la table (<code>6 × 6 = 36</code> lignes, dont 30 combinaisons fausses !).</li>
+          <li><strong>Avec <code>WHERE Client.idClt = Commande.idClt</code> (Jointure) :</strong> SQL ne conserve que les <strong>6 lignes cohérentes</strong> où la clé primaire du client correspond à la clé étrangère de la commande.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : Jointures Implicites, Alias et Chaîne de Jointures</span>
+        <span class="badge-time">25 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Syntaxe d'une jointure implicite via WHERE</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> T1.colA, T2.colB
+<span class="kw">FROM</span> Table1 T1, Table2 T2
+<span class="kw">WHERE</span> T1.clePrimaire = T2.cleEtrangere
+  [<span class="kw">AND</span> autres_conditions_de_filtrage];</pre>
+
+        <ul class="vocab-list">
+          <li><strong>Alias de tables :</strong> Donner un nom court à chaque table dans <code>FROM</code> (ex. : <code>Client C, Commande Cmd</code>) allège la requête et rend le code plus lisible.</li>
+          <li><strong>Lever les ambiguïtés :</strong> Dès qu'un nom de colonne existe dans plusieurs tables (ex. : <code>idClt</code> dans <code>Client</code> et <code>Commande</code>, ou <code>numCmd</code> dans <code>Commande</code> et <code>LigneCommande</code>), il est <strong>obligatoire</strong> de le préfixer par le nom ou l'alias de sa table (<code>C.idClt</code>).</li>
+          <li><strong>Règle des <em>N − 1</em> jointures :</strong> Pour relier correctement <strong><em>N</em> tables</strong> sans créer de produit cartésien, il faut obligatoirement écrire <strong><em>N − 1</em> conditions de jointure</strong> dans la clause <code>WHERE</code> :
+            <ul>
+              <li>2 tables → <strong>1</strong> condition de jointure ;</li>
+              <li>3 tables → <strong>2</strong> conditions de jointure ;</li>
+              <li>4 tables → <strong>3</strong> conditions de jointure.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>B. Carte des chemins de jointure dans « boutique_info » (4 tables → 3 liens)</h3>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 760 115" width="100%" height="115" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chaîne de jointures entre Client, Commande, LigneCommande et Produit">
+            <!-- Client -->
+            <rect x="8" y="18" width="132" height="72" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="74" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Client (C)</text>
+            <line x1="8" y1="45" x2="140" y2="45" stroke="#bfdbfe"/>
+            <text x="74" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#idClt</text>
+            <text x="74" y="80" text-anchor="middle" font-size="10" fill="#475569">nom, prenom, ville</text>
+
+            <!-- Lien 1 -->
+            <line x1="140" y1="54" x2="205" y2="54" stroke="#0f766e" stroke-width="2"/>
+            <text x="172" y="45" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f766e">Lien 1</text>
+            <text x="172" y="69" text-anchor="middle" font-size="9" font-family="Consolas, monospace" fill="#334155">C.idClt=Cmd.idClt</text>
+
+            <!-- Commande -->
+            <rect x="205" y="18" width="142" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+            <text x="276" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Commande (Cmd)</text>
+            <line x1="205" y1="45" x2="347" y2="45" stroke="#99f6e4"/>
+            <text x="276" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numCmd</text>
+            <text x="276" y="80" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#0f766e">dateCmd, idClt#</text>
+
+            <!-- Lien 2 -->
+            <line x1="347" y1="54" x2="412" y2="54" stroke="#0f766e" stroke-width="2"/>
+            <text x="379" y="45" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f766e">Lien 2</text>
+            <text x="379" y="69" text-anchor="middle" font-size="8.5" font-family="Consolas, monospace" fill="#334155">Cmd.numCmd=L.numCmd</text>
+
+            <!-- LigneCommande -->
+            <rect x="412" y="18" width="150" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+            <text x="487" y="37" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">LigneCommande (L)</text>
+            <line x1="412" y1="45" x2="562" y2="45" stroke="#99f6e4"/>
+            <text x="487" y="63" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numCmd#, #refProd#</text>
+            <text x="487" y="80" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#475569">qteCmd</text>
+
+            <!-- Lien 3 -->
+            <line x1="562" y1="54" x2="622" y2="54" stroke="#0f766e" stroke-width="2"/>
+            <text x="592" y="45" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f766e">Lien 3</text>
+            <text x="592" y="69" text-anchor="middle" font-size="8.5" font-family="Consolas, monospace" fill="#334155">L.refProd=P.refProd</text>
+
+            <!-- Produit -->
+            <rect x="622" y="18" width="130" height="72" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="687" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Produit (P)</text>
+            <line x1="622" y1="45" x2="752" y2="45" stroke="#bfdbfe"/>
+            <text x="687" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#refProd</text>
+            <text x="687" y="80" text-anchor="middle" font-size="10" fill="#475569">designation, prixUnit</text>
+          </svg>
+        </div>
+        <p style="margin-bottom:0; font-size:0.92rem;"><strong>Astuce de lecture :</strong> Pour relier <code>Client</code> à <code>Produit</code>, il n'existe pas de lien direct : il faut obligatoirement passer par les tables intermédiaires <code>Commande</code> et <code>LigneCommande</code> (4 tables → 3 conditions de jointure).</p>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : 10 requêtes multi-tables sur « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <div class="schema-list">
+        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
+        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+      </div>
+
+      <p>Dans phpMyAdmin (base <code>boutique_info</code>), écrivez et testez les <strong>10 requêtes</strong> suivantes en utilisant exclusivement des <strong>jointures implicites dans la clause <code>WHERE</code></strong> :</p>
+
+      <ol class="questions">
+        <li><strong>Jointure à 2 tables (<code>Client</code> + <code>Commande</code>) :</strong> Afficher le numéro de commande, la date de commande, le nom, le prénom et la ville du client, triés par date croissante.</li>
+        <li><strong>Jointure à 2 tables + filtre :</strong> Afficher le numéro et la date des commandes passées par des clients habitant à <code>'Sousse'</code>, avec le nom et le prénom du client.</li>
+        <li><strong>Jointure à 2 tables (<code>Produit</code> + <code>LigneCommande</code>) + calcul :</strong> Afficher le détail de la commande n°<code>2</code> : référence produit, désignation, prix unitaire, quantité commandée et <strong>sous-total</strong> (<code>prixUnit * qteCmd</code>, alias <code>Sous_Total</code>).</li>
+        <li><strong>Jointure à 2 tables + <code>GROUP BY</code> (Nombre de commandes par client) :</strong> Afficher l'identifiant, le nom et le prénom de chaque client ayant passé au moins une commande, ainsi que son nombre de commandes (<code>Nb_Cmd</code>), triés par nombre décroissant.</li>
+        <li><strong>Jointure à 2 tables + <code>GROUP BY</code> (Ventes par catégorie) :</strong> Afficher pour chaque catégorie de produit le nombre total d'unités vendues (<code>SUM(qteCmd)</code>) et le chiffre d'affaires généré (<code>SUM(prixUnit * qteCmd)</code>, alias <code>CA_DT</code>), triés par chiffre d'affaires décroissant.</li>
+        <li><strong>Jointure à 3 tables (<code>Commande</code> + <code>LigneCommande</code> + <code>Produit</code>) :</strong> Afficher le numéro de commande, la date de commande et le <strong>montant total</strong> (<code>SUM(prixUnit * qteCmd)</code>, alias <code>Total_Cmd</code>) de chaque commande, triés du montant le plus élevé au plus faible.</li>
+        <li><strong>Jointure à 3 tables + <code>HAVING</code> :</strong> Reprendre la requête précédente pour n'afficher que les commandes dont le montant total dépasse strictement <code>1000 DT</code>.</li>
+        <li><strong>Jointure à 4 tables (Détail complet) :</strong> Afficher la liste des produits commandés par <code>Sami Ben Salem</code> : numéro de commande, date de commande, désignation du produit, quantité commandée et montant de la ligne.</li>
+        <li><strong>Jointure à 4 tables + <code>GROUP BY</code> + <code>HAVING</code> (Meilleurs clients) :</strong> Afficher le nom, le prénom et le chiffre d'affaires total dépensé (<code>CA_Client</code>) pour chaque client ayant dépensé <strong>au moins 2500 DT</strong> au total, triés par chiffre d'affaires décroissant.</li>
+        <li><strong>Jointure à 4 tables + <code>GROUP BY</code> (Chiffre d'affaires par ville) :</strong> Afficher pour chaque ville cliente le nombre de commandes distinctes (<code>COUNT(DISTINCT Cmd.numCmd)</code>) et le chiffre d'affaires total généré (<code>CA_Ville</code>), triés par chiffre d'affaires décroissant.</li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Les 10 requêtes multi-tables (Jointures implicites)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Commandes avec nom, prénom et ville du client (6 lignes)</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd, C.nom, C.prenom, C.ville
+<span class="kw">FROM</span> Client C, Commande Cmd
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+<span class="kw">ORDER BY</span> Cmd.dateCmd <span class="kw">ASC</span>;
+
+<span class="cm">-- 2. Commandes des clients de Sousse (3 lignes : Cmd 1, 3 et 5)</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd, C.nom, C.prenom
+<span class="kw">FROM</span> Client C, Commande Cmd
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> C.ville = <span class="str">'Sousse'</span>;
+
+<span class="cm">-- 3. Détail de la commande n°2 (3 lignes : P02=1890, P05=230, P07=960)</span>
+<span class="kw">SELECT</span> P.refProd, P.designation, P.prixUnit, L.qteCmd,
+       (P.prixUnit * L.qteCmd) <span class="kw">AS</span> Sous_Total
+<span class="kw">FROM</span> Produit P, LigneCommande L
+<span class="kw">WHERE</span> P.refProd = L.refProd
+  <span class="kw">AND</span> L.numCmd = 2;
+
+<span class="cm">-- 4. Nombre de commandes par client (5 lignes — Nour n'apparaît pas car 0 commande)</span>
+<span class="kw">SELECT</span> C.idClt, C.nom, C.prenom, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Cmd
+<span class="kw">FROM</span> Client C, Commande Cmd
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+<span class="kw">GROUP BY</span> C.idClt, C.nom, C.prenom
+<span class="kw">ORDER BY</span> Nb_Cmd <span class="kw">DESC</span>;
+
+<span class="cm">-- 5. Ventes par catégorie (Ordinateur: 6790, Périphérique: 1960, Accessoire: 768, Stockage: 690)</span>
+<span class="kw">SELECT</span> P.categorie,
+       <span class="fn">SUM</span>(L.qteCmd) <span class="kw">AS</span> Unites_Vendues,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> CA_DT
+<span class="kw">FROM</span> Produit P, LigneCommande L
+<span class="kw">WHERE</span> P.refProd = L.refProd
+<span class="kw">GROUP BY</span> P.categorie
+<span class="kw">ORDER BY</span> CA_DT <span class="kw">DESC</span>;
+
+<span class="cm">-- 6. Montant total de chaque commande (3 tables → 2 jointures)</span>
+<span class="cm">-- Résultats : Cmd 2 (3080), Cmd 5 (2930), Cmd 1 (2541), Cmd 4 (656.5), Cmd 3 (625), Cmd 6 (375.5)</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> Total_Cmd
+<span class="kw">FROM</span> Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+<span class="kw">GROUP BY</span> Cmd.numCmd, Cmd.dateCmd
+<span class="kw">ORDER BY</span> Total_Cmd <span class="kw">DESC</span>;
+
+<span class="cm">-- 7. Commandes de plus de 1000 DT (3 lignes : Cmd 2, Cmd 5, Cmd 1)</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> Total_Cmd
+<span class="kw">FROM</span> Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+<span class="kw">GROUP BY</span> Cmd.numCmd, Cmd.dateCmd
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) &gt; 1000
+<span class="kw">ORDER BY</span> Total_Cmd <span class="kw">DESC</span>;
+
+<span class="cm">-- 8. Produits commandés par Sami Ben Salem (4 tables → 3 jointures, 4 lignes)</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd, P.designation, L.qteCmd,
+       (P.prixUnit * L.qteCmd) <span class="kw">AS</span> Montant_Ligne
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+  <span class="kw">AND</span> C.nom = <span class="str">'Ben Salem'</span> <span class="kw">AND</span> C.prenom = <span class="str">'Sami'</span>;
+
+<span class="cm">-- 9. Clients ayant dépensé >= 2500 DT (Sami: 3166, Ines: 3080, Aya: 2930)</span>
+<span class="kw">SELECT</span> C.nom, C.prenom,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> CA_Client
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+<span class="kw">GROUP BY</span> C.idClt, C.nom, C.prenom
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) &gt;= 2500
+<span class="kw">ORDER BY</span> CA_Client <span class="kw">DESC</span>;
+
+<span class="cm">-- 10. Chiffre d'affaires par ville (Sousse: 3 cmd / 6096 DT, Tunis: 1 / 3080, Sfax: 1 / 656.5, Monastir: 1 / 375.5)</span>
+<span class="kw">SELECT</span> C.ville,
+       <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> Cmd.numCmd) <span class="kw">AS</span> Nb_Commandes,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> CA_Ville
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+<span class="kw">GROUP BY</span> C.ville
+<span class="kw">ORDER BY</span> CA_Ville <span class="kw">DESC</span>;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux pièges des Jointures »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Piège 1 — Colonne ambiguë (Column 'idClt' in field list is ambiguous)</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> idClt, nom, numCmd
+<span class="kw">FROM</span> Client C, Commande Cmd
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt;</pre>
+        <p><strong>Question :</strong> Pourquoi MariaDB refuse-t-il d'exécuter cette requête ? Comment la corriger ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 1</span>
+          La colonne <code>idClt</code> existe dans <strong>les deux tables</strong> (<code>Client</code> et <code>Commande</code>). Il faut lever l'ambiguïté en écrivant <code>SELECT C.idClt, C.nom, Cmd.numCmd ...</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 2 — Jointure incomplète sur 3 tables</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut la date de commande et la désignation des produits commandés</span>
+<span class="kw">SELECT</span> Cmd.numCmd, Cmd.dateCmd, P.designation
+<span class="kw">FROM</span> Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> Cmd.numCmd = L.numCmd;</pre>
+        <p><strong>Question :</strong> Cette requête ne renvoie aucune erreur, mais affiche <strong>104 lignes</strong> au lieu de 13 ! Quelle condition a été oubliée ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 2</span>
+          Il y a <strong>3 tables</strong> dans <code>FROM</code>, donc il faut <strong>2 conditions de jointure</strong> (<em>N − 1</em>). L'élève a oublié <code>AND L.refProd = P.refProd</code>, provoquant un produit cartésien avec les 8 produits (<code>13 × 8 = 104</code> lignes).
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 3 — Où est passée Nour Bouazizi (idClt = 6) ?</h3>
+        <p>Dans la requête 4 du TP (<code>FROM Client C, Commande Cmd WHERE C.idClt = Cmd.idClt</code>), la cliente <strong>Nour Bouazizi</strong> (<code>idClt = 6</code>) et le produit <strong>Clé USB 128 Go</strong> (<code>P06</code>) n'apparaissent jamais. Pourquoi ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 3</span>
+          Une jointure implicite (jointure interne) ne conserve que les lignes ayant une <strong>correspondance dans les deux tables</strong>. Comme Nour n'a passé aucune commande et que <code>P06</code> n'a jamais été commandé, leurs clés ne trouvent aucun équivalent dans <code>Commande</code> ou <code>LigneCommande</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Préparation au devoir de synthèse</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Écrivez sur feuille les <strong>4 requêtes SQL</strong> (jointures implicites via <code>WHERE</code>) répondant aux demandes suivantes sur <code>boutique_info</code> :</p>
+      <ol class="questions">
+        <li>Afficher le nom, le prénom et la ville des clients ayant commandé au moins un article de la catégorie <code>'Ordinateur'</code> (sans doublon dans la liste des clients).</li>
+        <li>Afficher la référence et la désignation de chaque produit commandé au mois de <strong>février 2026</strong>, avec la quantité commandée et la date de la commande.</li>
+        <li>Afficher la désignation de chaque produit vendu et la quantité totale commandée (<code>SUM(qteCmd)</code>), uniquement pour les produits dont la quantité totale vendue est <strong>supérieure ou égale à 3</strong>, triés par quantité décroissante.</li>
+        <li>Afficher le nom et le prénom des clients ayant passé des commandes en <strong>mars 2026</strong>, accompagnés du montant total de leurs achats de mars 2026.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes en autonomie</span>
+        <pre class="sql-block"><span class="cm">-- 1. Clients ayant commandé un Ordinateur, sans doublon (Sami, Ines, Aya)</span>
+<span class="kw">SELECT DISTINCT</span> C.nom, C.prenom, C.ville
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+  <span class="kw">AND</span> P.categorie = <span class="str">'Ordinateur'</span>;
+
+<span class="cm">-- 2. Produits commandés en février 2026 (5 lignes : Cmd 2 et Cmd 3)</span>
+<span class="kw">SELECT</span> P.refProd, P.designation, L.qteCmd, Cmd.dateCmd
+<span class="kw">FROM</span> Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+  <span class="kw">AND</span> <span class="fn">YEAR</span>(Cmd.dateCmd) = 2026
+  <span class="kw">AND</span> <span class="fn">MONTH</span>(Cmd.dateCmd) = 2;
+
+<span class="cm">-- 3. Produits vendus à >= 3 exemplaires (Souris: 6, Clavier: 3, SSD: 3, Écran: 3)</span>
+<span class="kw">SELECT</span> P.designation, <span class="fn">SUM</span>(L.qteCmd) <span class="kw">AS</span> Qte_Vendue
+<span class="kw">FROM</span> Produit P, LigneCommande L
+<span class="kw">WHERE</span> P.refProd = L.refProd
+<span class="kw">GROUP BY</span> P.refProd, P.designation
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(L.qteCmd) &gt;= 3
+<span class="kw">ORDER BY</span> Qte_Vendue <span class="kw">DESC</span>;
+
+<span class="cm">-- 4. Achats par client en mars 2026 (Aya Mansouri: 2930 DT, Mehdi Khelifi: 656.5 DT)</span>
+<span class="kw">SELECT</span> C.nom, C.prenom,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> Total_Mars
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd
+  <span class="kw">AND</span> L.refProd = P.refProd
+  <span class="kw">AND</span> <span class="fn">YEAR</span>(Cmd.dateCmd) = 2026
+  <span class="kw">AND</span> <span class="fn">MONTH</span>(Cmd.dateCmd) = 3
+<span class="kw">GROUP BY</span> C.idClt, C.nom, C.prenom;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Règle mathématique :</strong> Si une requête contient <strong>5 tables</strong> dans sa clause <code>FROM</code>, combien de conditions de jointure faut-il écrire au minimum dans <code>WHERE</code> ?
+        <div class="quiz-answer">Réponse : 4 conditions de jointure (règle N − 1).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Produit cartésien :</strong> La table <code>A</code> contient 10 lignes et la table <code>B</code> contient 20 lignes. Combien de lignes renvoie <code>SELECT * FROM A, B;</code> (sans <code>WHERE</code>) ?
+        <div class="quiz-answer">Réponse : 200 lignes (10 × 20).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Erreur fréquente :</strong> Pourquoi est-il prudent d'inclure <code>C.idClt</code> dans <code>GROUP BY C.idClt, C.nom, C.prenom</code> même si l'on n'affiche que <code>C.nom</code> et <code>C.prenom</code> ?
+        <div class="quiz-answer">Réponse : Pour éviter que deux clients homonymes (même nom et même prénom) ne soient fusionnés dans le même groupe.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Comptage avec jointure :</strong> Dans la requête 10 (CA par ville), pourquoi a-t-on écrit <code>COUNT(DISTINCT Cmd.numCmd)</code> au lieu de <code>COUNT(*)</code> pour compter le nombre de commandes ?
+        <div class="quiz-answer">Réponse : Parce qu'après jointure avec LigneCommande, une commande contenant 3 articles apparaît sur 3 lignes : COUNT(*) compterait les lignes d'articles au lieu des commandes.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Prêt pour la séance 10 :</strong> Citez dans l'ordre les 6 clauses possibles d'une requête <code>SELECT</code> complète.
+        <div class="quiz-answer">Réponse : SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY (suivi éventuellement de LIMIT).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

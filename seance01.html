@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 1 — Bases de Données : Entités, Attributs et Identifiants (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 1 : Bases de Données (2h)</div>
+        <a class="btn-nav" href="seance02.html">S2 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 1 (2 heures)</span>
+      </div>
+      <h1>Introduction aux Bases de Données : Entités, Attributs et Identifiants</h1>
+      <p class="subtitle">Objectifs : Comprendre le rôle d'une base de données, identifier les entités, leurs attributs élémentaires, leurs domaines et leurs identifiants.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Oral)</strong></td>
+            <td>Partir du quotidien des élèves pour définir <em>donnée</em>, <em>BD</em> et <em>SGBD</em>.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Découverte (<em>Pixel Zone</em>)</strong></td>
+            <td>Dégager entités, attributs, domaines, identifiants et occurrences.</td>
+          </tr>
+          <tr>
+            <td>0h40 – 0h55</td>
+            <td>15 min</td>
+            <td><strong>3. Trace écrite</strong></td>
+            <td>Formalisation des 5 définitions fondamentales.</td>
+          </tr>
+          <tr>
+            <td>0h55 – 1h20</td>
+            <td>25 min</td>
+            <td><strong>4. Chasse aux pièges</strong></td>
+            <td>Atomicité, attributs calculés et choix d'un bon identifiant.</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h45</td>
+            <td>25 min</td>
+            <td><strong>5. Application autonome</strong></td>
+            <td>Étude de cas <em>QuickBite</em> en binôme + correction collective.</td>
+          </tr>
+          <tr>
+            <td>1h45 – 2h00</td>
+            <td>15 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Vérification rapide des acquis avant la fin de séance.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Où sont stockées nos données ?</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        Lorsque vous vous connectez à un jeu en ligne, commandez un repas sur une application ou consultez vos notes sur la plateforme du lycée, des milliers d'informations sont mémorisées, recherchées et mises à jour en une fraction de seconde.
+      </p>
+      <ul>
+        <li>Comment ces applications évitent-elles de mélanger les comptes de deux utilisateurs ?</li>
+        <li>Pourquoi un simple cahier papier ou un document texte ne suffit-il plus ?</li>
+      </ul>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 145" width="100%" height="145" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison Fichiers isolés vs SGBD centralisé">
+    <!-- Côté Gauche : Fichiers isolés -->
+    <rect x="8" y="8" width="350" height="130" rx="8" fill="#fef2f2" stroke="#b91c1c" stroke-width="1.5"/>
+    <text x="183" y="28" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b91c1c">❌ Fichiers isolés (Cahier / Tableur Excel sans SGBD)</text>
+    
+    <rect x="22" y="40" width="95" height="36" rx="4" fill="#ffffff" stroke="#fca5a5"/>
+    <text x="69" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Fichier Clients</text>
+    <text x="69" y="68" text-anchor="middle" font-size="7.5" fill="#b91c1c">Doublons &amp; fautes</text>
+
+    <rect x="135" y="40" width="95" height="36" rx="4" fill="#ffffff" stroke="#fca5a5"/>
+    <text x="182" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Fichier Commandes</text>
+    <text x="182" y="68" text-anchor="middle" font-size="7.5" fill="#b91c1c">IDs introuvables</text>
+
+    <rect x="248" y="40" width="95" height="36" rx="4" fill="#ffffff" stroke="#fca5a5"/>
+    <text x="295" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Fichier Stocks</text>
+    <text x="295" y="68" text-anchor="middle" font-size="7.5" fill="#b91c1c">Quantités fausses</text>
+
+    <text x="183" y="99" text-anchor="middle" font-size="9" font-weight="600" fill="#991b1b">⚠️ Risques majeurs : Incohérence, Conflits d'accès simultanés, Données perdues</text>
+    <text x="183" y="117" text-anchor="middle" font-size="8" fill="#7f1d1d">Aucun contrôle automatique de liaison entre fichiers</text>
+
+    <!-- Flèche centrale -->
+    <line x1="365" y1="73" x2="393" y2="73" stroke="#1d4ed8" stroke-width="2.5" stroke-dasharray="3,2"/>
+    <polygon points="398,73 390,68 390,78" fill="#1d4ed8"/>
+
+    <!-- Côté Droit : SGBD Centralisé -->
+    <rect x="402" y="8" width="350" height="130" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+    <text x="577" y="28" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803d">✔ Architecture avec SGBD (MariaDB / MySQL)</text>
+
+    <rect x="418" y="40" width="95" height="36" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="465" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Client</text>
+    <text x="465" y="68" text-anchor="middle" font-size="8" fill="#15803d">#idClt unique</text>
+
+    <line x1="513" y1="58" x2="538" y2="58" stroke="#0f766e" stroke-width="1.8"/>
+    <polygon points="538,58 531,54 531,62" fill="#0f766e"/>
+
+    <rect x="538" y="40" width="95" height="36" rx="4" fill="#f0fdfa" stroke="#99f6e4"/>
+    <text x="585" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#0f766e">Commande</text>
+    <text x="585" y="68" text-anchor="middle" font-size="8" fill="#0f766e">idClt# (FK reliée)</text>
+
+    <line x1="633" y1="58" x2="650" y2="58" stroke="#0f766e" stroke-width="1.8"/>
+
+    <rect x="650" y="40" width="88" height="36" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="694" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Produit</text>
+    <text x="694" y="68" text-anchor="middle" font-size="8" fill="#15803d">#refProd</text>
+
+    <text x="577" y="99" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">🔒 Avantages : Zéro redondance, Intégrité référentielle, Requêtes SQL</text>
+    <text x="577" y="117" text-anchor="middle" font-size="8" fill="#14532d">Le SGBD centralise et protège la cohérence de la base en temps réel</text>
+  </svg>
+  <div class="diagram-caption">Figure 1.1 — Pourquoi un SGBD ? Remplacement du désordre des fichiers isolés par une base de données centralisée et relationnelle.</div>
+</div>
+
+
+      <div class="course-box">
+        <strong>À retenir :</strong>
+        <ul class="vocab-list">
+          <li><strong>Base de données (BD) :</strong> Ensemble structuré et organisé de données relatives à un domaine précis, stockées pour être facilement consultées et mises à jour.</li>
+          <li><strong>SGBD (Système de Gestion de Base de Données) :</strong> Logiciel chargé de créer, sécuriser, modifier et interroger une base de données (ex. : MariaDB, MySQL, PostgreSQL).</li>
+        </ul>
+      </div>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Réponses attendues &amp; Synthèse orale</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Unicité des comptes :</strong> Grâce à un <strong>identifiant unique</strong> (numéro de compte, adresse e-mail ou pseudo unique) qui distingue infailliblement deux personnes, même si elles portent le même nom et prénom.</li>
+          <li><strong>Limites du papier et du texte brut :</strong>
+            <ul>
+              <li><em>Accès concurrent :</em> Plusieurs milliers d'utilisateurs doivent lire et écrire en même temps (impossible sur un fichier texte ou un cahier).</li>
+              <li><em>Volume &amp; Rapidité :</em> Rechercher un utilisateur parmi des millions prendrait des heures sans indexation.</li>
+              <li><em>Sécurité &amp; Intégrité :</em> Risque de perte, falsification, doublons ou erreurs de frappe sans contrôle automatique.</li>
+            </ul>
+          </li>
+          <li><strong>Notion clé à faire émerger :</strong> La nécessité d'un système structuré, sécurisé et multi-utilisateurs : la <strong>Base de Données</strong> pilotée par un <strong>SGBD</strong>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Activité de découverte : La salle de jeux « Pixel Zone »</span>
+        <span class="badge-time">25 min</span>
+      </h2>
+
+      <div class="context-box">
+        « Je veux enregistrer mes <strong>joueurs</strong> habituels en gardant pour chacun un numéro d'inscription, son pseudo, sa date de naissance et son numéro de téléphone. Je veux aussi suivre mes <strong>postes de jeu</strong> : chacun porte un code (ex. <code>P01</code>), un type (<em>PC Gamer</em>, <em>PS5</em>, <em>Casque VR</em>), un tarif horaire en dinars et son état (<em>Disponible</em> ou <em>En panne</em>). Enfin, je veux tenir la liste des <strong>jeux vidéo</strong> disponibles dans la salle, avec pour chacun un code jeu, son titre, son genre (<em>Sport</em>, <em>FPS</em>, <em>Course</em>...) et l'âge minimum recommandé (PEGI). »
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Identifier les entités :</strong> Quels sont les <strong>3 sujets (objets du monde réel)</strong> distincts sur lesquels le gérant veut stocker des informations ?
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Lister les attributs :</strong> Pour chaque entité trouvée, relevez toutes les informations (propriétés) qui la décrivent dans le texte.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Préciser les domaines :</strong> Pour chaque attribut, indiquez le type de valeurs qu'il peut prendre (chaîne de caractères, entier, décimal, date, liste de valeurs).
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Choisir l'identifiant :</strong> Pour l'entité <strong>Joueur</strong>, peut-on utiliser la <em>date de naissance</em> pour reconnaître un joueur de façon unique ? Et le <em>pseudo</em> ? Quel attribut garantit l'unicité ? Indiquez l'identifiant retenu pour chacune des 3 entités.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Donner des occurrences :</strong> Proposez <strong>2 exemples concrets</strong> (occurrences) pour l'entité <strong>Poste</strong> et <strong>2 exemples</strong> pour l'entité <strong>Jeu</strong>.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Étude de cas Pixel Zone</span>
+        <table>
+          <thead>
+            <tr>
+              <th>Entité</th>
+              <th>Attributs</th>
+              <th>Domaine de valeurs</th>
+              <th>Identifiant</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Joueur</strong></td>
+              <td><code>numInscr</code>, <code>pseudo</code>, <code>dateNaiss</code>, <code>tel</code></td>
+              <td>Entier, Chaîne, Date, Chaîne (8 chiffres)</td>
+              <td><code>numInscr</code></td>
+            </tr>
+            <tr>
+              <td><strong>Poste</strong></td>
+              <td><code>codePoste</code>, <code>typePoste</code>, <code>tarifH</code>, <code>etat</code></td>
+              <td>Chaîne, Chaîne, Décimal positif, <code>{Disponible, En panne}</code></td>
+              <td><code>codePoste</code></td>
+            </tr>
+            <tr>
+              <td><strong>Jeu</strong></td>
+              <td><code>codeJeu</code>, <code>titre</code>, <code>genre</code>, <code>ageMin</code></td>
+              <td>Chaîne, Chaîne, Chaîne, Entier positif</td>
+              <td><code>codeJeu</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>Justification (Q4) :</strong> Deux joueurs peuvent avoir la même date de naissance, et un joueur peut vouloir changer de pseudo. Un numéro d'inscription dédié (<code>numInscr</code>) garantit l'unicité et la stabilité.</p>
+        <p style="margin-bottom:0;"><strong>Exemples d'occurrences (Q5) :</strong><br>
+          • <strong>Poste :</strong> <code>(P01, "PC Gamer RTX", 8.000, "Disponible")</code> ; <code>(P02, "PlayStation 5", 10.000, "En panne")</code><br>
+          • <strong>Jeu :</strong> <code>(J01, "FC 26", "Sport", 3)</code> ; <code>(J02, "Valorant", "FPS", 16)</code>
+        </p>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase">
+      <h2>
+        <span>3. Synthèse : Vocabulaire fondamental</span>
+        <span class="badge-time">15 min — Trace écrite</span>
+      </h2>
+      <div class="course-box">
+        <ul class="vocab-list">
+          <li><strong>Entité :</strong> Objet concret ou abstrait du monde réel (personne, matériel, événement) présentant un intérêt pour l'application et possédant une existence propre (ex. : <em>Joueur</em>, <em>Poste</em>, <em>Jeu</em>).</li>
+          <li><strong>Attribut (ou propriété) :</strong> Caractéristique élémentaire décrivant une entité (ex. : <code>pseudo</code>, <code>tarifH</code>). Un attribut ne doit contenir qu'une seule information indivisible.</li>
+          <li><strong>Domaine :</strong> Ensemble des valeurs autorisées pour un attribut donné (ex. : <code>tarifH</code> est un nombre décimal strictement positif).</li>
+          <li><strong>Occurrence :</strong> Réalisation particulière (exemplaire concret) d'une entité, définie par une valeur pour chacun de ses attributs.</li>
+          <li><strong>Identifiant :</strong> Attribut (ou groupe d'attributs) dont la valeur est <strong>unique</strong> et <strong>obligatoire</strong> pour chaque occurrence d'une entité, permettant de la distinguer sans ambiguïté.</li>
+        </ul>
+      </div>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 155" width="100%" height="155" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Concept d'Entité et ses Occurrences concrètes">
+    <!-- Boîte Entité Abstraite -->
+    <rect x="15" y="12" width="225" height="130" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.8"/>
+    <rect x="15" y="12" width="225" height="30" rx="8" fill="#1d4ed8"/>
+    <text x="127" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">ENTITÉ : Joueur</text>
+    <text x="30" y="60" font-size="10.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idJoueur (Identifiant unique)</text>
+    <text x="30" y="78" font-size="10" fill="#334155">• pseudo</text>
+    <text x="30" y="95" font-size="10" fill="#334155">• email</text>
+    <text x="30" y="112" font-size="10" fill="#334155">• ville</text>
+    <text x="30" y="129" font-size="10" fill="#334155">• soldeHeures</text>
+
+    <!-- Flèche transition -->
+    <path d="M 245 77 L 285 77" stroke="#0f766e" stroke-width="2"/>
+    <polygon points="288,77 280,72 280,82" fill="#0f766e"/>
+    <text x="265" y="70" text-anchor="middle" font-size="8" font-weight="700" fill="#0f766e">devient</text>
+
+    <!-- Tableau Occurrences -->
+    <g transform="translate(295, 12)">
+      <rect x="0" y="0" width="450" height="130" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+      <rect x="0" y="0" width="450" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="225" y="17" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0f766e">OCCURRENCES RÉELLES (Lignes dans la table MariaDB)</text>
+      
+      <!-- En-têtes -->
+      <line x1="0" y1="48" x2="450" y2="48" stroke="#e2e8f0"/>
+      <text x="40" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">idJoueur #</text>
+      <text x="120" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">pseudo</text>
+      <text x="225" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">email</text>
+      <text x="325" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ville</text>
+      <text x="405" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">soldeHeures</text>
+
+      <!-- Ligne 1 -->
+      <line x1="0" y1="73" x2="450" y2="73" stroke="#f1f5f9"/>
+      <text x="40" y="65" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">1</text>
+      <text x="120" y="65" text-anchor="middle" font-size="9" fill="#334155">PixelMaster</text>
+      <text x="225" y="65" text-anchor="middle" font-size="8.5" fill="#334155">sami@mail.tn</text>
+      <text x="325" y="65" text-anchor="middle" font-size="9" fill="#334155">Tunis</text>
+      <text x="405" y="65" text-anchor="middle" font-size="9" fill="#334155">12.5</text>
+
+      <!-- Ligne 2 -->
+      <line x1="0" y1="98" x2="450" y2="98" stroke="#f1f5f9"/>
+      <text x="40" y="90" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">2</text>
+      <text x="120" y="90" text-anchor="middle" font-size="9" fill="#334155">ShadowGamer</text>
+      <text x="225" y="90" text-anchor="middle" font-size="8.5" fill="#334155">leila@mail.tn</text>
+      <text x="325" y="90" text-anchor="middle" font-size="9" fill="#334155">Sousse</text>
+      <text x="405" y="90" text-anchor="middle" font-size="9" fill="#334155">5.0</text>
+
+      <!-- Ligne 3 -->
+      <text x="40" y="116" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">3</text>
+      <text x="120" y="116" text-anchor="middle" font-size="9" fill="#334155">CyberFox</text>
+      <text x="225" y="116" text-anchor="middle" font-size="8.5" fill="#334155">yassine@mail.tn</text>
+      <text x="325" y="116" text-anchor="middle" font-size="9" fill="#334155">Sfax</text>
+      <text x="405" y="116" text-anchor="middle" font-size="9" fill="#334155">20.0</text>
+    </g>
+  </svg>
+  <div class="diagram-caption">Figure 1.2 — Modélisation conceptuelle : l'Entité abstraite (attributs) et ses occurrences matérielles sous forme de lignes dans la table.</div>
+</div>
+
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux pièges » : Les 3 règles d'or</span>
+        <span class="badge-time">25 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Piège 1 — Les attributs composés (Règle d'atomicité)</h3>
+        <p>Dans la base, on a stocké pour un joueur : <code>nomComplet = "Ben Ali Youssef"</code> et <code>adresse = "14 Rue de la Liberté, 4000 Sousse"</code>.</p>
+        <p><strong>Question :</strong> Si le gérant veut trier les joueurs par nom de famille ou afficher uniquement ceux qui habitent à Sousse, quel problème rencontre-t-il ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Règle à retenir</span>
+          Un attribut doit être <strong>atomique</strong> (indivisible). On éclate <code>nomComplet</code> en <code>nom</code> et <code>prenom</code>, et <code>adresse</code> en <code>rue</code>, <code>codePostal</code> et <code>ville</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 2 — Les attributs calculés (dérivés)</h3>
+        <p>Pour l'entité <strong>Joueur</strong>, un élève propose d'enregistrer à la fois <code>dateNaiss</code> et <code>age</code>. Dans une facture, il propose <code>prixUnit</code>, <code>qte</code> et <code>montantTotal</code>.</p>
+        <p><strong>Question :</strong> Que se passe-t-il l'année prochaine pour la valeur stockée dans <code>age</code> ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Règle à retenir</span>
+          On ne stocke pas une donnée <strong>calculable</strong> à partir d'autres attributs : l'âge deviendrait vite faux et nécessiterait des mises à jour constantes. On stocke <code>dateNaiss</code> et on calcule l'âge au moment de l'affichage.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 3 — Bon ou mauvais identifiant ?</h3>
+        <p>Pour l'entité <strong>Élève</strong> d'un lycée, cochez si l'attribut candidat est un bon identifiant et justifiez :</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Attribut candidat</th>
+              <th style="width: 110px;">Valide ?</th>
+              <th>Justification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>nom</code></td>
+              <td>[ &nbsp; ] Oui &nbsp; [ &nbsp; ] Non</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><code>numTel</code></td>
+              <td>[ &nbsp; ] Oui &nbsp; [ &nbsp; ] Non</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><code>numCIN</code></td>
+              <td>[ &nbsp; ] Oui &nbsp; [ &nbsp; ] Non</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><code>numInscription</code></td>
+              <td>[ &nbsp; ] Oui &nbsp; [ &nbsp; ] Non</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Choix de l'identifiant</span>
+          <ul style="margin:0; padding-left:18px;">
+            <li><code>nom</code> : <strong>Non</strong> — Risque élevé d'homonymes.</li>
+            <li><code>numTel</code> : <strong>Non</strong> — Peut être absent, partagé avec un parent ou changé.</li>
+            <li><code>numCIN</code> : <strong>Non</strong> — Les élèves de 3e n'ont pas encore tous de CIN (valeur manquante).</li>
+            <li><code>numInscription</code> : <strong>Oui</strong> — Unique, obligatoire et attribué à chaque élève dès son entrée.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Livraison « QuickBite »</span>
+        <span class="badge-time">25 min (15 min binôme + 10 min correction)</span>
+      </h2>
+
+      <div class="context-box">
+        Une application locale de livraison de repas souhaite gérer ses <strong>restaurants partenaires</strong> (nom du restaurant, adresse complète, spécialité, numéro de téléphone), ses <strong>plats</strong> (nom du plat, prix unitaire en DT, catégorie, temps de préparation en minutes) et ses <strong>livreurs</strong> (numéro CIN, nom et prénom, âge, type de véhicule : <em>Moto</em>, <em>Voiture</em> ou <em>Vélo</em>, téléphone).
+      </div>
+
+      <ol class="questions">
+        <li>Relevez les <strong>3 entités</strong> du système.</li>
+        <li>Pour chaque entité, proposez la liste des <strong>attributs élémentaires</strong> en corrigeant les erreurs volontairement glissées dans l'énoncé (données composées ou calculées).</li>
+        <li>Proposez un <strong>identifiant</strong> pertinent pour chaque entité (ajoutez un code artificiel si aucun identifiant naturel n'existe dans le texte).</li>
+        <li>Précisez le <strong>domaine de valeurs</strong> de <code>prixUnit</code>, <code>typeVehicule</code> et <code>dateNaiss</code>.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Étude de cas QuickBite</span>
+        <p><strong>Pièges corrigés :</strong> <code>adresse complète</code> éclatée (<code>rue</code>, <code>codePostal</code>, <code>ville</code>) ; <code>nom et prénom</code> éclaté (<code>nom</code>, <code>prenom</code>) ; <code>âge</code> remplacé par <code>dateNaiss</code> ; ajout des identifiants <code>idResto</code> et <code>codePlat</code>.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Entité</th>
+              <th>Identifiant</th>
+              <th>Autres attributs élémentaires</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Restaurant</strong></td>
+              <td><code>idResto</code></td>
+              <td><code>nomResto</code>, <code>rue</code>, <code>codePostal</code>, <code>ville</code>, <code>specialite</code>, <code>telResto</code></td>
+            </tr>
+            <tr>
+              <td><strong>Plat</strong></td>
+              <td><code>codePlat</code></td>
+              <td><code>nomPlat</code>, <code>prixUnit</code>, <code>categorie</code>, <code>tempsPrep</code></td>
+            </tr>
+            <tr>
+              <td><strong>Livreur</strong></td>
+              <td><code>numCIN</code> (ou <code>idLivreur</code>)</td>
+              <td><code>nom</code>, <code>prenom</code>, <code>dateNaiss</code>, <code>typeVehicule</code>, <code>telLivreur</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-bottom:0;"><strong>Domaines demandés (Q4) :</strong>
+          <code>prixUnit</code> : Décimal strictement positif |
+          <code>typeVehicule</code> : <code>{Moto, Voiture, Vélo}</code> |
+          <code>dateNaiss</code> : Date valide.
+        </p>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Vrai ou Faux :</strong> « Une occurrence est une colonne d'une entité. »
+        <div class="quiz-answer">Réponse : Faux — C'est un exemplaire concret (une ligne). Une colonne correspond à un attribut.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Vrai ou Faux :</strong> « Deux occurrences d'une même entité peuvent avoir la même valeur d'identifiant si leurs autres attributs sont différents. »
+        <div class="quiz-answer">Réponse : Faux — L'identifiant est strictement unique pour chaque occurrence.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Trouvez l'intrus</strong> parmi ces candidats pour l'entité <strong>Voiture</strong> : <code>matricule</code>, <code>marque</code>, <code>puissance</code>, <code>Client</code>, <code>couleur</code>.
+        <div class="quiz-answer">Réponse : Client — C'est une autre entité, pas un attribut de la voiture.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Réflexion :</strong> Dans un lycée, faut-il stocker la <code>moyenneGenerale</code> comme attribut de base ou la calculer à partir des notes ?
+        <div class="quiz-answer">Réponse : La calculer — C'est une donnée dérivée qui changerait à chaque nouvelle note.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Exemple :</strong> Donnez un exemple d'attribut dont le domaine est une liste fermée de valeurs.
+        <div class="quiz-answer">Réponse : Exemples valides : etatPoste {Disponible, En panne}, typeVehicule {Moto, Voiture, Vélo}, sexe {M, F}, mention.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

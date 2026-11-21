@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 10 — Évaluation Pratique de Synthèse : Bases de Données (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance09.html">← S9</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 10 : Évaluation Pratique (Sujet A — FitZone)</div>
+        <a class="btn-variant" href="seance10_sujet_b.html">Sujet B (TunisiTrip) ⇄</a>
+        <a class="btn-sql" href="seance10_sujet_a_fitzone.sql" download>📥 Script fitzone_db.sql</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; consignes prof</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Devoir de Synthèse / TP Noté — Durée : 2 heures</span>
+      </div>
+      <h1>Évaluation Pratique — Bases de Données : Club Sportif « FitZone »</h1>
+      <p class="subtitle">Compétences évaluées : Modélisation relationnelle, LDD (CREATE / ALTER), LMD (INSERT / UPDATE / DELETE), agrégation (GROUP BY / HAVING) et jointures implicites via WHERE.</p>
+    </header>
+
+    <!-- Cartouche élève -->
+    <div class="student-box">
+      <div><strong>Nom &amp; Prénom :</strong> ......................................................</div>
+      <div><strong>Classe :</strong> 3e Info ......</div>
+      <div class="note-box">Note : .......... / 20</div>
+    </div>
+
+    <!-- Barème détaillé & organisation (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Barème détaillé (20 points) et déroulement conseillé (120 min)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Partie</th>
+            <th>Durée conseillée</th>
+            <th>Détail du barème</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Partie 1 — Modélisation</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1 pt) + Q2 (1 pt) + Q3 (1,5 pt) + Q4 (0,5 pt)</td>
+            <td><strong>4 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 2 — LDD (SQL)</strong></td>
+            <td>30 min</td>
+            <td>Q1 (0,5 pt) + Q2 (1 pt) + Q3 (1,5 pt) + Q4 (1 pt) + Q5 (1 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 3 — LMD (Manipulation)</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1 pt) + Q2 (1 pt) + Q3 (1 pt)</td>
+            <td><strong>3 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 4 — Interrogation (SELECT)</strong></td>
+            <td>50 min</td>
+            <td>Q1 (0,5) + Q2 (0,5) + Q3 (1) + Q4 (1) + Q5 (1) + Q6 (1) + Q7 (1,5) + Q8 (1,5)</td>
+            <td><strong>8 pts</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;"><strong>TOTAL GÉNÉRAL</strong></td>
+            <td><strong>20 pts</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:0; font-size:0.88rem;"><strong>Conseil de passation sur machine :</strong> Faire enregistrer toutes les requêtes SQL des parties 2, 3 et 4 dans un seul fichier <code>nom_prenom_fitzone.sql</code> commenté et testé sous phpMyAdmin.</p>
+    </section>
+
+    <!-- CONTEXTE -->
+    <div class="diagram-wrap">
+  <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de fitzone_db">
+    <defs>
+      <marker id="arr-fz-1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arr-fz-2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f766e"/>
+      </marker>
+    </defs>
+
+    <!-- Table Coach -->
+    <g transform="translate(15, 12)">
+      <rect x="0" y="0" width="155" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="155" height="26" rx="6" fill="#eff6ff"/>
+      <text x="77" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Coach</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idCoach (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomCoach (VARCHAR)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">specialite (VARCHAR)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">tel (VARCHAR 15)</text>
+    </g>
+
+    <!-- Table Activite -->
+    <g transform="translate(200, 12)">
+      <rect x="0" y="0" width="160" height="115" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f0fdfa"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Activite</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># codeAct (VARCHAR 10)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">libelle (VARCHAR)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">tarifMensuel (DECIMAL)</text>
+      <text x="10" y="100" font-size="9" font-weight="700" fill="#1d4ed8">idCoach# (FK) ➔</text>
+    </g>
+
+    <!-- Table Inscription -->
+    <g transform="translate(390, 12)">
+      <rect x="0" y="0" width="165" height="115" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
+      <rect x="0" y="0" width="165" height="26" rx="6" fill="#fffbeb"/>
+      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">Inscription</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># idAdh# (FK)</text>
+      <text x="10" y="64" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># codeAct# (FK)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">dateInscr (DATE)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">montantPaye (DECIMAL)</text>
+    </g>
+
+    <!-- Table Adherent -->
+    <g transform="translate(585, 12)">
+      <rect x="0" y="0" width="160" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f5f3ff"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Adherent</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># idAdh (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomAdh, prenomAdh</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">dateNaiss (DATE)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR)</text>
+    </g>
+
+    <!-- Liens FK -->
+    <path d="M 200 100 C 185 100, 185 44, 175 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-fz-1)"/>
+    <path d="M 390 64 C 375 64, 375 44, 365 44" fill="none" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr-fz-2)"/>
+    <path d="M 555 44 C 565 44, 570 44, 580 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-fz-1)"/>
+
+    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">Schéma relationnel complet de fitzone_db : 4 tables reliées par 3 clés étrangères.</text>
+  </svg>
+  <div class="diagram-caption">Figure 10A.1 — Schéma Relationnel complet de la base FitZone (Coach, Activite, Inscription, Adherent).</div>
+</div>
+<div class="context-box">
+      <strong>Présentation du domaine — Club Sportif « FitZone » :</strong><br>
+      Le complexe sportif <strong>FitZone</strong> souhaite informatiser la gestion de ses <strong>coachs</strong>, de ses <strong>activités sportives</strong>, de ses <strong>adhérents</strong> et de leurs <strong>inscriptions</strong> selon les règles de gestion suivantes :
+      <ul style="margin:6px 0 0; padding-left:20px;">
+        <li>Chaque <strong>Coach</strong> possède un identifiant numérique auto-incrémenté (<code>idCoach</code>), un nom (<code>nomCoach</code>), une spécialité (<code>specialite</code>) et un numéro de téléphone (<code>tel</code>).</li>
+        <li>Chaque <strong>Activité</strong> est identifiée par un code (<code>codeAct</code>, ex. <code>ACT01</code>), possède un libellé (<code>libelle</code>), une salle (<code>salle</code>) et un tarif mensuel en DT (<code>tarifMois</code>). Un coach peut encadrer <em>plusieurs</em> activités, mais chaque activité est encadrée par <em>un seul</em> coach.</li>
+        <li>Chaque <strong>Adhérent</strong> est identifié par un numéro auto-incrémenté (<code>idAdh</code>) et décrit par son nom, son prénom, sa ville, son téléphone (facultatif) et sa date de naissance (<code>dateNaiss</code>).</li>
+        <li>Un adhérent peut s'inscrire à <em>plusieurs</em> activités, et une même activité accueille <em>plusieurs</em> adhérents. Chaque <strong>Inscription</strong> précise la date d'inscription (<code>dateInscr</code>) et le nombre de mois payés (<code>nbMois</code>).</li>
+      </ul>
+    </div>
+
+    <!-- PARTIE 1 -->
+    <section class="phase">
+      <h2>
+        <span>Partie 1 : Modélisation Relationnelle</span>
+        <span class="badge-pts">4 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Coach</strong> et <strong>Activité</strong>, puis entre <strong>Adhérent</strong> et <strong>Activité</strong>. Justifiez brièvement. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Un stagiaire propose d'ajouter la colonne <code>age</code> dans la table <code>Adherent</code> en plus de <code>dateNaiss</code>, et de fusionner <code>nom</code> et <code>prenom</code> dans un seul champ <code>nomComplet</code>. Quelle erreur de conception commet-il dans chacun des deux cas ? <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Écrivez la <strong>représentation textuelle complète</strong> des <strong>4 tables</strong> de la base <code>fitzone_db</code> (<code>Coach</code>, <code>Activite</code>, <code>Adherent</code>, <code>Inscription</code>) en utilisant la notation <code>#clePrimaire</code> et <code>cleEtrangere#</code>. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Dans quel ordre doit-on créer ces 4 tables en SQL pour respecter l'intégrité référentielle ? <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 1 (4 pts)</span>
+        <p><strong>1. Types de liens (1 pt) :</strong><br>
+          • <code>Coach</code> — <code>Activite</code> : <strong>1-N</strong> (un coach encadre plusieurs activités, une activité a un seul coach).<br>
+          • <code>Adherent</code> — <code>Activite</code> : <strong>N-N</strong> (un adhérent peut s'inscrire à plusieurs activités, et réciproquement), d'où la table d'association <code>Inscription</code>.
+        </p>
+        <p><strong>2. Erreurs de conception (1 pt) :</strong><br>
+          • <code>age</code> est un <strong>attribut calculé (dérivé)</strong> à partir de <code>dateNaiss</code> : il deviendrait vite obsolète.<br>
+          • <code>nomComplet</code> viole la règle d'<strong>atomicité</strong> (attribut composé qui empêche de trier ou filtrer facilement par nom de famille).
+        </p>
+        <p><strong>3. Modèle relationnel (1,5 pt) :</strong></p>
+        <div class="schema-list">
+          <strong>Coach</strong> (<span class="pk">#idCoach</span>, nomCoach, specialite, tel)<br>
+          <strong>Activite</strong> (<span class="pk">#codeAct</span>, libelle, salle, tarifMois, <span class="fk">idCoach#</span>)<br>
+          <strong>Adherent</strong> (<span class="pk">#idAdh</span>, nom, prenom, ville, tel, dateNaiss)<br>
+          <strong>Inscription</strong> (<span class="pk">#idAdh#</span>, <span class="pk">#codeAct#</span>, dateInscr, nbMois)
+        </div>
+        <p style="margin-bottom:0;"><strong>4. Ordre de création (0,5 pt) :</strong> <code>Coach</code> et <code>Adherent</code> d'abord (tables mères indépendantes), puis <code>Activite</code> (référence <code>Coach</code>), et enfin <code>Inscription</code> (référence <code>Adherent</code> et <code>Activite</code>).</p>
+      </div>
+    </section>
+
+    <!-- PARTIE 2 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Partie 2 : Langage de Définition de Données (LDD)</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          Créez la base de données <code>fitzone_db</code> (après suppression si elle existe déjà) et sélectionnez-la. <span class="q-pts">(0,5 pt)</span>
+        </li>
+        <li>
+          Créez les tables mères <code>Coach</code> et <code>Adherent</code> : <span class="q-pts">(1 pt)</span>
+          <ul>
+            <li><code>Coach</code> : <code>idCoach</code> (entier auto-incrémenté, PK), <code>nomCoach</code> (VARCHAR 40, obligatoire), <code>specialite</code> (VARCHAR 30, obligatoire), <code>tel</code> (VARCHAR 15, obligatoire et <strong>unique</strong>).</li>
+            <li><code>Adherent</code> : <code>idAdh</code> (entier auto-incrémenté, PK), <code>nom</code> (VARCHAR 40, obligatoire), <code>prenom</code> (VARCHAR 40, obligatoire), <code>ville</code> (VARCHAR 30, obligatoire), <code>tel</code> (VARCHAR 15, facultatif), <code>dateNaiss</code> (DATE, obligatoire).</li>
+          </ul>
+        </li>
+        <li>
+          Créez la table <code>Activite</code> : <code>codeAct</code> (VARCHAR 10, PK), <code>libelle</code> (VARCHAR 50, obligatoire), <code>salle</code> (VARCHAR 20, obligatoire), <code>tarifMois</code> (DECIMAL(8,3), obligatoire et <strong>strictement positif</strong>), <code>idCoach</code> (clé étrangère vers <code>Coach</code> avec <code>ON DELETE RESTRICT</code> et <code>ON UPDATE CASCADE</code>). <span class="q-pts">(1,5 pt)</span>
+        </li>
+        <li>
+          Créez la table <code>Inscription</code> : <code>idAdh</code>, <code>codeAct</code>, <code>dateInscr</code> (DATE, obligatoire), <code>nbMois</code> (INT, valeur par défaut <code>1</code>, compris entre <code>1</code> et <code>12</code> inclus). Déclarez la <strong>clé primaire composée</strong> et les <strong>deux clés étrangères</strong> (avec <code>ON DELETE CASCADE</code> vers <code>Adherent</code> et <code>ON DELETE RESTRICT</code> vers <code>Activite</code>). <span class="q-pts">(1 pt)</span>
+        </li>
+        <li>
+          <strong>Évolution de structure (<code>ALTER TABLE</code>) :</strong> <span class="q-pts">(1 pt)</span>
+          <ul>
+            <li>Ajoutez à la table <code>Adherent</code> une colonne <code>email</code> (<code>VARCHAR(80)</code>, facultative et unique).</li>
+            <li>Agrandissez la colonne <code>salle</code> de la table <code>Activite</code> à <code>VARCHAR(35)</code> (toujours obligatoire).</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 2 : Script LDD complet (5 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Base de données (0,5 pt)</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> fitzone_db;
+<span class="kw">CREATE DATABASE</span> fitzone_db <span class="kw">CHARACTER SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+<span class="kw">USE</span> fitzone_db;
+
+<span class="cm">-- 2. Tables mères Coach et Adherent (1 pt)</span>
+<span class="kw">CREATE TABLE</span> Coach (
+    idCoach    <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    nomCoach   <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    specialite <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel        <span class="ty">VARCHAR(15)</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_coach     <span class="kw">PRIMARY KEY</span> (idCoach),
+    <span class="kw">CONSTRAINT</span> uq_coach_tel <span class="kw">UNIQUE</span> (tel)
+);
+
+<span class="kw">CREATE TABLE</span> Adherent (
+    idAdh     <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    nom       <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    prenom    <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    ville     <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel       <span class="ty">VARCHAR(15)</span> <span class="kw">NULL</span>,
+    dateNaiss <span class="ty">DATE</span>        <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_adherent <span class="kw">PRIMARY KEY</span> (idAdh)
+);
+
+<span class="cm">-- 3. Table Activite (1,5 pt)</span>
+<span class="kw">CREATE TABLE</span> Activite (
+    codeAct   <span class="ty">VARCHAR(10)</span>,
+    libelle   <span class="ty">VARCHAR(50)</span>  <span class="kw">NOT NULL</span>,
+    salle     <span class="ty">VARCHAR(20)</span>  <span class="kw">NOT NULL</span>,
+    tarifMois <span class="ty">DECIMAL(8,3)</span> <span class="kw">NOT NULL</span>,
+    idCoach   <span class="ty">INT</span>          <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_activite    <span class="kw">PRIMARY KEY</span> (codeAct),
+    <span class="kw">CONSTRAINT</span> chk_tarif      <span class="kw">CHECK</span> (tarifMois &gt; 0),
+    <span class="kw">CONSTRAINT</span> fk_act_coach   <span class="kw">FOREIGN KEY</span> (idCoach)
+        <span class="kw">REFERENCES</span> Coach(idCoach)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+);
+
+<span class="cm">-- 4. Table d'association Inscription (1 pt)</span>
+<span class="kw">CREATE TABLE</span> Inscription (
+    idAdh     <span class="ty">INT</span>,
+    codeAct   <span class="ty">VARCHAR(10)</span>,
+    dateInscr <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+    nbMois    <span class="ty">INT</span>  <span class="kw">NOT NULL DEFAULT</span> 1,
+    <span class="kw">CONSTRAINT</span> pk_inscr       <span class="kw">PRIMARY KEY</span> (idAdh, codeAct),
+    <span class="kw">CONSTRAINT</span> chk_nb_mois    <span class="kw">CHECK</span> (nbMois <span class="kw">BETWEEN</span> 1 <span class="kw">AND</span> 12),
+    <span class="kw">CONSTRAINT</span> fk_inscr_adh   <span class="kw">FOREIGN KEY</span> (idAdh)
+        <span class="kw">REFERENCES</span> Adherent(idAdh)
+        <span class="kw">ON DELETE CASCADE ON UPDATE CASCADE</span>,
+    <span class="kw">CONSTRAINT</span> fk_inscr_act   <span class="kw">FOREIGN KEY</span> (codeAct)
+        <span class="kw">REFERENCES</span> Activite(codeAct)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+);
+
+<span class="cm">-- 5. Évolutions ALTER TABLE (1 pt)</span>
+<span class="kw">ALTER TABLE</span> Adherent <span class="kw">ADD</span> email <span class="ty">VARCHAR(80)</span> <span class="kw">NULL UNIQUE</span>;
+<span class="kw">ALTER TABLE</span> Activite <span class="kw">MODIFY</span> salle <span class="ty">VARCHAR(35)</span> <span class="kw">NOT NULL</span>;</pre>
+      </div>
+    </section>
+
+    <!-- JEU DE DONNEES DE REFERENCE -->
+    <section class="phase page-break">
+      <h2>
+        <span>Jeu de données de référence (fitzone_db)</span>
+        <span class="badge-pts">Pour les Parties 3 et 4</span>
+      </h2>
+
+      <div class="data-grid">
+        <div>
+          <strong>Table <code>Coach</code></strong>
+          <table>
+            <thead><tr><th>idCoach</th><th>nomCoach</th><th>specialite</th><th>tel</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Ben Youssef</td><td>Musculation</td><td>22100200</td></tr>
+              <tr><td>2</td><td>Trabelsi</td><td>Cardio</td><td>55300400</td></tr>
+              <tr><td>3</td><td>Gharbi</td><td>Arts Martiaux</td><td>98500600</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <strong>Table <code>Activite</code></strong>
+          <table>
+            <thead><tr><th>codeAct</th><th>libelle</th><th>salle</th><th>tarifMois</th><th>idCoach</th></tr></thead>
+            <tbody>
+              <tr><td>ACT01</td><td>CrossFit Intense</td><td>Salle A</td><td>120.000</td><td>1</td></tr>
+              <tr><td>ACT02</td><td>Musculation Libre</td><td>Salle A</td><td>90.000</td><td>1</td></tr>
+              <tr><td>ACT03</td><td>Spinning Cardio</td><td>Salle B</td><td>85.000</td><td>2</td></tr>
+              <tr><td>ACT04</td><td>Boxe Anglaise</td><td>Salle C</td><td>110.000</td><td>3</td></tr>
+              <tr><td>ACT05</td><td>Natation Fitness</td><td>Piscine</td><td>150.000</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-grid">
+        <div>
+          <strong>Table <code>Adherent</code></strong>
+          <table>
+            <thead><tr><th>idAdh</th><th>nom</th><th>prenom</th><th>ville</th><th>tel</th><th>dateNaiss</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Khelifi</td><td>Youssef</td><td>Sousse</td><td>22445566</td><td>2008-05-14</td></tr>
+              <tr><td>2</td><td>Mansouri</td><td>Meriem</td><td>Tunis</td><td>55778899</td><td>2007-11-02</td></tr>
+              <tr><td>3</td><td>Jaziri</td><td>Amine</td><td>Sousse</td><td><em>NULL</em></td><td>2009-02-20</td></tr>
+              <tr><td>4</td><td>Bouazizi</td><td>Sarra</td><td>Monastir</td><td>98112233</td><td>2008-08-30</td></tr>
+              <tr><td>5</td><td>Ben Ali</td><td>Rami</td><td>Sousse</td><td>29667788</td><td>2007-03-10</td></tr>
+              <tr><td>6</td><td>Chaabane</td><td>Lina</td><td>Tunis</td><td>50334455</td><td>2009-07-19</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <strong>Table <code>Inscription</code></strong>
+          <table>
+            <thead><tr><th>idAdh</th><th>codeAct</th><th>dateInscr</th><th>nbMois</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>ACT01</td><td>2026-01-10</td><td>3</td></tr>
+              <tr><td>1</td><td>ACT03</td><td>2026-02-05</td><td>2</td></tr>
+              <tr><td>2</td><td>ACT04</td><td>2026-01-18</td><td>6</td></tr>
+              <tr><td>3</td><td>ACT01</td><td>2026-02-12</td><td>1</td></tr>
+              <tr><td>3</td><td>ACT02</td><td>2026-03-01</td><td>3</td></tr>
+              <tr><td>4</td><td>ACT05</td><td>2026-03-15</td><td>2</td></tr>
+              <tr><td>5</td><td>ACT01</td><td>2026-04-02</td><td>4</td></tr>
+              <tr><td>5</td><td>ACT04</td><td>2026-04-10</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Script de peuplement complet (pour l'enseignant / test machine)</span>
+        <pre class="sql-block"><span class="kw">INSERT INTO</span> Coach (nomCoach, specialite, tel) <span class="kw">VALUES</span>
+(<span class="str">'Ben Youssef'</span>, <span class="str">'Musculation'</span>, <span class="str">'22100200'</span>),
+(<span class="str">'Trabelsi'</span>,    <span class="str">'Cardio'</span>,      <span class="str">'55300400'</span>),
+(<span class="str">'Gharbi'</span>,      <span class="str">'Arts Martiaux'</span>, <span class="str">'98500600'</span>);
+
+<span class="kw">INSERT INTO</span> Activite (codeAct, libelle, salle, tarifMois, idCoach) <span class="kw">VALUES</span>
+(<span class="str">'ACT01'</span>, <span class="str">'CrossFit Intense'</span>,  <span class="str">'Salle A'</span>, 120.000, 1),
+(<span class="str">'ACT02'</span>, <span class="str">'Musculation Libre'</span>, <span class="str">'Salle A'</span>,  90.000, 1),
+(<span class="str">'ACT03'</span>, <span class="str">'Spinning Cardio'</span>,   <span class="str">'Salle B'</span>,  85.000, 2),
+(<span class="str">'ACT04'</span>, <span class="str">'Boxe Anglaise'</span>,     <span class="str">'Salle C'</span>, 110.000, 3),
+(<span class="str">'ACT05'</span>, <span class="str">'Natation Fitness'</span>,  <span class="str">'Piscine'</span>, 150.000, 2);
+
+<span class="kw">INSERT INTO</span> Adherent (nom, prenom, ville, tel, dateNaiss) <span class="kw">VALUES</span>
+(<span class="str">'Khelifi'</span>,  <span class="str">'Youssef'</span>, <span class="str">'Sousse'</span>,   <span class="str">'22445566'</span>, <span class="str">'2008-05-14'</span>),
+(<span class="str">'Mansouri'</span>, <span class="str">'Meriem'</span>,  <span class="str">'Tunis'</span>,    <span class="str">'55778899'</span>, <span class="str">'2007-11-02'</span>),
+(<span class="str">'Jaziri'</span>,   <span class="str">'Amine'</span>,   <span class="str">'Sousse'</span>,   <span class="kw">NULL</span>,       <span class="str">'2009-02-20'</span>),
+(<span class="str">'Bouazizi'</span>, <span class="str">'Sarra'</span>,   <span class="str">'Monastir'</span>, <span class="str">'98112233'</span>, <span class="str">'2008-08-30'</span>),
+(<span class="str">'Ben Ali'</span>,  <span class="str">'Rami'</span>,    <span class="str">'Sousse'</span>,   <span class="str">'29667788'</span>, <span class="str">'2007-03-10'</span>),
+(<span class="str">'Chaabane'</span>, <span class="str">'Lina'</span>,    <span class="str">'Tunis'</span>,    <span class="str">'50334455'</span>, <span class="str">'2009-07-19'</span>);
+
+<span class="kw">INSERT INTO</span> Inscription (idAdh, codeAct, dateInscr, nbMois) <span class="kw">VALUES</span>
+(1, <span class="str">'ACT01'</span>, <span class="str">'2026-01-10'</span>, 3), (1, <span class="str">'ACT03'</span>, <span class="str">'2026-02-05'</span>, 2),
+(2, <span class="str">'ACT04'</span>, <span class="str">'2026-01-18'</span>, 6), (3, <span class="str">'ACT01'</span>, <span class="str">'2026-02-12'</span>, 1),
+(3, <span class="str">'ACT02'</span>, <span class="str">'2026-03-01'</span>, 3), (4, <span class="str">'ACT05'</span>, <span class="str">'2026-03-15'</span>, 2),
+(5, <span class="str">'ACT01'</span>, <span class="str">'2026-04-02'</span>, 4), (5, <span class="str">'ACT04'</span>, <span class="str">'2026-04-10'</span>, 2);</pre>
+      </div>
+    </section>
+
+    <!-- PARTIE 3 -->
+    <section class="phase">
+      <h2>
+        <span>Partie 3 : Langage de Manipulation de Données (LMD)</span>
+        <span class="badge-pts">3 points</span>
+      </h2>
+
+      <div class="info-box">
+        <strong>Consigne :</strong> Écrivez les requêtes LMD ci-dessous à partir du jeu de données de référence. <em>(Si vous travaillez sur machine, annulez vos tests ou réimportez le jeu de données initial avant la Partie 4.)</em>
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Insertion (<code>INSERT INTO</code>) :</strong> Insérez en une seule requête d'insertion multiple les deux premiers coachs (<code>Ben Youssef</code> et <code>Trabelsi</code>), puis insérez l'inscription de l'adhérente <code>Lina Chaabane</code> (<code>idAdh = 6</code>) à l'activité <code>ACT03</code> à la date du <code>2026-05-02</code> pour une durée de <code>3</code> mois. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Mise à jour (<code>UPDATE</code>) :</strong> Augmentez de <code>10%</code> le tarif mensuel (<code>tarifMois</code>) de toutes les activités se déroulant en <code>'Salle A'</code>, puis renseignez le téléphone <code>'52998877'</code> pour l'adhérent <code>Amine Jaziri</code> (<code>idAdh = 3</code>). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Suppression (<code>DELETE</code>) :</strong> Supprimez de la table <code>Inscription</code> l'inscription de l'adhérent <code>3</code> à l'activité <code>'ACT01'</code>. Expliquez ensuite en une phrase ce qui se passerait si l'on exécutait <code>DELETE FROM Adherent WHERE idAdh = 1;</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 3 : LMD (3 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Insertions (1 pt)</span>
+<span class="kw">INSERT INTO</span> Coach (nomCoach, specialite, tel) <span class="kw">VALUES</span>
+(<span class="str">'Ben Youssef'</span>, <span class="str">'Musculation'</span>, <span class="str">'22100200'</span>),
+(<span class="str">'Trabelsi'</span>,    <span class="str">'Cardio'</span>,      <span class="str">'55300400'</span>);
+
+<span class="kw">INSERT INTO</span> Inscription (idAdh, codeAct, dateInscr, nbMois)
+<span class="kw">VALUES</span> (6, <span class="str">'ACT03'</span>, <span class="str">'2026-05-02'</span>, 3);
+
+<span class="cm">-- 2. Mises à jour (1 pt)</span>
+<span class="kw">UPDATE</span> Activite
+<span class="kw">SET</span> tarifMois = tarifMois * 1.10
+<span class="kw">WHERE</span> salle = <span class="str">'Salle A'</span>;
+
+<span class="kw">UPDATE</span> Adherent
+<span class="kw">SET</span> tel = <span class="str">'52998877'</span>
+<span class="kw">WHERE</span> idAdh = 3;
+
+<span class="cm">-- 3. Suppression ciblée (1 pt)</span>
+<span class="kw">DELETE FROM</span> Inscription
+<span class="kw">WHERE</span> idAdh = 3 <span class="kw">AND</span> codeAct = <span class="str">'ACT01'</span>;</pre>
+        <p style="margin-bottom:0;"><strong>Effet de <code>DELETE FROM Adherent WHERE idAdh = 1;</code> :</strong> Grâce à la contrainte <code>ON DELETE CASCADE</code> définie sur <code>fk_inscr_adh</code>, l'adhérent n°1 est supprimé <strong>ainsi que automatiquement ses 2 inscriptions</strong> dans la table <code>Inscription</code>.</p>
+      </div>
+    </section>
+
+    <!-- PARTIE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Partie 4 : Interrogation de la Base (Requêtes SELECT)</span>
+        <span class="badge-pts">8 points</span>
+      </h2>
+
+      <div class="info-box">
+        <strong>Rappel méthodologique :</strong> Toutes les jointures doivent être rédigées sous forme de <strong>jointures implicites dans la clause <code>WHERE</code></strong> (<code>FROM T1, T2 WHERE T1.pk = T2.fk</code>) avec des alias de tables si nécessaire.
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Filtrage et <code>NULL</code> :</strong> Afficher l'identifiant, le nom et le prénom des adhérents habitant à <code>'Sousse'</code> qui n'ont pas renseigné de numéro de téléphone. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Motifs et intervalles :</strong> Afficher le code, le libellé et le tarif mensuel des activités dont le tarif est compris entre <code>90</code> et <code>150 DT</code> inclus et dont le libellé contient le mot <code>'Fitness'</code> ou <code>'Intense'</code>, triés par tarif décroissant. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Fonctions scalaires (chaînes et dates) :</strong> Afficher le nom complet formaté des adhérents sous la forme <code>KHELIFI Youssef</code> (alias <code>Adherent</code>) et leur année de naissance (alias <code>Annee_Naiss</code>), uniquement pour ceux nés en <code>2008</code> ou <code>2009</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Regroupement et <code>HAVING</code> :</strong> Afficher pour chaque ville le nombre d'adhérents inscrits (alias <code>Nb_Adherents</code>), en ne conservant que les villes qui comptent <strong>au moins 2 adhérents</strong>, triées par effectif décroissant. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure implicite (2 tables) :</strong> Afficher le libellé de chaque activité, sa salle, son tarif mensuel ainsi que le nom (<code>nomCoach</code>) et la spécialité du coach qui l'encadre, triés par nom de coach croissant. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure implicite (3 tables) et calcul :</strong> Afficher le détail complet des inscriptions réalisées au <strong>premier trimestre 2026</strong> (mois 1, 2 ou 3) : nom et prénom de l'adhérent, libellé de l'activité, date d'inscription, nombre de mois et <strong>montant payé</strong> (<code>tarifMois * nbMois</code>, alias <code>Montant_DT</code>). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure (3 tables) + <code>GROUP BY</code> :</strong> Afficher pour chaque activité ayant enregistré au moins une inscription : son code, son libellé, le nombre d'inscrits (<code>Nb_Inscrits</code>) et la recette totale générée (<code>SUM(tarifMois * nbMois)</code>, alias <code>Recette_DT</code>), triés par recette décroissante. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Synthèse (4 tables + <code>WHERE</code> + <code>GROUP BY</code> + <code>HAVING</code>) :</strong> En ne tenant compte que des adhérents habitant à <code>'Sousse'</code>, afficher le nom de chaque coach (<code>nomCoach</code>) et le chiffre d'affaires total généré par ses activités auprès des clients soussiens (<code>CA_Sousse</code>), uniquement pour les coachs dont ce chiffre d'affaires dépasse <code>500 DT</code>. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 4 : Requêtes SELECT (8 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Adhérents de Sousse sans téléphone (0,5 pt) → 1 ligne : Amine Jaziri</span>
+<span class="kw">SELECT</span> idAdh, nom, prenom
+<span class="kw">FROM</span> Adherent
+<span class="kw">WHERE</span> ville = <span class="str">'Sousse'</span> <span class="kw">AND</span> tel <span class="kw">IS NULL</span>;
+
+<span class="cm">-- 2. Activités entre 90 et 150 DT contenant Fitness ou Intense (0,5 pt) → ACT05, ACT01</span>
+<span class="kw">SELECT</span> codeAct, libelle, tarifMois
+<span class="kw">FROM</span> Activite
+<span class="kw">WHERE</span> tarifMois <span class="kw">BETWEEN</span> 90 <span class="kw">AND</span> 150
+  <span class="kw">AND</span> (libelle <span class="kw">LIKE</span> <span class="str">'%Fitness%'</span> <span class="kw">OR</span> libelle <span class="kw">LIKE</span> <span class="str">'%Intense%'</span>)
+<span class="kw">ORDER BY</span> tarifMois <span class="kw">DESC</span>;
+
+<span class="cm">-- 3. Nom complet formaté et année de naissance 2008/2009 (1 pt) → 4 lignes</span>
+<span class="kw">SELECT</span> <span class="fn">CONCAT</span>(<span class="fn">UPPER</span>(nom), <span class="str">' '</span>, prenom) <span class="kw">AS</span> Adherent,
+       <span class="fn">YEAR</span>(dateNaiss) <span class="kw">AS</span> Annee_Naiss
+<span class="kw">FROM</span> Adherent
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dateNaiss) <span class="kw">IN</span> (2008, 2009);
+
+<span class="cm">-- 4. Villes comptant au moins 2 adhérents (1 pt) → Sousse (3), Tunis (2)</span>
+<span class="kw">SELECT</span> ville, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Adherents
+<span class="kw">FROM</span> Adherent
+<span class="kw">GROUP BY</span> ville
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2
+<span class="kw">ORDER BY</span> Nb_Adherents <span class="kw">DESC</span>;
+
+<span class="cm">-- 5. Jointure implicite 2 tables : Activite + Coach (1 pt) → 5 lignes</span>
+<span class="kw">SELECT</span> Act.libelle, Act.salle, Act.tarifMois, C.nomCoach, C.specialite
+<span class="kw">FROM</span> Activite Act, Coach C
+<span class="kw">WHERE</span> Act.idCoach = C.idCoach
+<span class="kw">ORDER BY</span> C.nomCoach <span class="kw">ASC</span>;
+
+<span class="cm">-- 6. Jointure implicite 3 tables : T1 2026 + montant payé (1 pt) → 6 lignes</span>
+<span class="kw">SELECT</span> A.nom, A.prenom, Act.libelle, I.dateInscr, I.nbMois,
+       (Act.tarifMois * I.nbMois) <span class="kw">AS</span> Montant_DT
+<span class="kw">FROM</span> Adherent A, Inscription I, Activite Act
+<span class="kw">WHERE</span> A.idAdh = I.idAdh
+  <span class="kw">AND</span> I.codeAct = Act.codeAct
+  <span class="kw">AND</span> <span class="fn">YEAR</span>(I.dateInscr) = 2026
+  <span class="kw">AND</span> <span class="fn">MONTH</span>(I.dateInscr) <span class="kw">IN</span> (1, 2, 3);
+
+<span class="cm">-- 7. Jointure 2/3 tables + GROUP BY : Recette par activité (1,5 pt)</span>
+<span class="cm">-- Résultats : ACT01 (3 inscrits, 960 DT), ACT04 (2, 880 DT), ACT05 (1, 300 DT), ACT02 (1, 270 DT), ACT03 (1, 170 DT)</span>
+<span class="kw">SELECT</span> Act.codeAct, Act.libelle,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Inscrits,
+       <span class="fn">SUM</span>(Act.tarifMois * I.nbMois) <span class="kw">AS</span> Recette_DT
+<span class="kw">FROM</span> Activite Act, Inscription I
+<span class="kw">WHERE</span> Act.codeAct = I.codeAct
+<span class="kw">GROUP BY</span> Act.codeAct, Act.libelle
+<span class="kw">ORDER BY</span> Recette_DT <span class="kw">DESC</span>;
+
+<span class="cm">-- 8. Jointure 4 tables + WHERE + GROUP BY + HAVING (1,5 pt)</span>
+<span class="cm">-- Adhérents de Sousse : Ben Youssef (360+120+270+480 = 1230 DT > 500) ; Gharbi (220 DT) ; Trabelsi (170 DT)</span>
+<span class="kw">SELECT</span> C.nomCoach,
+       <span class="fn">SUM</span>(Act.tarifMois * I.nbMois) <span class="kw">AS</span> CA_Sousse
+<span class="kw">FROM</span> Coach C, Activite Act, Inscription I, Adherent A
+<span class="kw">WHERE</span> C.idCoach = Act.idCoach
+  <span class="kw">AND</span> Act.codeAct = I.codeAct
+  <span class="kw">AND</span> I.idAdh = A.idAdh
+  <span class="kw">AND</span> A.ville = <span class="str">'Sousse'</span>
+<span class="kw">GROUP BY</span> C.idCoach, C.nomCoach
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(Act.tarifMois * I.nbMois) &gt; 500;</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

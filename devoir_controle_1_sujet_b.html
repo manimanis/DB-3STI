@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devoir de Contrôle n°1 (Sujet B) — Bases de Données : Séances 1 à 5 (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a class="btn-back" href="index.html">← Sommaire</a>
+      <span class="toolbar-title">3e Info (STI) — DC1 (Sujet B) : VoltRide (1h — /20)</span>
+      <a class="btn-variant" href="devoir_controle_1_sujet_a.html">Variante Sujet A (Takwira) ⇄</a>
+      <a class="btn-sql" href="devoir_controle_1_sujet_b_voltride.sql" download>📥 Script voltride_db.sql</a>
+    </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; minutage</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Devoir de Contrôle n°1 — Durée : 1 heure</span>
+      </div>
+      <h1>
+        <span>Bases de Données : Modélisation, LDD et Manipulation (LMD)</span>
+        <span class="badge-variant">Sujet B</span>
+      </h1>
+      <p class="subtitle">Programme évalué : Séances 1 à 5 (Entités/attributs, modèle relationnel, CREATE, ALTER, INSERT, UPDATE, DELETE et intégrité).</p>
+    </header>
+
+    <!-- Cartouche élève -->
+    <div class="student-box">
+      <div><strong>Nom &amp; Prénom :</strong> ......................................................</div>
+      <div><strong>Classe :</strong> 3e Info ......</div>
+      <div class="note-box">Note : .......... / 20</div>
+    </div>
+
+    <!-- Barème détaillé (prof) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Barème détaillé (20 points) et minutage conseillé (60 min) — Parallèle au Sujet A</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Exercice</th>
+            <th>Durée</th>
+            <th>Détail du barème</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Exercice 1 — Connaissances &amp; Diagnostic</strong></td>
+            <td>10 min</td>
+            <td>Q1 : Vrai/Faux justifié (2 pts) + Q2 : Correction schéma (2 pts)</td>
+            <td><strong>4 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 2 — Modélisation (VoltRide)</strong></td>
+            <td>15 min</td>
+            <td>Q1 (1 pt) + Q2 (2,5 pts) + Q3 (1 pt) + Q4 (0,5 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 3 — LDD SQL (CREATE / ALTER)</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1,5 pt) + Q2 (2,5 pts) + Q3 (2 pts)</td>
+            <td><strong>6 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Exercice 4 — LMD SQL &amp; Intégrité</strong></td>
+            <td>15 min</td>
+            <td>Q1 (1,5 pt) + Q2 (1 pt) + Q3 (1 pt) + Q4 (0,5 pt) + Q5 (1 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;"><strong>TOTAL GÉNÉRAL</strong></td>
+            <td><strong>20 pts</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- EXERCICE 1 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 1 : Connaissances et Diagnostic de Schéma</span>
+        <span class="badge-pts">4 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          <strong>Vrai ou Faux :</strong> Cochez la bonne réponse et justifiez brièvement en cas de réponse « Faux ». <span class="q-pts">(2 pts — 0,5 pt × 4)</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Affirmation</th>
+                <th style="width: 115px;">Réponse</th>
+                <th style="width: 34%;">Justification (si Faux)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>a)</strong> Exécuter <code>UPDATE Trottinette SET tarifH = 15;</code> sans clause <code>WHERE</code> modifie le tarif de toutes les lignes de la table.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>b)</strong> Une colonne déclarée <code>PRIMARY KEY</code> peut accepter la valeur <code>NULL</code> pour un enregistrement.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>c)</strong> L'attribut <code>AUTO_INCREMENT</code> peut s'appliquer à une colonne de type <code>VARCHAR(10)</code>.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><strong>d)</strong> L'instruction <code>ALTER TABLE</code> efface automatiquement toutes les données déjà enregistrées dans la table.</td>
+                <td>[ &nbsp; ] Vrai &nbsp; [ &nbsp; ] Faux</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+
+        <li>
+          <strong>Correction d'un schéma erroné :</strong> Dans un réseau urbain, une <strong>Trottinette</strong> est rattachée à une seule <strong>Station</strong> de recharge, et une <strong>Station</strong> accueille plusieurs trottinettes. Un élève a proposé : <span class="q-pts">(2 pts)</span>
+          <div class="schema-list">
+            <strong>Trottinette</strong> (<span class="pk">#codeTrot</span>, modele, batterie)<br>
+            <strong>Station</strong> (<span class="pk">#idStat</span>, adresseComplete, <span class="fk">codeTrot#</span>)
+          </div>
+          Identifiez les <strong>2 erreurs de conception</strong> commises dans ce schéma, puis réécrivez le schéma relationnel corrigé.
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 1 (4 pts)</span>
+        <p><strong>1. Vrai / Faux (2 pts) :</strong><br>
+          • <strong>a) Vrai</strong> (0,5 pt).<br>
+          • <strong>b) Faux</strong> — Une clé primaire est obligatoirement unique et <code>NOT NULL</code> (intégrité d'entité) (0,5 pt).<br>
+          • <strong>c) Faux</strong> — <code>AUTO_INCREMENT</code> est réservé à un type numérique entier (<code>INT</code>) (0,5 pt).<br>
+          • <strong>d) Faux</strong> — <code>ALTER TABLE</code> modifie la structure tout en conservant les données existantes (sauf si l'on supprime une colonne avec <code>DROP COLUMN</code>) (0,5 pt).
+        </p>
+        <p style="margin-bottom:0;"><strong>2. Diagnostic et correction (2 pts) :</strong><br>
+          • <strong>Erreur 1 (Atomicité — 0,5 pt) :</strong> <code>adresseComplete</code> est un attribut composé → à éclater (ex. <code>rue</code>, <code>codePostal</code>, <code>ville</code>).<br>
+          • <strong>Erreur 2 (Sens de la FK — 0,5 pt) :</strong> Dans un lien <code>1-N</code> (<code>Station</code> → <code>Trottinette</code>), la clé étrangère doit migrer côté <code>N</code> (dans <code>Trottinette</code>, pas dans <code>Station</code>).<br>
+          • <strong>Schéma corrigé (1 pt) :</strong> <code>Station(#idStat, rue, codePostal, ville)</code> et <code>Trottinette(#codeTrot, modele, batterie, idStat#)</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- EXERCICE 2 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 2 : Modélisation — Service « VoltRide »</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <div class="context-box">
+        <div class="diagram-wrap">
+  <svg viewBox="0 0 760 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de voltride_db">
+    <defs>
+      <marker id="arr-dc1b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      </marker>
+    </defs>
+
+    <!-- Table Trottinette -->
+    <g transform="translate(20, 15)">
+      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="#eff6ff"/>
+      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Trottinette</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># codeTrot (VARCHAR 5)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">modele (VARCHAR 30)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">categorie (CHECK Urb./Tout-t.)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
+    </g>
+
+    <!-- Table Location -->
+    <g transform="translate(285, 15)">
+      <rect x="0" y="0" width="190" height="125" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="190" height="26" rx="6" fill="#f0fdfa"/>
+      <text x="95" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Location</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># idLoc (INT AUTO)</text>
+      <text x="10" y="62" font-size="8.5" fill="#334155">dateLoc (DATE), heureDeb</text>
+      <text x="10" y="80" font-size="8.5" fill="#334155">dureeMin (CHECK BETWEEN 15 AND 300)</text>
+      <text x="10" y="98" font-size="9" font-weight="700" fill="#1d4ed8">codeTrot# (FK) ➔</text>
+      <text x="10" y="116" font-size="9" font-weight="700" fill="#7c3aed">idAb# (FK) ➔</text>
+    </g>
+
+    <!-- Table Abonne -->
+    <g transform="translate(560, 15)">
+      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="#f5f3ff"/>
+      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Abonne</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># idAb (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomAb (VARCHAR 30)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">tel (VARCHAR 15 UNIQUE)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR 30)</text>
+    </g>
+
+    <!-- Liens FK -->
+    <path d="M 285 98 C 240 98, 240 44, 205 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1b)"/>
+    <path d="M 475 116 C 515 116, 515 44, 555 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1b)"/>
+
+    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">voltride_db : La table Location relie une Trottinette mise à disposition à l'Abonné locataire.</text>
+  </svg>
+  <div class="diagram-caption">Figure DC1B.1 — Schéma Relationnel de la base VoltRide (Trottinette, Location, Abonne).</div>
+</div>
+La start-up de location de trottinettes électriques <strong>VoltRide</strong> souhaite créer une base de données nommée <code>voltride_db</code> pour gérer son activité :
+        <ul style="margin:6px 0 0; padding-left:20px;">
+          <li>Chaque <strong>Trottinette</strong> est identifiée par un code (<code>codeTrot</code>, ex. <code>TR01</code>), possède un modèle (<code>modele</code>), une catégorie (<code>categorie</code> : <em>Urbaine</em> ou <em>Tout-terrain</em>) et un tarif horaire en dinars (<code>tarifH</code>).</li>
+          <li>Chaque <strong>Abonné</strong> possède un numéro auto-incrémenté (<code>idAb</code>), un nom (<code>nomAb</code>), un téléphone (<code>telAb</code>) et sa ville (<code>ville</code>).</li>
+          <li>Chaque <strong>Location</strong> est identifiée par un numéro auto-incrémenté (<code>numLoc</code>), possède une date (<code>dateLoc</code>), une heure de début entière (<code>heureDeb</code>, ex. <code>14</code>) et une durée en heures (<code>dureeH</code>). Une trottinette fait l'objet de <em>plusieurs</em> locations, mais chaque location concerne <em>une seule</em> trottinette. Un abonné effectue <em>plusieurs</em> locations, mais chaque location appartient à <em>un seul</em> abonné.</li>
+        </ul>
+      </div>
+
+      <ol class="questions">
+        <li>Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Trottinette</strong> et <strong>Location</strong>, puis entre <strong>Abonné</strong> et <strong>Location</strong>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Trottinette</code>, <code>Abonne</code>, <code>Location</code>) en indiquant les clés primaires (<code>#pk</code>) et les clés étrangères (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>Indiquez dans quel ordre il faut <strong>insérer</strong> les données dans ces 3 tables, puis dans quel ordre il faudrait les <strong>supprimer</strong> avec <code>DROP TABLE</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>Pourquoi ne peut-on pas choisir <code>nomAb</code> comme clé primaire de la table <code>Abonne</code> ? <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 2 (5 pts)</span>
+        <p><strong>1. Types de liens (1 pt) :</strong> <code>Trottinette</code> — <code>Location</code> : <strong>1-N</strong> (0,5 pt) | <code>Abonne</code> — <code>Location</code> : <strong>1-N</strong> (0,5 pt).</p>
+        <p><strong>2. Modèle relationnel (2,5 pts) :</strong></p>
+        <div class="schema-list">
+          <strong>Trottinette</strong> (<span class="pk">#codeTrot</span>, modele, categorie, tarifH)<br>
+          <strong>Abonne</strong> (<span class="pk">#idAb</span>, nomAb, telAb, ville)<br>
+          <strong>Location</strong> (<span class="pk">#numLoc</span>, dateLoc, heureDeb, dureeH, <span class="fk">codeTrot#</span>, <span class="fk">idAb#</span>)
+        </div>
+        <p><strong>3. Ordre (1 pt) :</strong> Insertion : <code>Trottinette</code> et <code>Abonne</code> d'abord, puis <code>Location</code> (0,5 pt). Suppression : <code>Location</code> d'abord, puis <code>Trottinette</code> et <code>Abonne</code> (0,5 pt).</p>
+        <p style="margin-bottom:0;"><strong>4. Choix de clé primaire (0,5 pt) :</strong> Deux abonnés peuvent porter le même nom (risque d'homonymes), ce qui violerait la règle d'unicité de la clé primaire.</p>
+      </div>
+    </section>
+
+    <!-- EXERCICE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Exercice 3 : Langage de Définition de Données (LDD)</span>
+        <span class="badge-pts">6 points</span>
+      </h2>
+
+      <p>On suppose que la base <code>voltride_db</code> et la table <code>Abonne(idAb INT AUTO_INCREMENT PRIMARY KEY, nomAb VARCHAR(40) NOT NULL, telAb VARCHAR(15) NOT NULL, ville VARCHAR(30) NOT NULL)</code> sont déjà créées.</p>
+
+      <ol class="questions">
+        <li>
+          Écrivez la requête SQL de création de la table <code>Trottinette</code> respectant les règles suivantes : <span class="q-pts">(1,5 pt)</span>
+          <ul>
+            <li><code>codeTrot</code> : chaîne de 6 caractères max, clé primaire ;</li>
+            <li><code>modele</code> : chaîne de 40 caractères max, obligatoire ;</li>
+            <li><code>categorie</code> : liste fermée parmi <code>'Urbaine'</code> et <code>'Tout-terrain'</code>, obligatoire ;</li>
+            <li><code>tarifH</code> : nombre décimal (7 chiffres dont 3 après la virgule), obligatoire et <strong>strictement positif</strong>.</li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          Écrivez la requête SQL de création de la table <code>Location</code> : <span class="q-pts">(2,5 pts)</span>
+          <ul>
+            <li><code>numLoc</code> : entier auto-incrémenté, clé primaire ;</li>
+            <li><code>dateLoc</code> : date obligatoire ; <code>heureDeb</code> : entier obligatoire ;</li>
+            <li><code>dureeH</code> : entier obligatoire, valeur par défaut <code>1</code>, compris entre <code>1</code> et <code>4</code> inclus ;</li>
+            <li><code>codeTrot</code> : clé étrangère vers <code>Trottinette(codeTrot)</code> avec <code>ON DELETE RESTRICT</code> ;</li>
+            <li><code>idAb</code> : clé étrangère vers <code>Abonne(idAb)</code> avec <code>ON DELETE CASCADE</code>.</li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          Écrivez les <strong>3 requêtes <code>ALTER TABLE</code></strong> permettant d'effectuer les évolutions suivantes : <span class="q-pts">(2 pts)</span>
+          <ul>
+            <li><strong>a)</strong> Ajouter à la table <code>Abonne</code> une colonne <code>cinAb</code> de type <code>VARCHAR(8)</code>, facultative et <strong>unique</strong>. <span class="q-pts">(1 pt)</span></li>
+            <li><strong>b)</strong> Agrandir la colonne <code>modele</code> de la table <code>Trottinette</code> à <code>VARCHAR(60)</code> (toujours obligatoire). <span class="q-pts">(0,5 pt)</span></li>
+            <li><strong>c)</strong> Renommer la colonne <code>telAb</code> de la table <code>Abonne</code> en <code>numTel</code> (<code>VARCHAR(20) NOT NULL</code>). <span class="q-pts">(0,5 pt)</span></li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 3 : LDD (6 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Création de Trottinette (1,5 pt)</span>
+<span class="kw">CREATE TABLE</span> Trottinette (
+    codeTrot  <span class="ty">VARCHAR(6)</span>,
+    modele    <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    categorie <span class="ty">ENUM('Urbaine', 'Tout-terrain')</span> <span class="kw">NOT NULL</span>,
+    tarifH    <span class="ty">DECIMAL(7,3)</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_trottinette <span class="kw">PRIMARY KEY</span> (codeTrot),
+    <span class="kw">CONSTRAINT</span> chk_tarif_trot <span class="kw">CHECK</span> (tarifH &gt; 0)
+);
+
+<span class="cm">-- 2. Création de Location (2,5 pts)</span>
+<span class="kw">CREATE TABLE</span> Location (
+    numLoc   <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    dateLoc  <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+    heureDeb <span class="ty">INT</span>  <span class="kw">NOT NULL</span>,
+    dureeH   <span class="ty">INT</span>  <span class="kw">NOT NULL DEFAULT</span> 1,
+    codeTrot <span class="ty">VARCHAR(6)</span> <span class="kw">NOT NULL</span>,
+    idAb     <span class="ty">INT</span>        <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_location   <span class="kw">PRIMARY KEY</span> (numLoc),
+    <span class="kw">CONSTRAINT</span> chk_duree_loc <span class="kw">CHECK</span> (dureeH <span class="kw">BETWEEN</span> 1 <span class="kw">AND</span> 4),
+    <span class="kw">CONSTRAINT</span> fk_loc_trot   <span class="kw">FOREIGN KEY</span> (codeTrot)
+        <span class="kw">REFERENCES</span> Trottinette(codeTrot) <span class="kw">ON DELETE RESTRICT</span>,
+    <span class="kw">CONSTRAINT</span> fk_loc_ab     <span class="kw">FOREIGN KEY</span> (idAb)
+        <span class="kw">REFERENCES</span> Abonne(idAb) <span class="kw">ON DELETE CASCADE</span>
+);
+
+<span class="cm">-- 3. Évolutions ALTER TABLE (2 pts)</span>
+<span class="kw">ALTER TABLE</span> Abonne      <span class="kw">ADD</span> cinAb <span class="ty">VARCHAR(8)</span> <span class="kw">NULL UNIQUE</span>;
+<span class="kw">ALTER TABLE</span> Trottinette <span class="kw">MODIFY</span> modele <span class="ty">VARCHAR(60)</span> <span class="kw">NOT NULL</span>;
+<span class="kw">ALTER TABLE</span> Abonne      <span class="kw">CHANGE</span> telAb numTel <span class="ty">VARCHAR(20)</span> <span class="kw">NOT NULL</span>;</pre>
+      </div>
+    </section>
+
+    <!-- EXERCICE 4 -->
+    <section class="phase">
+      <h2>
+        <span>Exercice 4 : Manipulation des Données (LMD) et Intégrité</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          <strong>Insertion multiple :</strong> Insérez en <strong>une seule requête</strong> les deux trottinettes suivantes dans la table <code>Trottinette</code> : <span class="q-pts">(1,5 pt)</span>
+          <ul>
+            <li><code>TR01</code>, <code>Xiaomi Pro 2</code>, <code>Urbaine</code>, <code>12.000 DT</code></li>
+            <li><code>TR02</code>, <code>Dualtron Mini</code>, <code>Tout-terrain</code>, <code>18.500 DT</code></li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Insertion simple :</strong> Insérez dans la table <code>Abonne</code> l'abonné <code>'Sami Khelil'</code>, téléphone <code>'55443322'</code>, ville <code>'Sousse'</code>, sans numéro de CIN (<code>cinAb</code> non renseigné). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Mise à jour :</strong> Réduisez de <code>2.000 DT</code> le tarif horaire (<code>tarifH</code>) de toutes les trottinettes de catégorie <code>'Tout-terrain'</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Suppression ciblée :</strong> Supprimez de la table <code>Location</code> la location portant le numéro <code>24</code>. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+
+        <li>
+          <strong>Analyse d'intégrité :</strong> Expliquez précisément la réaction du SGBDR pour chacune des deux commandes ci-dessous : <span class="q-pts">(1 pt — 0,5 pt × 2)</span>
+          <ul>
+            <li><strong>a)</strong> <code>DELETE FROM Trottinette WHERE codeTrot = 'TR01';</code> (sachant que la trottinette <code>'TR01'</code> possède 4 locations enregistrées).</li>
+            <li><strong>b)</strong> <code>INSERT INTO Location (dateLoc, heureDeb, dureeH, codeTrot, idAb) VALUES ('2026-12-05', 14, 6, 'TR01', 1);</code></li>
+          </ul>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Exercice 4 : LMD et Intégrité (5 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Insertion multiple dans Trottinette (1,5 pt)</span>
+<span class="kw">INSERT INTO</span> Trottinette (codeTrot, modele, categorie, tarifH) <span class="kw">VALUES</span>
+(<span class="str">'TR01'</span>, <span class="str">'Xiaomi Pro 2'</span>,  <span class="str">'Urbaine'</span>,      12.000),
+(<span class="str">'TR02'</span>, <span class="str">'Dualtron Mini'</span>, <span class="str">'Tout-terrain'</span>, 18.500);
+
+<span class="cm">-- 2. Insertion simple dans Abonne (1 pt)</span>
+<span class="kw">INSERT INTO</span> Abonne (nomAb, numTel, ville, cinAb)
+<span class="kw">VALUES</span> (<span class="str">'Sami Khelil'</span>, <span class="str">'55443322'</span>, <span class="str">'Sousse'</span>, <span class="kw">NULL</span>);
+
+<span class="cm">-- 3. Mise à jour conditionnelle (1 pt)</span>
+<span class="kw">UPDATE</span> Trottinette
+<span class="kw">SET</span> tarifH = tarifH - 2
+<span class="kw">WHERE</span> categorie = <span class="str">'Tout-terrain'</span>;
+
+<span class="cm">-- 4. Suppression ciblée (0,5 pt)</span>
+<span class="kw">DELETE FROM</span> Location
+<span class="kw">WHERE</span> numLoc = 24;</pre>
+        <p style="margin-bottom:0;"><strong>5. Analyse d'intégrité (1 pt) :</strong><br>
+          • <strong>a)</strong> La suppression est <strong>bloquée (refusée)</strong> grâce à la clause <code>ON DELETE RESTRICT</code> définie sur <code>fk_loc_trot</code>, car la trottinette <code>'TR01'</code> est encore référencée par 4 lignes dans la table fille <code>Location</code> (0,5 pt).<br>
+          • <strong>b)</strong> L'insertion est <strong>refusée</strong> pour violation de la contrainte de domaine <code>CHECK (dureeH BETWEEN 1 AND 4)</code> : la durée saisie (<code>6</code> heures) dépasse la borne maximale autorisée (0,5 pt).
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

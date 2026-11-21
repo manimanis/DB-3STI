@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 3 — LDD SQL : CREATE DATABASE, CREATE TABLE et Contraintes (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance02.html">← S2</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 3 : LDD SQL (2h)</div>
+        <a class="btn-nav" href="seance04.html">S4 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 3 (2 heures)</span>
+      </div>
+      <h1>LDD SQL : Création de la Base et des Tables sous phpMyAdmin</h1>
+      <p class="subtitle">Objectifs : Choisir les types de données SQL adaptés, créer une base de données et ses tables avec les contraintes de base (PK, FK, NOT NULL, AUTO_INCREMENT, DEFAULT).</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Prise en main phpMyAdmin</strong></td>
+            <td>Découvrir l'interface, créer une BD test graphiquement puis observer le code SQL généré par l'outil.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h35</td>
+            <td>20 min</td>
+            <td><strong>2. Dictionnaire des données</strong></td>
+            <td>Traduire les champs du fil rouge <em>TechStore</em> en types SQL (<code>INT</code>, <code>VARCHAR</code>, <code>DECIMAL</code>, <code>DATE</code>, <code>ENUM</code>) et contraintes.</td>
+          </tr>
+          <tr>
+            <td>0h35 – 0h50</td>
+            <td>15 min</td>
+            <td><strong>3. Synthèse LDD</strong></td>
+            <td>Formaliser la syntaxe de <code>CREATE DATABASE</code>, <code>USE</code> et <code>CREATE TABLE</code> (PK, FK, <code>NOT NULL</code>, <code>AUTO_INCREMENT</code>, <code>DEFAULT</code>).</td>
+          </tr>
+          <tr>
+            <td>0h50 – 1h30</td>
+            <td>40 min</td>
+            <td><strong>4. TP guidé : Script TechStore</strong></td>
+            <td>Écrire et exécuter le script SQL complet de <code>boutique_info</code> (4 tables), puis vérifier le résultat dans le <em>Concepteur</em> phpMyAdmin.</td>
+          </tr>
+          <tr>
+            <td>1h30 – 1h45</td>
+            <td>15 min</td>
+            <td><strong>5. Chasse aux bugs LDD</strong></td>
+            <td>Diagnostiquer 3 erreurs classiques d'exécution SQL (ordre des tables, types incompatibles sur FK, syntaxe).</td>
+          </tr>
+          <tr>
+            <td>1h45 – 2h00</td>
+            <td>15 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Valider les types SQL et les contraintes avant la fin de séance.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Prise en main : Interface graphique vs Langage SQL</span>
+        <span class="badge-time">15 min — Manip. guidée</span>
+      </h2>
+      <p>
+        Le langage <strong>SQL</strong> (<em>Structured Query Language</em>) permet de dialoguer avec le SGBDR (MariaDB / MySQL). Sa première partie, le <strong>LDD</strong> (<em>Langage de Définition de Données</em>), sert à construire la structure de la base (bases, tables, colonnes, contraintes).
+      </p>
+      <div class="context-box">
+        <strong>Manipulation rapide sous phpMyAdmin :</strong>
+        <ol style="margin:6px 0 0; padding-left:20px;">
+          <li>Ouvrez <code>http://localhost/phpmyadmin</code> dans votre navigateur.</li>
+          <li>Cliquez sur <strong>Nouvelle base de données</strong>, créez une base nommée <code>test_tp3</code> (interclassement <code>utf8mb4_unicode_ci</code>).</li>
+          <li>Créez graphiquement une table <code>TestCategorie</code> contenant 2 colonnes : <code>idCat</code> (INT, PRIMARY, A_I) et <code>libelle</code> (VARCHAR 30).</li>
+          <li>Avant de valider, cliquez sur le bouton <strong>Aperçu SQL</strong> : observez que phpMyAdmin ne fait que traduire vos clics en instructions SQL !</li>
+        </ol>
+      </div>
+      <p><em>Pourquoi apprendre à écrire le SQL directement ?</em> Parce qu'un script <code>.sql</code> est reproductible, rapide à corriger, facile à sauvegarder et indispensable dès qu'on relie la base à un site web ou un programme.</p>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Analyse comparative &amp; Synthèse orale</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Limites du mode graphique (clic-bouton) :</strong>
+            <ul>
+              <li><em>Lenteur et répétition :</em> Recréer 10 tables avec 50 colonnes à la main prend un temps considérable et favorise les oublis de contraintes.</li>
+              <li><em>Non reproductible :</em> Impossible de rejouer les clics automatiquement sur un autre serveur ou chez un hébergeur.</li>
+              <li><em>Pas d'automatisation :</em> Les applications web (PHP, Python, Java) ne peuvent pas « cliquer » sur phpMyAdmin ; elles doivent impérativement envoyer des requêtes SQL textuelles.</li>
+            </ul>
+          </li>
+          <li><strong>Avantages d'un script <code>.sql</code> :</strong>
+            <ul>
+              <li><em>Vitesse &amp; Versioning :</em> Un script de 500 lignes s'exécute en quelques millisecondes et se sauvegarde dans un fichier texte léger.</li>
+              <li><em>Portabilité :</em> Le même script s'importe indifféremment sous MariaDB, MySQL, en ligne de commande ou via phpMyAdmin.</li>
+            </ul>
+          </li>
+          <li><strong>Bilan à dicter :</strong> phpMyAdmin n'est qu'un <em>traducteur visuel</em>. Le véritable langage compris par le moteur de base de données est le <strong>SQL</strong>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Préparation : Dictionnaire des données de « TechStore »</span>
+        <span class="badge-time">20 min</span>
+      </h2>
+
+      <p>Rappel du schéma relationnel conçu à la séance 2 pour notre boutique informatique <strong>TechStore</strong> (base <code>boutique_info</code>) :</p>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel complet de boutique_info">
+    <defs>
+      <marker id="arr-s3-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arr-s3-t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f766e"/>
+      </marker>
+      <marker id="arr-s3-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed"/>
+      </marker>
+    </defs>
+
+    <!-- Table Client -->
+    <g transform="translate(15, 12)">
+      <rect x="0" y="0" width="160" height="135" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#eff6ff"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Client</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idClt (INT AUTO)</text>
+      <text x="10" y="64" font-size="9" fill="#334155">nomClt (VARCHAR 30)</text>
+      <text x="10" y="82" font-size="9" fill="#334155">prenomClt (VARCHAR 30)</text>
+      <text x="10" y="100" font-size="9" fill="#334155">villeClt (VARCHAR 30)</text>
+      <text x="10" y="118" font-size="9" fill="#334155">telClt (VARCHAR 15)</text>
+    </g>
+
+    <!-- Table Commande -->
+    <g transform="translate(205, 12)">
+      <rect x="0" y="0" width="165" height="110" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="165" height="26" rx="6" fill="#f0fdfa"/>
+      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Commande</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline"># numCmd (INT)</text>
+      <text x="10" y="65" font-size="9" fill="#334155">dateCmd (DATE)</text>
+      <text x="10" y="88" font-size="9.5" font-weight="700" fill="#1d4ed8">idClt# (FK) ➔</text>
+    </g>
+
+    <!-- Table LigneCommande -->
+    <g transform="translate(395, 12)">
+      <rect x="0" y="0" width="165" height="110" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
+      <rect x="0" y="0" width="165" height="26" rx="6" fill="#fffbeb"/>
+      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">LigneCommande</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># numCmd# (FK)</text>
+      <text x="10" y="65" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># refProd# (FK)</text>
+      <text x="10" y="88" font-size="9" fill="#334155">qteCmd (INT)</text>
+    </g>
+
+    <!-- Table Produit -->
+    <g transform="translate(585, 12)">
+      <rect x="0" y="0" width="160" height="135" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f5f3ff"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Produit</text>
+      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># refProd (VARCHAR 10)</text>
+      <text x="10" y="64" font-size="9" fill="#334155">designation (VARCHAR 50)</text>
+      <text x="10" y="82" font-size="9" fill="#334155">prixUnitaire (DECIMAL 7,2)</text>
+      <text x="10" y="100" font-size="9" fill="#334155">qteStock (INT)</text>
+      <text x="10" y="118" font-size="9" fill="#334155">categorie (VARCHAR 30)</text>
+    </g>
+
+    <!-- Liens d'intégrité référentielle -->
+    <path d="M 205 88 C 185 88, 185 44, 175 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-s3-b)"/>
+    <path d="M 395 44 C 380 44, 380 44, 370 44" fill="none" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr-s3-t)"/>
+    <path d="M 560 65 C 570 65, 570 44, 585 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-s3-p)"/>
+
+    <text x="380" y="158" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">Légende : Les flèches relient chaque Clé Étrangère (FK #) à la Clé Primaire (PK #) de la table mère correspondante.</text>
+  </svg>
+  <div class="diagram-caption">Figure 3.1 — Schéma Relationnel complet de la base boutique_info avec ses 4 tables et contraintes référentielles.</div>
+</div>
+
+      <div class="schema-list">
+        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr)<br>
+        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>)<br>
+        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+      </div>
+
+      <p><strong>Travail demandé :</strong> Complétez le tableau ci-dessous en choisissant pour chaque champ le type SQL le plus adapté et les contraintes nécessaires (<code>PK</code>, <code>FK</code>, <code>NOT NULL</code>, <code>NULL</code>, <code>AUTO_INCREMENT</code>, <code>DEFAULT</code>) :</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Table</th>
+            <th>Champ</th>
+            <th>Exigence métier</th>
+            <th style="width: 170px;">Type SQL choisi</th>
+            <th style="width: 210px;">Contraintes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="3"><strong>Client</strong></td>
+            <td><code>idClt</code></td>
+            <td>Numéro entier généré automatiquement (1, 2, 3...)</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><code>nom</code></td>
+            <td>Texte jusqu'à 40 caractères, obligatoire</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><code>tel</code></td>
+            <td>Chaîne de 15 car. max, facultatif (peut être vide)</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td rowspan="4"><strong>Produit</strong></td>
+            <td><code>refProd</code></td>
+            <td>Code alphanumérique ex. <code>P01</code> (max 10 car.)</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><code>categorie</code></td>
+            <td>Parmi : Ordinateur, Accessoire, Stockage, Périphérique</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><code>prixUnit</code></td>
+            <td>Montant en DT avec 3 chiffres après la virgule (ex. 2450.000)</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><code>qteStock</code></td>
+            <td>Entier, vaut <code>0</code> par défaut si non précisé</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>Commande</strong></td>
+            <td><code>dateCmd</code></td>
+            <td>Date au format <code>AAAA-MM-JJ</code>, obligatoire</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Dictionnaire des données</span>
+        <table>
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Champ</th>
+              <th>Type SQL</th>
+              <th>Contraintes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Client</td>
+              <td><code>idClt</code></td>
+              <td><code>INT</code></td>
+              <td><code>PRIMARY KEY</code>, <code>AUTO_INCREMENT</code></td>
+            </tr>
+            <tr>
+              <td>Client</td>
+              <td><code>nom</code></td>
+              <td><code>VARCHAR(40)</code></td>
+              <td><code>NOT NULL</code></td>
+            </tr>
+            <tr>
+              <td>Client</td>
+              <td><code>tel</code></td>
+              <td><code>VARCHAR(15)</code></td>
+              <td><code>NULL</code> (facultatif — jamais <code>INT</code> pour un téléphone afin de conserver un éventuel <code>0</code> ou <code>+216</code>)</td>
+            </tr>
+            <tr>
+              <td>Produit</td>
+              <td><code>refProd</code></td>
+              <td><code>VARCHAR(10)</code></td>
+              <td><code>PRIMARY KEY</code></td>
+            </tr>
+            <tr>
+              <td>Produit</td>
+              <td><code>categorie</code></td>
+              <td><code>ENUM('Ordinateur','Accessoire','Stockage','Périphérique')</code> (ou <code>VARCHAR(30)</code>)</td>
+              <td><code>NOT NULL</code></td>
+            </tr>
+            <tr>
+              <td>Produit</td>
+              <td><code>prixUnit</code></td>
+              <td><code>DECIMAL(10,3)</code></td>
+              <td><code>NOT NULL</code> (10 chiffres au total dont 3 décimales pour les millimes)</td>
+            </tr>
+            <tr>
+              <td>Produit</td>
+              <td><code>qteStock</code></td>
+              <td><code>INT</code></td>
+              <td><code>NOT NULL DEFAULT 0</code></td>
+            </tr>
+            <tr>
+              <td>Commande</td>
+              <td><code>dateCmd</code></td>
+              <td><code>DATE</code></td>
+              <td><code>NOT NULL</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. Synthèse : Types SQL et Syntaxe du LDD</span>
+        <span class="badge-time">15 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Principaux types de données MariaDB / MySQL</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Type SQL</th>
+              <th>Usage</th>
+              <th>Exemple de valeur</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>INT</code></td>
+              <td>Nombre entier (identifiants, quantités, âges)</td>
+              <td><code>1</code>, <code>35</code>, <code>2026</code></td>
+            </tr>
+            <tr>
+              <td><code>DECIMAL(M, D)</code></td>
+              <td>Nombre décimal exact (prix, montants) : <em>M</em> chiffres max dont <em>D</em> après la virgule</td>
+              <td><code>DECIMAL(10,3)</code> → <code>2450.000</code></td>
+            </tr>
+            <tr>
+              <td><code>VARCHAR(N)</code></td>
+              <td>Chaîne de caractères de longueur variable (jusqu'à <em>N</em> caractères)</td>
+              <td><code>'Sousse'</code>, <code>'P01'</code></td>
+            </tr>
+            <tr>
+              <td><code>DATE</code></td>
+              <td>Date calendrier au format standard ISO <code>AAAA-MM-JJ</code></td>
+              <td><code>'2026-11-21'</code></td>
+            </tr>
+            <tr>
+              <td><code>ENUM('v1','v2',...)</code></td>
+              <td>Liste fermée de valeurs prédéfinies</td>
+              <td><code>ENUM('Disponible','En panne')</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>B. Syntaxe de création de base et de table</h3>
+        <pre class="sql-block"><span class="cm">-- 1. Créer et sélectionner la base de données</span>
+<span class="kw">CREATE DATABASE</span> nom_base;
+<span class="kw">USE</span> nom_base;
+
+<span class="cm">-- 2. Créer une table avec ses colonnes et contraintes</span>
+<span class="kw">CREATE TABLE</span> NomTable (
+    colonne1 <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    colonne2 <span class="ty">VARCHAR(50)</span> <span class="kw">NOT NULL</span>,
+    colonne3 <span class="ty">INT</span> <span class="kw">NOT NULL DEFAULT</span> 0,
+    col_fk   <span class="ty">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_nom <span class="kw">PRIMARY KEY</span> (colonne1),
+    <span class="kw">CONSTRAINT</span> fk_nom <span class="kw">FOREIGN KEY</span> (col_fk) <span class="kw">REFERENCES</span> TableMere(cle_mere)
+);</pre>
+
+        <h3>C. Rôle des contraintes de base</h3>
+        <ul class="vocab-list">
+          <li><code>NOT NULL</code> : Interdit de laisser le champ vide lors de l'insertion.</li>
+          <li><code>AUTO_INCREMENT</code> : Numérotation automatique (réservée à une colonne entière qui est clé primaire).</li>
+          <li><code>DEFAULT valeur</code> : Attribue automatiquement une valeur par défaut si rien n'est saisi.</li>
+          <li><code>PRIMARY KEY (col1, ...)</code> : Définit la clé primaire (simple ou composée).</li>
+          <li><code>FOREIGN KEY (col) REFERENCES TableMere(pk)</code> : Relie la table fille à la table mère. <strong>Condition stricte :</strong> la colonne clé étrangère doit avoir exactement le <strong>même type</strong> que la clé primaire référencée.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase">
+      <h2>
+        <span>4. TP guidé : Création de la base « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <p>Ouvrez l'onglet <strong>SQL</strong> de phpMyAdmin (ou créez un fichier <code>techstore_ldd.sql</code> dans votre éditeur de code puis importez-le) et réalisez les étapes suivantes dans l'ordre :</p>
+
+      <ol class="questions">
+        <li>
+          <strong>Étape 1 — Base de données :</strong> Écrivez les instructions permettant de créer la base <code>boutique_info</code> (en supprimant d'abord une éventuelle ancienne version avec <code>DROP DATABASE IF EXISTS</code>) puis de la sélectionner.
+        </li>
+        <li>
+          <strong>Étape 2 — Tables mères :</strong> Créez les tables <code>Client</code> et <code>Produit</code> :
+          <ul>
+            <li><code>Client</code> : <code>idClt</code> (entier auto-incrémenté, PK), <code>nom</code> (VARCHAR 40, obligatoire), <code>prenom</code> (VARCHAR 40, obligatoire), <code>ville</code> (VARCHAR 30, obligatoire), <code>tel</code> (VARCHAR 15, facultatif), <code>dateInscr</code> (DATE, obligatoire).</li>
+            <li><code>Produit</code> : <code>refProd</code> (VARCHAR 10, PK), <code>designation</code> (VARCHAR 80, obligatoire), <code>categorie</code> (VARCHAR 30, obligatoire), <code>prixUnit</code> (DECIMAL(10,3), obligatoire), <code>qteStock</code> (INT, obligatoire, valeur par défaut <code>0</code>).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Étape 3 — Table fille <code>Commande</code> :</strong> Créez <code>Commande</code> avec <code>numCmd</code> (entier auto-incrémenté, PK), <code>dateCmd</code> (DATE, obligatoire) et <code>idClt</code> (clé étrangère référençant <code>Client(idClt)</code>).
+        </li>
+        <li>
+          <strong>Étape 4 — Table d'association <code>LigneCommande</code> :</strong> Créez <code>LigneCommande</code> avec <code>numCmd</code>, <code>refProd</code> et <code>qteCmd</code> (INT, obligatoire). Déclarez la <strong>clé primaire composée</strong> <code>(numCmd, refProd)</code> ainsi que les <strong>deux clés étrangères</strong> vers <code>Commande</code> et <code>Produit</code>.
+        </li>
+        <li>
+          <strong>Étape 5 — Vérification visuelle :</strong> Exécutez <code>SHOW TABLES;</code> puis <code>DESCRIBE Commande;</code>. Enfin, dans phpMyAdmin, cliquez sur la base <code>boutique_info</code> puis sur l'onglet <strong>Concepteur</strong> (<em>Designer</em>) : vérifiez que les 3 flèches de relations apparaissent bien entre les 4 tables.
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Script LDD complet (boutique_info)</span>
+        <pre class="sql-block"><span class="cm">-- Étape 1 : Création et sélection de la base</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> boutique_info;
+<span class="kw">CREATE DATABASE</span> boutique_info
+  <span class="kw">CHARACTER SET</span> utf8mb4
+  <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+
+<span class="kw">USE</span> boutique_info;
+
+<span class="cm">-- Étape 2 : Tables mères (indépendantes)</span>
+<span class="kw">CREATE TABLE</span> Client (
+    idClt     <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    nom       <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    prenom    <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    ville     <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel       <span class="ty">VARCHAR(15)</span> <span class="kw">NULL</span>,
+    dateInscr <span class="ty">DATE</span>        <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_client <span class="kw">PRIMARY KEY</span> (idClt)
+);
+
+<span class="kw">CREATE TABLE</span> Produit (
+    refProd     <span class="ty">VARCHAR(10)</span>,
+    designation <span class="ty">VARCHAR(80)</span>   <span class="kw">NOT NULL</span>,
+    categorie   <span class="ty">VARCHAR(30)</span>   <span class="kw">NOT NULL</span>,
+    prixUnit    <span class="ty">DECIMAL(10,3)</span> <span class="kw">NOT NULL</span>,
+    qteStock    <span class="ty">INT</span>           <span class="kw">NOT NULL DEFAULT</span> 0,
+    <span class="kw">CONSTRAINT</span> pk_produit <span class="kw">PRIMARY KEY</span> (refProd)
+);
+
+<span class="cm">-- Étape 3 : Table fille Commande (référence Client)</span>
+<span class="kw">CREATE TABLE</span> Commande (
+    numCmd  <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    dateCmd <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+    idClt   <span class="ty">INT</span>  <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_commande   <span class="kw">PRIMARY KEY</span> (numCmd),
+    <span class="kw">CONSTRAINT</span> fk_cmd_client <span class="kw">FOREIGN KEY</span> (idClt) <span class="kw">REFERENCES</span> Client(idClt)
+);
+
+<span class="cm">-- Étape 4 : Table d'association LigneCommande (PK composée + 2 FK)</span>
+<span class="kw">CREATE TABLE</span> LigneCommande (
+    numCmd  <span class="ty">INT</span>,
+    refProd <span class="ty">VARCHAR(10)</span>,
+    qteCmd  <span class="ty">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_ligne    <span class="kw">PRIMARY KEY</span> (numCmd, refProd),
+    <span class="kw">CONSTRAINT</span> fk_lig_cmd  <span class="kw">FOREIGN KEY</span> (numCmd)  <span class="kw">REFERENCES</span> Commande(numCmd),
+    <span class="kw">CONSTRAINT</span> fk_lig_prod <span class="kw">FOREIGN KEY</span> (refProd) <span class="kw">REFERENCES</span> Produit(refProd)
+);</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase page-break">
+      <h2>
+        <span>5. Atelier « Chasse aux bugs SQL »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Chaque extrait SQL ci-dessous provoque une erreur lors de son exécution dans MariaDB / phpMyAdmin. Identifiez l'erreur et expliquez comment la corriger.</p>
+
+      <div class="trap-card">
+        <h3>Bug 1 — Création d'une table fille trop tôt</h3>
+        <pre class="sql-block"><span class="kw">CREATE TABLE</span> Commande (
+    numCmd <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+    idClt  <span class="ty">INT</span>,
+    <span class="kw">FOREIGN KEY</span> (idClt) <span class="kw">REFERENCES</span> Client(idClt)
+);
+<span class="kw">CREATE TABLE</span> Client (
+    idClt <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+    nom   <span class="ty">VARCHAR(40)</span>
+);</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 1</span>
+          <strong>Erreur d'ordre :</strong> <code>Commande</code> référence <code>Client</code> avant que la table <code>Client</code> n'existe. Il faut toujours exécuter <code>CREATE TABLE Client</code> <strong>avant</strong> <code>CREATE TABLE Commande</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Bug 2 — Clé étrangère incompatible</h3>
+        <pre class="sql-block"><span class="cm">-- Sachant que Produit.refProd est déclaré en VARCHAR(10)</span>
+<span class="kw">CREATE TABLE</span> LigneCommande (
+    numCmd  <span class="ty">INT</span>,
+    refProd <span class="ty">INT</span>,
+    qteCmd  <span class="ty">INT</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (numCmd, refProd),
+    <span class="kw">FOREIGN KEY</span> (refProd) <span class="kw">REFERENCES</span> Produit(refProd)
+);</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 2</span>
+          <strong>Incompatibilité de type :</strong> Dans <code>LigneCommande</code>, <code>refProd</code> est déclaré en <code>INT</code> alors que <code>Produit.refProd</code> est un <code>VARCHAR(10)</code>. Les deux colonnes doivent avoir exactement le même type (<code>VARCHAR(10)</code>).
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Bug 3 — Double erreur de syntaxe</h3>
+        <pre class="sql-block"><span class="kw">CREATE TABLE</span> Produit (
+    refProd  <span class="ty">VARCHAR(10)</span> <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+    prixUnit <span class="ty">DECIMAL(10,3)</span> <span class="kw">NOT NULL</span>,
+);</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 3</span>
+          <strong>1)</strong> <code>AUTO_INCREMENT</code> ne s'applique qu'à un type entier (<code>INT</code>), jamais à un <code>VARCHAR</code>.<br>
+          <strong>2)</strong> Il y a une <strong>virgule en trop</strong> après <code>NOT NULL</code> juste avant la parenthèse fermante <code>);</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Choix de type :</strong> Pourquoi stocke-t-on un numéro de téléphone ou un code postal en <code>VARCHAR</code> plutôt qu'en <code>INT</code> ?
+        <div class="quiz-answer">Réponse : Parce qu'on n'effectue pas de calculs arithmétiques dessus, et un type INT supprimerait les zéros initiaux (ex. 07... deviendrait 7...) ou empêcherait des caractères comme « +216 ».</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Précision :</strong> Quelle est la valeur maximale stockable dans un champ de type <code>DECIMAL(5,2)</code> ?
+        <div class="quiz-answer">Réponse : 999.99 (5 chiffres au total : 3 avant la virgule et 2 après).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Vrai ou Faux :</strong> « On peut mettre deux colonnes <code>AUTO_INCREMENT</code> dans une même table. »
+        <div class="quiz-answer">Réponse : Faux — Une table ne peut contenir qu'une seule colonne AUTO_INCREMENT, qui doit être une clé (en pratique la clé primaire).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Contrainte :</strong> Que fait SQL si l'on insère un nouveau produit sans préciser de valeur pour <code>qteStock</code> (déclaré <code>INT NOT NULL DEFAULT 0</code>) ?
+        <div class="quiz-answer">Réponse : Il accepte l'insertion et attribue automatiquement la valeur 0 à qteStock.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Commande utile :</strong> Quelle commande SQL permet d'afficher la structure (colonnes, types, clés) d'une table déjà créée ?
+        <div class="quiz-answer">Réponse : DESCRIBE NomTable; (ou DESC NomTable;).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 4 — LDD Avancé : UNIQUE, CHECK, ALTER TABLE, DROP TABLE et CASCADE (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance03.html">← S3</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 4 : LDD Avancé et Modifications (2h)</div>
+        <a class="btn-nav" href="seance05.html">S5 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 4 (2 heures)</span>
+      </div>
+      <h1>LDD Avancé : Contraintes (UNIQUE, CHECK), ALTER TABLE, DROP TABLE et CASCADE</h1>
+      <p class="subtitle">Objectifs : Faire évoluer une base existante sans perdre ses données, sécuriser les valeurs par des contraintes métier et maîtriser les règles de suppression en cascade.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Situation problème</strong></td>
+            <td>Faire émerger le besoin de modifier une table sans la détruire et d'empêcher les valeurs absurdes (prix négatif, doublon d'e-mail).</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Synthèse de cours</strong></td>
+            <td>Formaliser <code>UNIQUE</code>, <code>CHECK</code>, <code>ALTER TABLE</code> (<code>ADD</code>, <code>MODIFY</code>, <code>CHANGE</code>, <code>DROP</code>), <code>DROP TABLE</code> et <code>ON DELETE CASCADE / RESTRICT</code>.</td>
+          </tr>
+          <tr>
+            <td>0h40 – 1h20</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé sur TechStore</strong></td>
+            <td>Appliquer le scénario d'évolution sur <code>boutique_info</code>, mettre à jour les règles <code>ON DELETE</code> et tester <code>DROP TABLE</code> sur une table brouillon.</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h35</td>
+            <td>15 min</td>
+            <td><strong>4. Chasse aux bugs LDD</strong></td>
+            <td>Diagnostiquer 3 erreurs classiques : <code>DROP TABLE</code> dans le mauvais ordre, confusion <code>MODIFY</code>/<code>CHANGE</code>, <code>UNIQUE</code> vs <code>PRIMARY KEY</code>.</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Écrire 4 requêtes <code>ALTER TABLE</code> sur une nouvelle table <code>Fournisseur</code> (sans machine ou vérification rapide).</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Valider les acquis clés avant le passage au LMD (séance 5).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Situation problème : Le cahier des charges évolue !</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        La base <code>boutique_info</code> de <strong>TechStore</strong> a été mise en service la semaine dernière. Dès les premiers jours d'utilisation, le gérant vous envoie 4 demandes urgentes :
+      </p>
+      <div class="context-box">
+        <ol style="margin:0; padding-left:20px;">
+          <li>« Je veux enregistrer l'<strong>adresse e-mail</strong> de chaque client, et deux clients ne doivent jamais pouvoir utiliser le même e-mail. »</li>
+          <li>« Un vendeur a saisi par erreur un produit avec un <strong>prix négatif</strong> (<code>-45.000 DT</code>) et un stock à <code>-3</code>. La base doit bloquer automatiquement ces erreurs ! »</li>
+          <li>« Si j'annule et supprime une <strong>Commande</strong>, je veux que ses lignes dans <code>LigneCommande</code> disparaissent automatiquement. En revanche, on doit m'interdire de supprimer un <strong>Client</strong> qui a déjà passé des commandes. »</li>
+          <li>« Attention : la base contient déjà des clients. Hors de question de tout effacer et recommencer de zéro ! »</li>
+        </ol>
+      </div>
+      <p><strong>Question d'ouverture :</strong> Comment modifier la structure de tables existantes et ajouter ces garde-fous directement au niveau du SGBDR ?</p>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Solutions techniques attendues</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>Demande 1 (Email unique) :</strong> Ajouter la colonne puis lui associer une contrainte <code>UNIQUE</code> (ex. : <code>uq_client_email</code>) pour rejeter les doublons à l'insertion.</li>
+          <li><strong>Demande 2 (Prix et stock positifs) :</strong> Définir des contraintes <code>CHECK (prixUnit &gt; 0)</code> et <code>CHECK (qteStock &gt;= 0)</code> afin que le SGBD bloque matériellement toute saisie invalide.</li>
+          <li><strong>Demande 3 (Gestion des suppressions) :</strong>
+            <ul>
+              <li>Sur la clé étrangère <code>numCmd</code> de <code>LigneCommande</code> : appliquer <code>ON DELETE CASCADE</code> (supprimer la commande entraîne ses lignes).</li>
+              <li>Sur la clé étrangère <code>idClt</code> de <code>Commande</code> : appliquer <code>ON DELETE RESTRICT</code> (bloque la suppression d'un client s'il possède des commandes actives).</li>
+            </ul>
+          </li>
+          <li><strong>Demande 4 (Ne rien perdre) :</strong> Utiliser l'instruction <strong><code>ALTER TABLE</code></strong> (et non pas <code>DROP TABLE</code> + recréation) pour faire évoluer le schéma en place sans toucher aux données déjà saisies.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : Contraintes avancées, ALTER TABLE, DROP TABLE et CASCADE</span>
+        <span class="badge-time">25 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Contraintes avancées (UNIQUE et CHECK)</h3>
+        <ul class="vocab-list">
+          <li><code>UNIQUE</code> : Garantit que toutes les valeurs d'une colonne sont distinctes (pas de doublon), mais contrairement à <code>PRIMARY KEY</code>, une colonne <code>UNIQUE</code> peut accepter des valeurs <code>NULL</code> et une table peut en posséder plusieurs.</li>
+          <li><code>CHECK (condition)</code> : Vérifie qu'une valeur respecte une règle métier avant d'accepter l'insertion ou la modification (ex. : <code>CHECK (prixUnit &gt; 0)</code>, <code>CHECK (qteStock &gt;= 0)</code>).</li>
+        </ul>
+
+        <h3>B. Modifier la structure d'une table : ALTER TABLE</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Action souhaitée</th>
+              <th>Syntaxe MariaDB / MySQL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ajouter une colonne</td>
+              <td><code>ALTER TABLE Table ADD nomCol TYPE [contraintes];</code></td>
+            </tr>
+            <tr>
+              <td>Modifier le type ou les contraintes d'une colonne (même nom)</td>
+              <td><code>ALTER TABLE Table MODIFY nomCol NOUVEAU_TYPE [contraintes];</code></td>
+            </tr>
+            <tr>
+              <td>Renommer une colonne (et préciser son type)</td>
+              <td><code>ALTER TABLE Table CHANGE ancienNom nouveauNom TYPE [contraintes];</code></td>
+            </tr>
+            <tr>
+              <td>Supprimer une colonne</td>
+              <td><code>ALTER TABLE Table DROP COLUMN nomCol;</code></td>
+            </tr>
+            <tr>
+              <td>Ajouter une contrainte nommée (<code>UNIQUE</code>, <code>CHECK</code>, <code>FK</code>)</td>
+              <td><code>ALTER TABLE Table ADD CONSTRAINT nom_cstr ... ;</code></td>
+            </tr>
+            <tr>
+              <td>Supprimer une clé étrangère</td>
+              <td><code>ALTER TABLE Table DROP FOREIGN KEY nom_fk;</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>C. Supprimer une table : DROP TABLE</h3>
+        <pre class="sql-block"><span class="kw">DROP TABLE</span> NomTable;
+<span class="kw">DROP TABLE IF EXISTS</span> NomTable; <span class="cm">-- Évite une erreur si la table n'existe pas</span></pre>
+        <p style="margin:0 0 12px;"><strong>Règle d'ordre :</strong> À cause de l'intégrité référentielle, on supprime toujours les <strong>tables filles avant les tables mères</strong> (ex. : <code>LigneCommande</code> → <code>Commande</code> → <code>Client</code> et <code>Produit</code>).</p>
+
+        <h3>D. Gestion des suppressions et modifications liées (Clé étrangère)</h3>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 145" width="100%" height="145" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison ON DELETE RESTRICT vs ON DELETE CASCADE">
+    <!-- Panneau Gauche : RESTRICT -->
+    <rect x="15" y="10" width="350" height="125" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+    <text x="190" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">🛡️ ON DELETE RESTRICT (Par défaut)</text>
+    
+    <g transform="translate(30, 40)">
+      <rect x="0" y="0" width="125" height="40" rx="4" fill="#ffffff" stroke="#b45309"/>
+      <text x="62" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Client #1</text>
+      <text x="62" y="30" text-anchor="middle" font-size="7.5" fill="#b91c1c">DELETE Client #1...</text>
+      
+      <circle cx="150" cy="20" r="12" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+      <text x="150" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="#dc2626">⛔</text>
+
+      <rect x="175" y="0" width="135" height="40" rx="4" fill="#ffffff" stroke="#64748b"/>
+      <text x="242" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Commandes liées</text>
+      <text x="242" y="30" text-anchor="middle" font-size="7.5" fill="#475569">Existent encore (idClt=1)</text>
+    </g>
+
+    <text x="190" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#b91c1c">Action bloquée : Erreur 1451 (Cannot delete or update)</text>
+    <text x="190" y="116" text-anchor="middle" font-size="8" fill="#475569">Sécurité maximale : protège contre la perte accidentelle d'historique de commandes</text>
+
+    <!-- Panneau Droit : CASCADE -->
+    <rect x="395" y="10" width="350" height="125" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+    <text x="570" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">⚡ ON DELETE CASCADE</text>
+
+    <g transform="translate(410, 40)">
+      <rect x="0" y="0" width="125" height="40" rx="4" fill="#ffffff" stroke="#15803d"/>
+      <text x="62" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Client #1</text>
+      <text x="62" y="30" text-anchor="middle" font-size="7.5" fill="#b91c1c">Supprimé !</text>
+
+      <path d="M 130 20 L 165 20" stroke="#15803d" stroke-width="2" stroke-dasharray="3,2"/>
+      <polygon points="170,20 162,16 162,24" fill="#15803d"/>
+
+      <rect x="175" y="0" width="135" height="40" rx="4" fill="#fef2f2" stroke="#f87171"/>
+      <text x="242" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#b91c1c">Commandes liées</text>
+      <text x="242" y="30" text-anchor="middle" font-size="7.5" fill="#b91c1c">Purge automatique !</text>
+    </g>
+
+    <text x="570" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#15803d">Propagation automatique exécutée silencieusement par le SGBD</text>
+    <text x="570" y="116" text-anchor="middle" font-size="8" fill="#475569">Pratique mais irréversible : à réserver aux tables composantes (ex. lignes d'une commande)</text>
+  </svg>
+  <div class="diagram-caption">Figure 4.1 — Actions référentielles : sécurité RESTRICT (bouclier anti-suppression) vs propagation CASCADE (suppression liée).</div>
+</div>
+
+        <p style="margin-top:0;">Lorsqu'on supprime (<code>ON DELETE</code>) ou modifie (<code>ON UPDATE</code>) une ligne de la <strong>table mère</strong>, le SGBDR applique la règle définie sur la clé étrangère de la <strong>table fille</strong> :</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Comportement sur la table fille</th>
+              <th>Cas d'usage dans TechStore</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ON DELETE RESTRICT</code> <em>(défaut)</em></td>
+              <td><strong>Bloque</strong> la suppression dans la table mère tant qu'il existe au moins une ligne liée dans la table fille.</td>
+              <td>Empêcher de supprimer un <code>Client</code> qui a des <code>Commande</code>s, ou un <code>Produit</code> déjà commandé.</td>
+            </tr>
+            <tr>
+              <td><code>ON DELETE CASCADE</code></td>
+              <td><strong>Supprime automatiquement</strong> toutes les lignes liées dans la table fille.</td>
+              <td>Supprimer une <code>Commande</code> efface automatiquement ses lignes dans <code>LigneCommande</code>.</td>
+            </tr>
+            <tr>
+              <td><code>ON UPDATE CASCADE</code></td>
+              <td>Si la clé primaire mère est modifiée, la clé étrangère fille est <strong>mise à jour automatiquement</strong>.</td>
+              <td>Si <code>refProd</code> passe de <code>P01</code> à <code>PC01</code>, <code>LigneCommande</code> suit automatiquement.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : Scénario d'évolution sur « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <p>Ouvrez phpMyAdmin, sélectionnez votre base <code>boutique_info</code> (créée en séance 3), puis réalisez chaque étape dans l'onglet <strong>SQL</strong> en vérifiant le résultat avec <code>DESCRIBE</code> ou <code>SHOW CREATE TABLE</code>.</p>
+
+      <ol class="questions">
+        <li>
+          <strong>Ajouter une colonne et une contrainte <code>UNIQUE</code> :</strong>
+          <ul>
+            <li>Ajoutez à la table <code>Client</code> une colonne <code>email</code> de type <code>VARCHAR(80)</code> (facultative).</li>
+            <li>Ajoutez ensuite une contrainte nommée <code>uq_client_email</code> imposant l'unicité de <code>email</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Modifier et renommer des colonnes :</strong>
+          <ul>
+            <li>Agrandissez la colonne <code>tel</code> de <code>Client</code> pour passer de <code>VARCHAR(15)</code> à <code>VARCHAR(20)</code> (toujours facultative).</li>
+            <li>Ajoutez une colonne temporaire <code>remarque VARCHAR(100)</code> dans <code>Client</code>, renommez-la en <code>notes</code> (<code>VARCHAR(150)</code>) avec <code>CHANGE</code>, puis supprimez-la avec <code>DROP COLUMN</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Ajouter des contraintes <code>CHECK</code> :</strong>
+          <ul>
+            <li>Sur <code>Produit</code> : ajoutez <code>chk_prix</code> (<code>prixUnit &gt; 0</code>) et <code>chk_stock</code> (<code>qteStock &gt;= 0</code>).</li>
+            <li>Sur <code>LigneCommande</code> : ajoutez <code>chk_qte_cmd</code> (<code>qteCmd &gt; 0</code>).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Activer <code>ON DELETE CASCADE</code> sur <code>LigneCommande</code> :</strong>
+          <ul>
+            <li>Supprimez la clé étrangère existante <code>fk_lig_cmd</code> de <code>LigneCommande</code>.</li>
+            <li>Recréez-la avec <code>ON DELETE CASCADE</code> et <code>ON UPDATE CASCADE</code>.</li>
+            <li>Faites de même sur <code>fk_cmd_client</code> (table <code>Commande</code>) et <code>fk_lig_prod</code> (table <code>LigneCommande</code>) avec <code>ON DELETE RESTRICT</code> et <code>ON UPDATE CASCADE</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Tester <code>DROP TABLE</code> et l'ordre de suppression :</strong>
+          <ul>
+            <li>Créez une petite table brouillon <code>Promotion(idPromo INT PRIMARY KEY, refProd VARCHAR(10), taux INT, FOREIGN KEY (refProd) REFERENCES Produit(refProd))</code>.</li>
+            <li>Essayez d'exécuter <code>DROP TABLE Produit;</code> — observez le message d'erreur du SGBDR.</li>
+            <li>Supprimez proprement la table brouillon <code>Promotion</code> avec <code>DROP TABLE IF EXISTS Promotion;</code>.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Script complet d'évolution LDD (boutique_info)</span>
+        <pre class="sql-block"><span class="kw">USE</span> boutique_info;
+
+<span class="cm">-- 1. Ajout de email + contrainte UNIQUE</span>
+<span class="kw">ALTER TABLE</span> Client <span class="kw">ADD</span> email <span class="ty">VARCHAR(80)</span> <span class="kw">NULL</span>;
+<span class="kw">ALTER TABLE</span> Client <span class="kw">ADD CONSTRAINT</span> uq_client_email <span class="kw">UNIQUE</span> (email);
+
+<span class="cm">-- 2. MODIFY, CHANGE et DROP COLUMN</span>
+<span class="kw">ALTER TABLE</span> Client <span class="kw">MODIFY</span> tel <span class="ty">VARCHAR(20)</span> <span class="kw">NULL</span>;
+<span class="kw">ALTER TABLE</span> Client <span class="kw">ADD</span> remarque <span class="ty">VARCHAR(100)</span>;
+<span class="kw">ALTER TABLE</span> Client <span class="kw">CHANGE</span> remarque notes <span class="ty">VARCHAR(150)</span>;
+<span class="kw">ALTER TABLE</span> Client <span class="kw">DROP COLUMN</span> notes;
+
+<span class="cm">-- 3. Ajout des contraintes CHECK</span>
+<span class="kw">ALTER TABLE</span> Produit       <span class="kw">ADD CONSTRAINT</span> chk_prix    <span class="kw">CHECK</span> (prixUnit &gt; 0);
+<span class="kw">ALTER TABLE</span> Produit       <span class="kw">ADD CONSTRAINT</span> chk_stock   <span class="kw">CHECK</span> (qteStock &gt;= 0);
+<span class="kw">ALTER TABLE</span> LigneCommande <span class="kw">ADD CONSTRAINT</span> chk_qte_cmd <span class="kw">CHECK</span> (qteCmd &gt; 0);
+
+<span class="cm">-- 4. Mise à jour des clés étrangères (CASCADE / RESTRICT)</span>
+<span class="kw">ALTER TABLE</span> LigneCommande <span class="kw">DROP FOREIGN KEY</span> fk_lig_cmd;
+<span class="kw">ALTER TABLE</span> LigneCommande
+  <span class="kw">ADD CONSTRAINT</span> fk_lig_cmd <span class="kw">FOREIGN KEY</span> (numCmd)
+  <span class="kw">REFERENCES</span> Commande(numCmd)
+  <span class="kw">ON DELETE CASCADE ON UPDATE CASCADE</span>;
+
+<span class="kw">ALTER TABLE</span> Commande <span class="kw">DROP FOREIGN KEY</span> fk_cmd_client;
+<span class="kw">ALTER TABLE</span> Commande
+  <span class="kw">ADD CONSTRAINT</span> fk_cmd_client <span class="kw">FOREIGN KEY</span> (idClt)
+  <span class="kw">REFERENCES</span> Client(idClt)
+  <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>;
+
+<span class="kw">ALTER TABLE</span> LigneCommande <span class="kw">DROP FOREIGN KEY</span> fk_lig_prod;
+<span class="kw">ALTER TABLE</span> LigneCommande
+  <span class="kw">ADD CONSTRAINT</span> fk_lig_prod <span class="kw">FOREIGN KEY</span> (refProd)
+  <span class="kw">REFERENCES</span> Produit(refProd)
+  <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>;
+
+<span class="cm">-- 5. Test DROP TABLE (table brouillon)</span>
+<span class="kw">CREATE TABLE</span> Promotion (
+    idPromo <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+    refProd <span class="ty">VARCHAR(10)</span>,
+    taux    <span class="ty">INT</span>,
+    <span class="kw">CONSTRAINT</span> fk_promo_prod <span class="kw">FOREIGN KEY</span> (refProd) <span class="kw">REFERENCES</span> Produit(refProd)
+);
+
+<span class="cm">-- DROP TABLE Produit;  -- Échoue : référencée par Promotion et LigneCommande !</span>
+<span class="kw">DROP TABLE IF EXISTS</span> Promotion; <span class="cm">-- Réussit : table fille supprimée proprement</span></pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux bugs LDD »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Bug 1 — Suppression impossible d'une table</h3>
+        <pre class="sql-block"><span class="kw">DROP TABLE</span> Client;
+<span class="kw">DROP TABLE</span> Commande;
+<span class="kw">DROP TABLE</span> LigneCommande;</pre>
+        <p><strong>Question :</strong> Pourquoi la première ligne renvoie-t-elle une erreur <code>Cannot delete or update a parent row</code> ? Dans quel ordre faut-il exécuter ces 3 commandes ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 1</span>
+          <code>Client</code> est référencée par <code>Commande</code>, qui est elle-même référencée par <code>LigneCommande</code>. Il faut supprimer de la fille vers la mère :<br>
+          <code>DROP TABLE LigneCommande;</code> → <code>DROP TABLE Commande;</code> → <code>DROP TABLE Client;</code>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Bug 2 — Confusion entre MODIFY et CHANGE</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut renommer la colonne "ville" en "gouvernorat"</span>
+<span class="kw">ALTER TABLE</span> Client <span class="kw">MODIFY</span> ville gouvernorat <span class="ty">VARCHAR(30)</span>;</pre>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 2</span>
+          <code>MODIFY</code> ne sert qu'à changer le type ou les contraintes en gardant le même nom. Pour <strong>renommer</strong> une colonne, il faut utiliser <code>CHANGE</code> :<br>
+          <code>ALTER TABLE Client CHANGE ville gouvernorat VARCHAR(30) NOT NULL;</code>
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Bug 3 — Risque caché de ON DELETE CASCADE</h3>
+        <p>Un développeur débutant met <code>ON DELETE CASCADE</code> sur la clé étrangère <code>Commande(idClt) → Client(idClt)</code>. Que se passe-t-il si un employé supprime par erreur un client qui a passé 25 commandes sur l'année ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Bug 3</span>
+          Les <strong>25 commandes</strong> (et toutes leurs lignes dans <code>LigneCommande</code> !) seraient <strong>détruites automatiquement</strong>, faussant toute la comptabilité de la boutique. C'est pourquoi on privilégie <code>ON DELETE RESTRICT</code> sur les entités métier critiques.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Évolution de la table « Fournisseur »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>On suppose que TechStore ajoute la table suivante à sa base :</p>
+      <pre class="sql-block"><span class="kw">CREATE TABLE</span> Fournisseur (
+    idFourn <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+    nom     <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel     <span class="ty">VARCHAR(15)</span>
+);</pre>
+
+      <p>Écrivez les <strong>4 requêtes SQL</strong> permettant d'effectuer les modifications suivantes :</p>
+      <ol class="questions">
+        <li>Ajouter une colonne <code>matriculeFisc</code> de type <code>VARCHAR(20)</code> obligatoire et <strong>unique</strong>.</li>
+        <li>Agrandir la taille de la colonne <code>nom</code> à <code>60</code> caractères (en gardant <code>NOT NULL</code>).</li>
+        <li>Ajouter une colonne <code>delaiLivraison</code> (entier, valeur par défaut <code>3</code>) avec une contrainte vérifiant qu'il est compris entre <code>1</code> et <code>30</code> jours.</li>
+        <li>Renommer la colonne <code>tel</code> en <code>telephone</code> (<code>VARCHAR(20)</code>).</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes ALTER TABLE sur Fournisseur</span>
+        <pre class="sql-block"><span class="cm">-- 1. Ajouter matriculeFisc obligatoire et unique</span>
+<span class="kw">ALTER TABLE</span> Fournisseur <span class="kw">ADD</span> matriculeFisc <span class="ty">VARCHAR(20)</span> <span class="kw">NOT NULL UNIQUE</span>;
+
+<span class="cm">-- 2. Agrandir nom à 60 caractères</span>
+<span class="kw">ALTER TABLE</span> Fournisseur <span class="kw">MODIFY</span> nom <span class="ty">VARCHAR(60)</span> <span class="kw">NOT NULL</span>;
+
+<span class="cm">-- 3. Ajouter delaiLivraison avec DEFAULT et CHECK</span>
+<span class="kw">ALTER TABLE</span> Fournisseur <span class="kw">ADD</span> delaiLivraison <span class="ty">INT</span> <span class="kw">DEFAULT</span> 3;
+<span class="kw">ALTER TABLE</span> Fournisseur <span class="kw">ADD CONSTRAINT</span> chk_delai <span class="kw">CHECK</span> (delaiLivraison &gt;= 1 <span class="kw">AND</span> delaiLivraison &lt;= 30);
+
+<span class="cm">-- 4. Renommer tel en telephone</span>
+<span class="kw">ALTER TABLE</span> Fournisseur <span class="kw">CHANGE</span> tel telephone <span class="ty">VARCHAR(20)</span>;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Différence clé :</strong> Citez deux différences entre une contrainte <code>PRIMARY KEY</code> et une contrainte <code>UNIQUE</code>.
+        <div class="quiz-answer">Réponse : 1) Une table ne peut avoir qu'une seule PRIMARY KEY, mais plusieurs colonnes UNIQUE. 2) PRIMARY KEY interdit NULL, alors que UNIQUE autorise NULL (sauf si on ajoute NOT NULL).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Vrai ou Faux :</strong> « L'instruction <code>ALTER TABLE</code> efface les données déjà enregistrées dans la table. »
+        <div class="quiz-answer">Réponse : Faux — ALTER TABLE modifie uniquement la structure tout en conservant les données existantes (sauf si on utilise DROP COLUMN sur une colonne remplie).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Syntaxe :</strong> Quelle clause de <code>ALTER TABLE</code> utilise-t-on pour renommer une colonne : <code>MODIFY</code> ou <code>CHANGE</code> ?
+        <div class="quiz-answer">Réponse : CHANGE (en précisant l'ancien nom, le nouveau nom et le type).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Cascade :</strong> Que fait <code>ON DELETE CASCADE</code> sur la table <code>LigneCommande</code> lorsqu'on supprime la commande n°5 dans <code>Commande</code> ?
+        <div class="quiz-answer">Réponse : Le SGBDR supprime automatiquement toutes les lignes de LigneCommande dont numCmd vaut 5.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Sécurité :</strong> Quelle précaution simple évite qu'un script contenant <code>DROP TABLE Promotion;</code> ne plante si la table a déjà été supprimée ?
+        <div class="quiz-answer">Réponse : Écrire DROP TABLE IF EXISTS Promotion;.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

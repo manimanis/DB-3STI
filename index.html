@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module Bases de Données — Sommaire des 10 Séances (3e Info STI)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-meta">3e Année Sciences de l'Informatique (STI) — MariaDB / MySQL (phpMyAdmin)</div>
+      <h1>Module Bases de Données — Progression sur 10 Séances</h1>
+      <p>Supports de cours, travaux pratiques guidés, ateliers « Chasse aux pièges », corrigés en mode Professeur et évaluation de synthèse (20 heures au total).</p>
+    </div>
+  </header>
+
+  <main class="index-container">
+
+    <!-- Panneaux supérieurs : Mémento + Suivi -->
+    <section class="top-panels">
+      <div class="panel panel-memento">
+        <div>
+          <h2>Mémento SQL — Fiche de révision A4</h2>
+          <p>L'essentiel du programme en 1 feuille recto-verso prête à imprimer : LDD, LMD, SELECT, fonctions, GROUP BY, HAVING et jointures.</p>
+        </div>
+        <a class="btn-link" href="memento_sql.html">Ouvrir le Mémento →</a>
+      </div>
+
+      <div class="panel panel-progress">
+        <div class="progress-header">
+          <span>Avancement du module</span>
+          <span id="progressText">0 / 10 séances (0%)</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressFill" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-footer">
+          <span>Cochez chaque séance terminée en classe</span>
+          <button id="btnReset" class="btn-reset" type="button">Réinitialiser</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filtres par partie -->
+    <nav class="filter-bar" aria-label="Filtrer les séances par thème">
+      <span class="filter-label">Filtrer :</span>
+      <button class="filter-btn active" data-filter="all" type="button">Toutes (10)</button>
+      <button class="filter-btn" data-filter="model" type="button">Modélisation (S1–S2)</button>
+      <button class="filter-btn" data-filter="ldd" type="button">LDD — Structure (S3–S4)</button>
+      <button class="filter-btn" data-filter="lmd" type="button">LMD &amp; Requêtes (S5–S9)</button>
+      <button class="filter-btn" data-filter="eval" type="button">Évaluation (S10)</button>
+    </nav>
+
+    <!-- Grille des 10 séances -->
+    <section class="sessions-grid" id="sessionsGrid">
+
+      <!-- Séance 1 -->
+      <article class="card" data-cat="model" data-id="s01">
+        <div class="card-top">
+          <span class="session-num">Séance 1 • 2h</span>
+          <span class="tag-cat tag-model">Modélisation</span>
+        </div>
+        <h3>Entités, Attributs et Identifiants</h3>
+        <p>Rôle d'une BD/SGBD, entités, attributs élémentaires (atomicité), données calculées, domaines, occurrences et choix d'identifiant.</p>
+        <div class="card-context">Contextes : <strong>Pixel Zone</strong> &amp; <strong>QuickBite</strong></div>
+        <div class="card-actions">
+          <a class="open-link" href="seance01.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 2 -->
+      <article class="card" data-cat="model" data-id="s02">
+        <div class="card-top">
+          <span class="session-num">Séance 2 • 2h</span>
+          <span class="tag-cat tag-model">Modélisation</span>
+        </div>
+        <h3>Liens (1-N, N-N) et Modèle Relationnel</h3>
+        <p>Anomalies de redondance, passage aux tables, clés primaires (PK), clés étrangères (FK), tables d'association et intégrité référentielle.</p>
+        <div class="card-context">Contextes : <strong>Pixel Zone</strong> → Fil rouge <strong>TechStore</strong></div>
+        <div class="card-actions">
+          <a class="open-link" href="seance02.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 3 -->
+      <article class="card" data-cat="ldd" data-id="s03">
+        <div class="card-top">
+          <span class="session-num">Séance 3 • 2h</span>
+          <span class="tag-cat tag-ldd">LDD</span>
+        </div>
+        <h3>Création de la BD et des Tables</h3>
+        <p>Prise en main de phpMyAdmin, types SQL (<code>INT</code>, <code>VARCHAR</code>, <code>DECIMAL</code>, <code>DATE</code>, <code>ENUM</code>), <code>CREATE DATABASE</code>, <code>CREATE TABLE</code>, PK/FK, <code>NOT NULL</code>, <code>AUTO_INCREMENT</code>.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (<code>boutique_info</code>)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance03.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 4 -->
+      <article class="card" data-cat="ldd" data-id="s04">
+        <div class="card-top">
+          <span class="session-num">Séance 4 • 2h</span>
+          <span class="tag-cat tag-ldd">LDD Avancé</span>
+        </div>
+        <h3>Contraintes Avancées, ALTER &amp; CASCADE</h3>
+        <p>Contraintes <code>UNIQUE</code> et <code>CHECK</code>, évolution de tables avec <code>ALTER TABLE</code> (<code>ADD</code>, <code>MODIFY</code>, <code>CHANGE</code>, <code>DROP</code>), <code>DROP TABLE</code> et <code>ON DELETE CASCADE / RESTRICT</code>.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (<code>boutique_info</code>)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance04.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 5 -->
+      <article class="card" data-cat="lmd" data-id="s05">
+        <div class="card-top">
+          <span class="session-num">Séance 5 • 2h</span>
+          <span class="tag-cat tag-lmd">LMD</span>
+        </div>
+        <h3>Manipulation : INSERT, UPDATE, DELETE</h3>
+        <p>Insertion simple et multiple, mises à jour ciblées, suppressions, piège de l'oubli du <code>WHERE</code> et laboratoire d'erreurs sur clés étrangères.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (<code>boutique_info</code>)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance05.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 6 -->
+      <article class="card" data-cat="lmd" data-id="s06">
+        <div class="card-top">
+          <span class="session-num">Séance 6 • 2h</span>
+          <span class="tag-cat tag-lmd">SELECT 1/2</span>
+        </div>
+        <h3>Interrogation Simple, Motifs et Tri</h3>
+        <p>Projection, <code>DISTINCT</code>, <code>AS</code>, filtrage <code>WHERE</code>, <code>AND/OR/NOT</code>, <code>BETWEEN</code>, <code>IN</code>, <code>LIKE</code> (<code>%</code>, <code>_</code>), <code>IS NULL</code>, <code>ORDER BY</code> et <code>LIMIT</code>.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (12 requêtes)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance06.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 7 -->
+      <article class="card" data-cat="lmd" data-id="s07">
+        <div class="card-top">
+          <span class="session-num">Séance 7 • 2h</span>
+          <span class="tag-cat tag-lmd">SELECT 2/2</span>
+        </div>
+        <h3>Calculs, Fonctions Scalaires &amp; Agrégation</h3>
+        <p>Calculs arithmétiques (<code>ROUND</code>), chaînes (<code>CONCAT</code>, <code>UPPER</code>, <code>SUBSTRING</code>, <code>LENGTH</code>), dates (<code>YEAR</code>, <code>MONTH</code>, <code>CURDATE</code>, <code>DATEDIFF</code>) et agrégation (<code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>).</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (12 requêtes)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance07.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 8 -->
+      <article class="card" data-cat="lmd" data-id="s08">
+        <div class="card-top">
+          <span class="session-num">Séance 8 • 2h</span>
+          <span class="tag-cat tag-lmd">Regroupements</span>
+        </div>
+        <h3>GROUP BY, HAVING et WHERE vs HAVING</h3>
+        <p>Statistiques par groupe, règle d'or du <code>GROUP BY</code>, filtrage de groupes avec <code>HAVING</code> et pipeline d'exécution logique.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (10 requêtes)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance08.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 9 -->
+      <article class="card" data-cat="lmd" data-id="s09">
+        <div class="card-top">
+          <span class="session-num">Séance 9 • 2h</span>
+          <span class="tag-cat tag-lmd">Multi-tables</span>
+        </div>
+        <h3>Jointures Implicites via WHERE</h3>
+        <p>Piège du produit cartésien, alias de tables, règle des <em>N − 1</em> jointures sur 2, 3 et 4 tables, combinaison avec <code>GROUP BY</code> et <code>HAVING</code>.</p>
+        <div class="card-context">Fil rouge : <strong>TechStore</strong> (10 requêtes)</div>
+        <div class="card-actions">
+          <a class="open-link" href="seance09.html">Ouvrir la fiche →</a>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+      <!-- Séance 10 -->
+      <article class="card" data-cat="eval" data-id="s10">
+        <div class="card-top">
+          <span class="session-num">Séance 10 • 2h</span>
+          <span class="tag-cat tag-eval">Évaluation / 20</span>
+        </div>
+        <h3>Devoir Pratique de Synthèse (2 Sujets)</h3>
+        <p>Sujet complet sur 20 points avec barème et corrigé (Modélisation, LDD, LMD, fonctions, agrégation et jointures implicites). Deux variantes au choix :</p>
+        <div style="display:flex; flex-direction:column; gap:6px; margin: 4px 0;">
+          <div class="card-context" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Sujet A : <strong>FitZone</strong> (<code>fitzone_db</code>)</span>
+            <a class="open-link" href="seance10_sujet_a_fitzone.sql" download style="font-size:0.8rem; color:var(--corr); text-decoration:none;">📥 fitzone.sql</a>
+          </div>
+          <div class="card-context" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Sujet B : <strong>TunisiTrip</strong> (<code>tunisitrip_db</code>)</span>
+            <a class="open-link" href="seance10_sujet_b_tunisitrip.sql" download style="font-size:0.8rem; color:var(--corr); text-decoration:none;">📥 tunisitrip.sql</a>
+          </div>
+        </div>
+        <div class="card-actions">
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <a class="open-link" href="seance10.html">Sujet A (FitZone) →</a>
+            <a class="open-link" href="seance10_sujet_b.html" style="color:var(--accent);">Sujet B (TunisiTrip) →</a>
+          </div>
+          <label class="check-label"><input type="checkbox" class="session-check"> Faite</label>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Section Devoirs de Contrôle (1h) -->
+    <section class="dc-section" style="margin-top: 40px;">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 1.35rem; margin: 0 0 6px; color: var(--text);">📝 Devoirs de Contrôle n°1 (1h — /20)</h2>
+        <p style="margin: 0; font-size: 0.92rem; color: var(--muted);">Évaluations sommatives sur table / machine (Séances 1 à 5 : Modélisation conceptuelle &amp; relationnelle, LDD et manipulation élémentaire).</p>
+      </div>
+      <div class="sessions-grid">
+        <!-- DC1 Sujet A -->
+        <article class="card dc-card" style="border-left: 4px solid #f59e0b;">
+          <div class="card-top">
+            <span class="session-num" style="background:#fffbeb; color:#b45309; border-color:#fde68a;">DC1 • Sujet A</span>
+            <span class="tag-cat" style="background:#fef3c7; color:#92400e;">1h • 20 points</span>
+          </div>
+          <h3>Complexe « Takwira Arena »</h3>
+          <p>Questions de cours, modélisation relationnelle (Equipe, Terrain, Reservation), script LDD sous phpMyAdmin et requêtes de manipulation.</p>
+          <div class="card-context" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Base : <code>takwira_db</code></span>
+            <a class="open-link" href="devoir_controle_1_sujet_a_takwira.sql" download style="font-size:0.8rem; color:var(--corr); text-decoration:none;">📥 takwira_db.sql</a>
+          </div>
+          <div class="card-actions">
+            <a class="open-link" href="devoir_controle_1_sujet_a.html">Ouvrir le Sujet A (Takwira) →</a>
+          </div>
+        </article>
+
+        <!-- DC1 Sujet B -->
+        <article class="card dc-card" style="border-left: 4px solid #0f766e;">
+          <div class="card-top">
+            <span class="session-num" style="background:#f0fdfa; color:#0f766e; border-color:#99f6e4;">DC1 • Sujet B</span>
+            <span class="tag-cat" style="background:#ccfbf1; color:#115e59;">1h • 20 points</span>
+          </div>
+          <h3>Service « VoltRide »</h3>
+          <p>Questions de cours, modélisation relationnelle (Abonne, Trottinette, Trajet), script LDD sous phpMyAdmin et requêtes de manipulation.</p>
+          <div class="card-context" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Base : <code>voltride_db</code></span>
+            <a class="open-link" href="devoir_controle_1_sujet_b_voltride.sql" download style="font-size:0.8rem; color:var(--corr); text-decoration:none;">📥 voltride_db.sql</a>
+          </div>
+          <div class="card-actions">
+            <a class="open-link" href="devoir_controle_1_sujet_b.html">Ouvrir le Sujet B (VoltRide) →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div>Arborescence du module : <code>index.html</code>, <code>memento_sql.html</code>, <code>seance01.html</code> … <code>seance10.html</code>, <code>seance10_sujet_b.html</code>, <code>devoir_controle_1_sujet_a.html</code>, <code>devoir_controle_1_sujet_b.html</code> (+ 4 scripts SQL)</div>
+    <div>3e Année Sciences de l'Informatique (STI) — Module Bases de Données</div>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "bd_3info_progress_v1";
+    const cards = Array.from(document.querySelectorAll("#sessionsGrid .card"));
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
+    const btnReset = document.getElementById("btnReset");
+
+    // Charger l'état sauvegardé
+    function loadProgress() {
+      let saved = {};
+      try {
+        saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch (e) {
+        saved = {};
+      }
+      cards.forEach((card) => {
+        const id = card.dataset.id;
+        const cb = card.querySelector(".session-check");
+        const isDone = Boolean(saved[id]);
+        cb.checked = isDone;
+        card.classList.toggle("done", isDone);
+      });
+      updateBar();
+    }
+
+    // Sauvegarder et actualiser la barre
+    function saveProgress() {
+      const data = {};
+      cards.forEach((card) => {
+        const cb = card.querySelector(".session-check");
+        data[card.dataset.id] = cb.checked;
+        card.classList.toggle("done", cb.checked);
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateBar();
+    }
+
+    function updateBar() {
+      const total = cards.length;
+      const done = cards.filter((c) => c.querySelector(".session-check").checked).length;
+      const pct = Math.round((done / total) * 100);
+      progressText.textContent = `${done} / ${total} séances (${pct}%)`;
+      progressFill.style.width = `${pct}%`;
+    }
+
+    cards.forEach((card) => {
+      card.querySelector(".session-check").addEventListener("change", saveProgress);
+    });
+
+    btnReset.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      loadProgress();
+    });
+
+    // Filtrage par catégorie
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const filter = btn.dataset.filter;
+        cards.forEach((card) => {
+          const match = filter === "all" || card.dataset.cat === filter;
+          card.classList.toggle("hidden", !match);
+        });
+      });
+    });
+
+    loadProgress();
+  </script>
+</body>
+</html>

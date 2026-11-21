@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mémento SQL — Fiche de révision 3e Info (Recto-Verso A4)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils écran -->
+  <div class="toolbar">
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <a href="index.html" style="color: #93c5fd; text-decoration: none; font-size: 0.86rem; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(147, 197, 253, 0.35); background: rgba(30, 58, 138, 0.35); display: inline-flex; align-items: center; gap: 5px;">← Sommaire</a>
+      <div>
+        <div class="toolbar-title">Mémento SQL — 3e Année Sciences de l'Informatique (STI)</div>
+      <div class="toolbar-hint">Format calibré : 1 feuille A4 recto-verso (activez « Graphiques d'arrière-plan » à l'impression)</div>
+    </div>
+    <button class="btn-print" type="button" onclick="window.print()">Imprimer Recto-Verso / PDF</button>
+  </div>
+
+  <!-- ==================== PAGE 1 : RECTO ==================== -->
+  <section class="sheet sheet-recto">
+    <header class="sheet-header">
+      <h1>MÉMENTO SQL — Modélisation, LDD &amp; LMD</h1>
+      <span class="face-tag">Recto — 1 / 2</span>
+    </header>
+
+    <!-- Bloc 1 & 2 : Modélisation + Types -->
+    <div class="grid-2">
+      <div class="box box-primary">
+        <h2>1. Modèle Relationnel &amp; Intégrité</h2>
+        <ul>
+          <li><strong>Entité → Table</strong> | <strong>Attribut → Champ</strong> | <strong>Occurrence → Ligne</strong>.</li>
+          <li><strong>Clé primaire (PK)</strong> <code>#champ</code> : <strong>unique</strong> et <strong>non nulle</strong>.</li>
+          <li><strong>Clé étrangère (FK)</strong> <code>champ#</code> : référence la PK d'une table mère (<strong>même type</strong> obligatoire).</li>
+          <li><strong>Lien <code>1-N</code> :</strong> la PK côté <code>1</code> migre comme FK dans la table côté <code>N</code>.</li>
+          <li><strong>Lien <code>N-N</code> :</strong> création d'une <strong>table d'association</strong> ayant une PK composée des deux FK + attributs propres.</li>
+          <li><strong>Règles d'or :</strong> attributs <strong>atomiques</strong> (pas de <code>nomComplet</code>) et <strong>non calculés</strong> (stocker <code>dateNaiss</code>, pas <code>age</code>).</li>
+          <li><strong>3 Intégrités :</strong> <em>Domaine</em> (type/bornes), <em>Entité</em> (PK unique/non nulle), <em>Référentielle</em> (toute FK existe dans la table mère).</li>
+        </ul>
+      </div>
+
+      <div class="box box-accent">
+        <h2>2. Types de Données (MariaDB / MySQL)</h2>
+        <table>
+          <thead>
+            <tr><th>Type SQL</th><th>Usage &amp; exemple</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>INT</code></td><td>Entier (identifiants, stocks, âges) : <code>15</code></td></tr>
+            <tr><td><code>DECIMAL(M,D)</code></td><td>Décimal exact (prix : <em>M</em> chiffres dont <em>D</em> décimales) : <code>DECIMAL(10,3)</code> → <code>2450.000</code></td></tr>
+            <tr><td><code>VARCHAR(N)</code></td><td>Texte variable jusqu'à <em>N</em> car. (noms, codes, <strong>tél.</strong>)</td></tr>
+            <tr><td><code>DATE</code></td><td>Date ISO <code>'AAAA-MM-JJ'</code> : <code>'2026-02-14'</code></td></tr>
+            <tr><td><code>ENUM('a','b')</code></td><td>Liste fermée de valeurs autorisées</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px; color:#475569; margin-top:4px;">
+          <strong>Schéma fil rouge (TechStore) :</strong><br>
+          <code>Client(#idClt, nom, prenom, ville, tel, dateInscr)</code><br>
+          <code>Produit(#refProd, designation, categorie, prixUnit, qteStock)</code><br>
+          <code>Commande(#numCmd, dateCmd, idClt#)</code><br>
+          <code>LigneCommande(#numCmd#, #refProd#, qteCmd)</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 3 : LDD Création -->
+    <div class="box box-primary">
+      <h2>3. LDD — Création de la Base et des Tables (CREATE)</h2>
+      <div class="grid-2-wide">
+        <pre><span class="kw">DROP DATABASE IF EXISTS</span> boutique_info;
+<span class="kw">CREATE DATABASE</span> boutique_info;
+<span class="kw">USE</span> boutique_info;
+
+<span class="kw">CREATE TABLE</span> Produit (
+  refProd     <span class="ty">VARCHAR(10)</span>,
+  designation <span class="ty">VARCHAR(80)</span>   <span class="kw">NOT NULL</span>,
+  prixUnit    <span class="ty">DECIMAL(10,3)</span> <span class="kw">NOT NULL</span>,
+  qteStock    <span class="ty">INT</span>           <span class="kw">NOT NULL DEFAULT</span> 0,
+  <span class="kw">CONSTRAINT</span> pk_prod  <span class="kw">PRIMARY KEY</span> (refProd),
+  <span class="kw">CONSTRAINT</span> chk_prix <span class="kw">CHECK</span> (prixUnit &gt; 0)
+);
+
+<span class="kw">CREATE TABLE</span> LigneCommande (
+  numCmd  <span class="ty">INT</span>,
+  refProd <span class="ty">VARCHAR(10)</span>,
+  qteCmd  <span class="ty">INT</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> pk_lig   <span class="kw">PRIMARY KEY</span> (numCmd, refProd),
+  <span class="kw">CONSTRAINT</span> fk_l_cmd <span class="kw">FOREIGN KEY</span> (numCmd)
+    <span class="kw">REFERENCES</span> Commande(numCmd) <span class="kw">ON DELETE CASCADE</span>,
+  <span class="kw">CONSTRAINT</span> fk_l_prd <span class="kw">FOREIGN KEY</span> (refProd)
+    <span class="kw">REFERENCES</span> Produit(refProd) <span class="kw">ON DELETE RESTRICT</span>
+);</pre>
+        <div>
+          <strong>Contraintes essentielles :</strong>
+          <ul>
+            <li><code>NOT NULL</code> : champ obligatoire.</li>
+            <li><code>AUTO_INCREMENT</code> : numérotation auto (colonne <code>INT</code> PK uniquement).</li>
+            <li><code>DEFAULT val</code> : valeur par défaut.</li>
+            <li><code>UNIQUE</code> : pas de doublon (autorise <code>NULL</code>, plusieurs possibles/table).</li>
+            <li><code>CHECK (cond)</code> : règle métier.</li>
+          </ul>
+          <strong>Options de clé étrangère :</strong>
+          <ul>
+            <li><code>ON DELETE RESTRICT</code> <em>(défaut)</em> : bloque la suppression mère si des lignes filles existent.</li>
+            <li><code>ON DELETE CASCADE</code> : supprime automatiquement les lignes filles liées.</li>
+            <li><code>ON UPDATE CASCADE</code> : répercute la modif. de la PK mère sur la FK fille.</li>
+          </ul>
+          <div style="font-size:11px; margin-top:4px;"><strong>Utilitaires :</strong> <code>SHOW TABLES;</code> | <code>DESCRIBE Table;</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 4 : LDD Modification & Suppression -->
+    <div class="box box-accent">
+      <h2>4. LDD — Modification (ALTER TABLE) &amp; Suppression (DROP TABLE)</h2>
+      <div class="grid-2">
+        <table>
+          <thead>
+            <tr><th>Action</th><th>Syntaxe MariaDB / MySQL</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Ajouter colonne</td><td><code>ALTER TABLE T ADD col TYPE [cstr];</code></td></tr>
+            <tr><td>Modifier type/cstr</td><td><code>ALTER TABLE T MODIFY col TYPE [cstr];</code></td></tr>
+            <tr><td>Renommer colonne</td><td><code>ALTER TABLE T CHANGE anc nouv TYPE;</code></td></tr>
+            <tr><td>Supprimer colonne</td><td><code>ALTER TABLE T DROP COLUMN col;</code></td></tr>
+            <tr><td>Ajouter contrainte</td><td><code>ALTER TABLE T ADD CONSTRAINT nom ...;</code></td></tr>
+            <tr><td>Supprimer une FK</td><td><code>ALTER TABLE T DROP FOREIGN KEY nom;</code></td></tr>
+          </tbody>
+        </table>
+        <div>
+          <pre><span class="cm">-- Exemples d'évolution</span>
+<span class="kw">ALTER TABLE</span> Client <span class="kw">ADD</span> email <span class="ty">VARCHAR(80)</span> <span class="kw">UNIQUE</span>;
+<span class="kw">ALTER TABLE</span> Client <span class="kw">MODIFY</span> tel <span class="ty">VARCHAR(20)</span>;
+<span class="kw">ALTER TABLE</span> Produit <span class="kw">ADD CONSTRAINT</span> chk_st <span class="kw">CHECK</span> (qteStock &gt;= 0);
+
+<span class="cm">-- Suppression de table (filles AVANT mères !)</span>
+<span class="kw">DROP TABLE IF EXISTS</span> LigneCommande;
+<span class="kw">DROP TABLE IF EXISTS</span> Commande;</pre>
+          <div style="font-size:11px;"><strong>Ordre strict :</strong> <code>CREATE</code> / <code>INSERT</code> → Mères puis Filles | <code>DROP</code> / <code>DELETE</code> → Filles puis Mères.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 5 : LMD Manipulation -->
+    <div class="box box-primary">
+      <h2>5. LMD — Manipulation des Données (INSERT, UPDATE, DELETE)</h2>
+      <div class="grid-2">
+        <pre><span class="cm">-- Insertion simple</span>
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr)
+<span class="kw">VALUES</span> (<span class="str">'Ben Salem'</span>, <span class="str">'Sami'</span>, <span class="str">'Sousse'</span>, <span class="str">'22451200'</span>, <span class="str">'2025-09-12'</span>);
+
+<span class="cm">-- Insertion multiple (NULL sans apostrophes)</span>
+<span class="kw">INSERT INTO</span> Client (nom, prenom, ville, tel, dateInscr) <span class="kw">VALUES</span>
+(<span class="str">'Trabelsi'</span>, <span class="str">'Ines'</span>, <span class="str">'Tunis'</span>,  <span class="str">'55890123'</span>, <span class="str">'2025-10-03'</span>),
+(<span class="str">'Mansouri'</span>, <span class="str">'Aya'</span>,  <span class="str">'Sousse'</span>, <span class="kw">NULL</span>,       <span class="str">'2026-01-15'</span>);</pre>
+        <div>
+          <pre><span class="cm">-- Mise à jour (virgules dans SET, JAMAIS AND)</span>
+<span class="kw">UPDATE</span> Produit
+<span class="kw">SET</span> prixUnit = prixUnit * 1.10, qteStock = qteStock + 5
+<span class="kw">WHERE</span> categorie = <span class="str">'Accessoire'</span>;
+
+<span class="cm">-- Suppression ciblée</span>
+<span class="kw">DELETE FROM</span> Produit <span class="kw">WHERE</span> refProd = <span class="str">'P06'</span>;</pre>
+          <div class="box-danger">
+            <strong>DANGER :</strong> Sans <code>WHERE</code>, <code>UPDATE</code> modifie <strong>toute la table</strong> et <code>DELETE</code> la <strong>vide totalement</strong> !
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      <span>3e Année Sciences de l'Informatique (STI) — Programme Bases de Données</span>
+      <span>Mémento SQL — Page 1/2 (Recto)</span>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE 2 : VERSO ==================== -->
+  <section class="sheet sheet-verso">
+    <header class="sheet-header">
+      <h1>MÉMENTO SQL — SELECT, Fonctions, Groupes &amp; Jointures</h1>
+      <span class="face-tag">Verso — 2 / 2</span>
+    </header>
+
+    <!-- Bloc 6 : Structure SELECT & Opérateurs WHERE -->
+    <div class="grid-2-wide">
+      <div class="box box-primary">
+        <h2>6. Structure SELECT &amp; Ordre des Clauses</h2>
+        <pre><span class="kw">SELECT</span> [<span class="kw">DISTINCT</span>] col1 [<span class="kw">AS</span> alias1], expr ...
+<span class="kw">FROM</span> Table1 [T1], Table2 [T2]
+[<span class="kw">WHERE</span> condition_lignes_et_jointures]
+[<span class="kw">GROUP BY</span> col_groupe1, ...]
+[<span class="kw">HAVING</span> condition_sur_les_groupes]
+[<span class="kw">ORDER BY</span> col1 [<span class="kw">ASC</span>|<span class="kw">DESC</span>], col2 [<span class="kw">ASC</span>|<span class="kw">DESC</span>]]
+[<span class="kw">LIMIT</span> n];</pre>
+        <div class="pill-row">
+          <span>Exécution :</span>
+          <span class="pill">1.FROM</span><span class="arrow">→</span>
+          <span class="pill">2.WHERE</span><span class="arrow">→</span>
+          <span class="pill">3.GROUP BY</span><span class="arrow">→</span>
+          <span class="pill">4.HAVING</span><span class="arrow">→</span>
+          <span class="pill">5.SELECT</span><span class="arrow">→</span>
+          <span class="pill">6.ORDER BY</span>
+        </div>
+      </div>
+
+      <div class="box box-accent">
+        <h2>7. Opérateurs de Filtrage (WHERE)</h2>
+        <table>
+          <tbody>
+            <tr><td><strong>Comparaison</strong></td><td><code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td></tr>
+            <tr><td><strong>Logiques</strong></td><td><code>AND</code>, <code>OR</code>, <code>NOT</code> <em>(<code>AND</code> prioritaire → parenthèses !)</em></td></tr>
+            <tr><td><strong>Intervalle</strong></td><td><code>[NOT] BETWEEN v1 AND v2</code> <em>(bornes incluses)</em></td></tr>
+            <tr><td><strong>Liste</strong></td><td><code>[NOT] IN (v1, v2, ...)</code></td></tr>
+            <tr><td><strong>Motif texte</strong></td><td><code>[NOT] LIKE 'motif'</code> : <code>%</code> = 0..n car. | <code>_</code> = 1 car.</td></tr>
+            <tr><td><strong>Valeur NULL</strong></td><td><code>IS NULL</code> / <code>IS NOT NULL</code> <em>(jamais <code>= NULL</code>)</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bloc 8 : Fonctions scalaires -->
+    <div class="box box-primary">
+      <h2>8. Calculs &amp; Fonctions Scalaires (1 résultat par ligne)</h2>
+      <div class="grid-2">
+        <table>
+          <thead><tr><th>Chaînes &amp; Arithmétique</th><th>Effet / Exemple</th></tr></thead>
+          <tbody>
+            <tr><td><code>ROUND(val, d)</code></td><td>Arrondit à <em>d</em> décimales : <code>ROUND(prix*1.19, 3)</code></td></tr>
+            <tr><td><code>CONCAT(c1, c2, ...)</code></td><td>Assemble : <code>CONCAT(prenom, ' ', nom)</code></td></tr>
+            <tr><td><code>UPPER(c)</code> / <code>LOWER(c)</code></td><td>Majuscules / minuscules</td></tr>
+            <tr><td><code>CHAR_LENGTH(c)</code></td><td>Nombre de caractères (ou <code>LENGTH(c)</code> en octets)</td></tr>
+            <tr><td><code>SUBSTRING(c, pos, n)</code></td><td>Extrait <em>n</em> car. dès <em>pos</em> <strong>(indice démarre à 1 !)</strong></td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>Dates</th><th>Effet / Exemple</th></tr></thead>
+          <tbody>
+            <tr><td><code>YEAR(d)</code>, <code>MONTH(d)</code>, <code>DAY(d)</code></td><td>Extrait l'année, le mois (1-12) ou le jour (1-31)</td></tr>
+            <tr><td><code>CURDATE()</code></td><td>Date actuelle du serveur (<code>AAAA-MM-JJ</code>)</td></tr>
+            <tr><td><code>DATEDIFF(d1, d2)</code></td><td>Nombre de jours <code>d1 - d2</code> (date récente en 1er)</td></tr>
+            <tr><td><code>ADDDATE(d, n)</code></td><td>Ajoute <em>n</em> jours à la date <em>d</em></td></tr>
+            <tr><td><code>DATE_FORMAT(d, '%d/%m/%Y')</code></td><td>Formate une date à l'affichage</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bloc 9 : Agrégation + GROUP BY / HAVING -->
+    <div class="box box-accent">
+      <h2>9. Agrégation, Regroupements (GROUP BY) &amp; WHERE vs HAVING</h2>
+      <div class="grid-2">
+        <div>
+          <table>
+            <thead><tr><th>Fonction d'agrégation</th><th>Rôle (face à <code>NULL</code>)</th></tr></thead>
+            <tbody>
+              <tr><td><code>COUNT(*)</code></td><td>Nb total de lignes (inclut <code>NULL</code>)</td></tr>
+              <tr><td><code>COUNT(col)</code></td><td>Nb de valeurs non nulles (ignore <code>NULL</code>)</td></tr>
+              <tr><td><code>COUNT(DISTINCT col)</code></td><td>Nb de valeurs distinctes non nulles</td></tr>
+              <tr><td><code>SUM(col)</code> / <code>AVG(col)</code></td><td>Somme / Moyenne (ignorent <code>NULL</code>)</td></tr>
+              <tr><td><code>MIN(col)</code> / <code>MAX(col)</code></td><td>Minimum / Maximum (nombres, dates, textes)</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:11px; margin-top:3px;"><strong>Règle d'or <code>GROUP BY</code> :</strong> toute colonne de <code>SELECT</code> hors agrégation doit figurer dans <code>GROUP BY</code>.</div>
+        </div>
+        <div>
+          <table>
+            <thead><tr><th>Critère</th><th><code>WHERE</code></th><th><code>HAVING</code></th></tr></thead>
+            <tbody>
+              <tr><td><strong>Moment</strong></td><td><strong>Avant</strong> <code>GROUP BY</code></td><td><strong>Après</strong> <code>GROUP BY</code></td></tr>
+              <tr><td><strong>Cible</strong></td><td>Filtre les <strong>lignes</strong></td><td>Filtre les <strong>groupes</strong></td></tr>
+              <tr><td><strong>Agrégation</strong></td><td><strong>Interdite</strong></td><td><strong>Autorisée</strong></td></tr>
+              <tr><td><strong>Exemple</strong></td><td><code>WHERE qteStock &gt; 0</code></td><td><code>HAVING AVG(prix) &gt; 200</code></td></tr>
+            </tbody>
+          </table>
+          <pre><span class="cm">-- Catégories ayant >= 2 produits en stock</span>
+<span class="kw">SELECT</span> categorie, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb <span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> qteStock &gt; 0 <span class="kw">GROUP BY</span> categorie <span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 10 : Jointures implicites via WHERE -->
+    <div class="box box-primary">
+      <h2>10. Jointures Implicites via WHERE (2, 3 et 4 tables)</h2>
+      <div class="grid-2-wide">
+        <pre><span class="cm">-- Exemple complet : 4 tables → 3 conditions de jointure + WHERE + GROUP BY + HAVING</span>
+<span class="cm">-- Clients de Sousse ayant dépensé >= 2500 DT au total</span>
+<span class="kw">SELECT</span> C.nom, C.prenom,
+       <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> Cmd.numCmd) <span class="kw">AS</span> Nb_Cmd,
+       <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) <span class="kw">AS</span> CA_Client
+<span class="kw">FROM</span> Client C, Commande Cmd, LigneCommande L, Produit P
+<span class="kw">WHERE</span> C.idClt = Cmd.idClt          <span class="cm">-- Jointure 1 (Client ↔ Commande)</span>
+  <span class="kw">AND</span> Cmd.numCmd = L.numCmd        <span class="cm">-- Jointure 2 (Commande ↔ LigneCommande)</span>
+  <span class="kw">AND</span> L.refProd = P.refProd        <span class="cm">-- Jointure 3 (LigneCommande ↔ Produit)</span>
+  <span class="kw">AND</span> C.ville = <span class="str">'Sousse'</span>           <span class="cm">-- Filtre métier</span>
+<span class="kw">GROUP BY</span> C.idClt, C.nom, C.prenom
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(P.prixUnit * L.qteCmd) &gt;= 2500
+<span class="kw">ORDER BY</span> CA_Client <span class="kw">DESC</span>;</pre>
+        <div>
+          <strong>Méthode infaillible en 4 étapes :</strong>
+          <ul>
+            <li><strong>1. Lister les tables</strong> nécessaires dans <code>FROM</code> avec des <strong>alias courts</strong> (<code>Client C, Commande Cmd</code>).</li>
+            <li><strong>2. Règle des <em>N − 1</em> jointures :</strong> pour <em>N</em> tables, écrire exactement <strong><em>N − 1</em> égalités <code>PK = FK</code></strong> dans <code>WHERE</code> pour éviter le produit cartésien.</li>
+            <li><strong>3. Préfixer</strong> toute colonne présente dans plusieurs tables (<code>C.idClt</code>, <code>Cmd.numCmd</code>).</li>
+            <li><strong>4. Compter sans doublon :</strong> utiliser <code>COUNT(DISTINCT Cmd.numCmd)</code> si une jointure multiplie les lignes.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 11 : Pièges d'examen -->
+    <div class="box box-warn">
+      <h2>11. Top 6 des Pièges à Éviter en Devoir</h2>
+      <ul class="checklist">
+        <li><strong><code>= NULL</code> interdit :</strong> toujours écrire <code>IS NULL</code> ou <code>IS NOT NULL</code>.</li>
+        <li><strong><code>AND</code> prioritaire sur <code>OR</code> :</strong> encadrer les <code>OR</code> par des <code>(...)</code>.</li>
+        <li><strong>Agrégation dans <code>WHERE</code> :</strong> interdite → utiliser <code>HAVING</code> après <code>GROUP BY</code>.</li>
+        <li><strong>Oubli d'une jointure :</strong> provoque un produit cartésien (vérifier <em>N − 1</em> liens).</li>
+        <li><strong><code>UPDATE</code> avec <code>AND</code> :</strong> dans <code>SET</code>, séparer les colonnes par une virgule <code>,</code>.</li>
+        <li><strong>Alias dans <code>WHERE</code> :</strong> interdit (exécuté avant <code>SELECT</code>) ; autorisé dans <code>ORDER BY</code>.</li>
+      </ul>
+    </div>
+
+    <div class="footer-note">
+      <span>3e Année Sciences de l'Informatique (STI) — Programme Bases de Données</span>
+      <span>Mémento SQL — Page 2/2 (Verso)</span>
+    </div>
+  </section>
+
+</body>
+</html>

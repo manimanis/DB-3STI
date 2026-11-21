@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 7 — Calculs, Fonctions Scalaires et Agrégation SQL (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+        <a class="btn-back" href="index.html">← Sommaire</a>
+        <a class="btn-nav" href="seance06.html">← S6</a>
+        <div class="toolbar-title">3e Info (STI) — Séance 7 : Calculs, Fonctions et Agrégation (2h)</div>
+        <a class="btn-nav" href="seance08.html">S8 →</a>
+      </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Module : Bases de Données — Séance 7 (2 heures)</span>
+      </div>
+      <h1>Calculs, Fonctions Scalaires (Chaînes / Dates) et Agrégation (SELECT 2/2)</h1>
+      <p class="subtitle">Objectifs : Produire des colonnes calculées, formater des chaînes et des dates en SQL, et obtenir des statistiques globales grâce aux fonctions d'agrégation.</p>
+    </header>
+
+    <!-- Découpage horaire (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Scénario pédagogique calibré (120 minutes)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Horaire</th>
+            <th>Durée</th>
+            <th>Phase</th>
+            <th>Objectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0h00 – 0h15</td>
+            <td>15 min</td>
+            <td><strong>1. Accroche (Données dérivées)</strong></td>
+            <td>Rappeler la règle de la séance 1 (ne pas stocker les données calculables) et montrer comment SQL les calcule à la volée.</td>
+          </tr>
+          <tr>
+            <td>0h15 – 0h40</td>
+            <td>25 min</td>
+            <td><strong>2. Synthèse de cours</strong></td>
+            <td>Présenter les 4 familles : arithmétique (<code>ROUND</code>), chaînes (<code>CONCAT</code>, <code>UPPER</code>, <code>LENGTH</code>, <code>SUBSTRING</code>), dates (<code>YEAR</code>, <code>MONTH</code>, <code>CURDATE</code>, <code>DATEDIFF</code>) et agrégation (<code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>).</td>
+          </tr>
+          <tr>
+            <td>0h40 – 1h20</td>
+            <td>40 min</td>
+            <td><strong>3. TP guidé (12 requêtes)</strong></td>
+            <td>Exécuter 12 requêtes graduelles de calcul et de reporting sur <code>boutique_info</code> dans phpMyAdmin.</td>
+          </tr>
+          <tr>
+            <td>1h20 – 1h35</td>
+            <td>15 min</td>
+            <td><strong>4. Chasse aux pièges</strong></td>
+            <td>Analyser 3 pièges classiques : <code>COUNT(*)</code> vs <code>COUNT(col)</code>, ordre des arguments dans <code>DATEDIFF</code>, et agrégation interdite dans <code>WHERE</code>.</td>
+          </tr>
+          <tr>
+            <td>1h35 – 1h50</td>
+            <td>15 min</td>
+            <td><strong>5. Exercice autonome</strong></td>
+            <td>Rédiger 4 requêtes de synthèse sur feuille à partir de <code>Client</code>, <code>Produit</code> et <code>LigneCommande</code>.</td>
+          </tr>
+          <tr>
+            <td>1h50 – 2h00</td>
+            <td>10 min</td>
+            <td><strong>6. Quiz éclair</strong></td>
+            <td>Valider les comportements face à <code>NULL</code>, l'indexation SQL (base 1) et les fonctions d'agrégation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase">
+      <h2>
+        <span>1. Accroche : Comment afficher ce qui n'est pas stocké ?</span>
+        <span class="badge-time">15 min — Oral</span>
+      </h2>
+      <p>
+        En séance 1, nous avons appris à ne pas stocker d'attributs calculables (comme le montant TTC, la valeur d'un stock ou l'ancienneté d'un client). Pourtant, le gérant de <strong>TechStore</strong> a besoin chaque semaine d'un tableau de bord contenant :
+      </p>
+      <div class="context-box">
+        <ul style="margin:0; padding-left:20px;">
+          <li>Le <strong>prix TTC</strong> (TVA 19%) et la <strong>valeur en stock</strong> (<code>prixUnit * qteStock</code>) de chaque article.</li>
+          <li>Le nom complet formaté des clients (ex. : <code>BEN SALEM Sami</code>) et le nombre de jours écoulés depuis leur inscription.</li>
+          <li>Des <strong>indicateurs globaux</strong> : nombre total de clients, prix moyen du catalogue, article le moins cher et valeur totale de l'entrepôt.</li>
+        </ul>
+      </div>
+      <p><strong>Principe clé :</strong> Les <em>fonctions scalaires</em> (arithmétiques, chaînes, dates) produisent <strong>un résultat par ligne</strong>, tandis que les <em>fonctions d'agrégation</em> résument <strong>plusieurs lignes en une seule valeur</strong>.</p>
+    <div class="solution">
+        <span class="solution-label">Guide Enseignant — Distinction Scalaire vs Agrégation</span>
+        <ul style="margin:0; padding-left:18px;">
+          <li><strong>1. Calculs par ligne (Expressions scalaires) :</strong>
+            <ul>
+              <li><em>Prix TTC (19%) :</em> <code>ROUND(prixUnit * 1.19, 3) AS Prix_TTC</code></li>
+              <li><em>Valeur du stock :</em> <code>(prixUnit * qteStock) AS Valeur_Stock</code></li>
+              <li><em>Formatage du nom :</em> <code>CONCAT(UPPER(nom), ' ', prenom) AS Client</code></li>
+              <li><em>Ancienneté en jours :</em> <code>DATEDIFF(CURRENT_DATE, dateInscr) AS Jours_Inscrit</code></li>
+              <li><em>Règle :</em> Le nombre de lignes résultantes est exactement égal au nombre de lignes de la table de départ.</li>
+            </ul>
+          </li>
+          <li><strong>2. Indicateurs globaux (Fonctions d'agrégation) :</strong>
+            <ul>
+              <li><code>COUNT(*)</code> (total clients/produits), <code>AVG(prixUnit)</code> (prix moyen), <code>MIN(prixUnit)</code> / <code>MAX(prixUnit)</code>, <code>SUM(prixUnit * qteStock)</code> (valeur globale du stock).</li>
+              <li><em>Règle :</em> Ces fonctions résument l'ensemble de la table en <strong>une seule ligne unique de synthèse</strong>.</li>
+            </ul>
+          </li>
+          <li><strong>Piège classique à signaler :</strong> Il est strictement interdit d'écrire <code>SELECT designation, AVG(prixUnit) FROM Produit;</code> car on ne peut pas mélanger sur une même ligne une colonne détaillée et une agrégation globale sans clause <code>GROUP BY</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase">
+      <h2>
+        <span>2. Synthèse : Les 4 familles d'expressions et fonctions SQL</span>
+        <span class="badge-time">25 min — Trace écrite</span>
+      </h2>
+
+      <div class="course-box">
+        <h3 style="margin-top:0;">A. Expressions arithmétiques et arrondi</h3>
+        <p style="margin-top:0;">On peut combiner des colonnes numériques avec <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> directement dans <code>SELECT</code> ou <code>WHERE</code>, et arrondir avec <code>ROUND(valeur, nbDecimales)</code> :</p>
+        <pre class="sql-block"><span class="kw">SELECT</span> designation, <span class="fn">ROUND</span>(prixUnit * 1.19, 3) <span class="kw">AS</span> Prix_TTC <span class="kw">FROM</span> Produit;</pre>
+
+        <h3>B. Fonctions sur les chaînes de caractères</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Fonction</th>
+              <th>Rôle</th>
+              <th>Exemple et résultat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>CONCAT(ch1, ch2, ...)</code></td>
+              <td>Assemble plusieurs chaînes en une seule.</td>
+              <td><code>CONCAT(prenom, ' ', nom)</code> → <code>'Sami Ben Salem'</code></td>
+            </tr>
+            <tr>
+              <td><code>UPPER(ch)</code> / <code>LOWER(ch)</code></td>
+              <td>Convertit en MAJUSCULES ou en minuscules.</td>
+              <td><code>UPPER('Sousse')</code> → <code>'SOUSSE'</code></td>
+            </tr>
+            <tr>
+              <td><code>LENGTH(ch)</code> / <code>CHAR_LENGTH(ch)</code></td>
+              <td>Longueur en octets (<code>LENGTH</code>) ou en caractères (<code>CHAR_LENGTH</code>).</td>
+              <td><code>CHAR_LENGTH('Sami')</code> → <code>4</code></td>
+            </tr>
+            <tr>
+              <td><code>SUBSTRING(ch, pos, nb)</code></td>
+              <td>Extrait <em>nb</em> caractères à partir de la position <em>pos</em>. <strong>Attention : en SQL, les indices commencent à 1 !</strong></td>
+              <td><code>SUBSTRING('Sousse', 1, 3)</code> → <code>'Sou'</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>C. Fonctions sur les dates</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Fonction</th>
+              <th>Rôle</th>
+              <th>Exemple</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>YEAR(d)</code>, <code>MONTH(d)</code>, <code>DAY(d)</code></td>
+              <td>Extrait l'année, le mois (1–12) ou le jour (1–31) d'une date.</td>
+              <td><code>YEAR('2026-02-14')</code> → <code>2026</code> ; <code>MONTH(...)</code> → <code>2</code></td>
+            </tr>
+            <tr>
+              <td><code>CURDATE()</code></td>
+              <td>Renvoie la date du jour du serveur (<code>AAAA-MM-JJ</code>).</td>
+              <td><code>CURDATE()</code> → <code>'2026-11-21'</code></td>
+            </tr>
+            <tr>
+              <td><code>DATEDIFF(d1, d2)</code></td>
+              <td>Calcule le nombre de jours entre deux dates : <strong><code>d1 - d2</code></strong> (mettre la date la plus récente en premier).</td>
+              <td><code>DATEDIFF(CURDATE(), dateInscr)</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>D. Fonctions d'agrégation (Statistiques globales)</h3>
+<div class="diagram-wrap">
+  <svg viewBox="0 0 760 155" width="100%" height="155" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Différence entre Fonctions Scalaires et Fonctions d'Agrégation">
+    <!-- Panneau Gauche : Fonctions Scalaires -->
+    <rect x="15" y="10" width="350" height="135" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+    <text x="190" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">1. FONCTIONS SCALAIRES (Ligne par ligne)</text>
+    <text x="190" y="43" text-anchor="middle" font-size="8" fill="#475569">Exemples : UPPER(), ROUND(), DATEDIFF(), YEAR()</text>
+
+    <!-- N entrées -> N sorties -->
+    <g transform="translate(35, 52)">
+      <rect x="0" y="0" width="85" height="18" rx="3" fill="#ffffff" stroke="#93c5fd"/>
+      <text x="42" y="13" text-anchor="middle" font-size="8" fill="#1e293b">'ben ali'</text>
+      <line x1="88" y1="9" x2="155" y2="9" stroke="#1d4ed8" stroke-width="1.5"/>
+      <polygon points="158,9 152,6 152,12" fill="#1d4ed8"/>
+      <rect x="160" y="0" width="85" height="18" rx="3" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="202" y="13" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8">'BEN ALI'</text>
+
+      <rect x="0" y="24" width="85" height="18" rx="3" fill="#ffffff" stroke="#93c5fd"/>
+      <text x="42" y="37" text-anchor="middle" font-size="8" fill="#1e293b">'trabelsi'</text>
+      <line x1="88" y1="33" x2="155" y2="33" stroke="#1d4ed8" stroke-width="1.5"/>
+      <polygon points="158,33 152,30 152,36" fill="#1d4ed8"/>
+      <rect x="160" y="24" width="85" height="18" rx="3" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="202" y="37" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8">'TRABELSI'</text>
+
+      <rect x="0" y="48" width="85" height="18" rx="3" fill="#ffffff" stroke="#93c5fd"/>
+      <text x="42" y="61" text-anchor="middle" font-size="8" fill="#1e293b">'gharbi'</text>
+      <line x1="88" y1="57" x2="155" y2="57" stroke="#1d4ed8" stroke-width="1.5"/>
+      <polygon points="158,57 152,54 152,60" fill="#1d4ed8"/>
+      <rect x="160" y="48" width="85" height="18" rx="3" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="202" y="61" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8">'GHARBI'</text>
+    </g>
+    <text x="190" y="133" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1e40af">Résultat : N valeurs en entrée ➔ N valeurs transformées en sortie</text>
+
+    <!-- Panneau Droit : Fonctions d'Agrégation -->
+    <rect x="395" y="10" width="350" height="135" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+    <text x="570" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">2. FONCTIONS D'AGRÉGATION (Synthèse)</text>
+    <text x="570" y="43" text-anchor="middle" font-size="8" fill="#475569">Exemples : COUNT(), SUM(), AVG(), MIN(), MAX()</text>
+
+    <!-- N entrées -> 1 sortie -->
+    <g transform="translate(420, 52)">
+      <rect x="0" y="0" width="70" height="66" rx="4" fill="#ffffff" stroke="#86efac"/>
+      <text x="35" y="18" text-anchor="middle" font-size="8.5" fill="#1e293b">150.00 DT</text>
+      <text x="35" y="38" text-anchor="middle" font-size="8.5" fill="#1e293b">220.00 DT</text>
+      <text x="35" y="58" text-anchor="middle" font-size="8.5" fill="#1e293b">80.00 DT</text>
+
+      <path d="M 75 14 L 140 33" stroke="#15803d" stroke-width="1.5"/>
+      <path d="M 75 33 L 140 33" stroke="#15803d" stroke-width="1.5"/>
+      <path d="M 75 52 L 140 33" stroke="#15803d" stroke-width="1.5"/>
+      <polygon points="144,33 138,29 138,37" fill="#15803d"/>
+
+      <rect x="146" y="12" width="130" height="42" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+      <text x="211" y="28" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">SUM(prixTotal)</text>
+      <text x="211" y="44" text-anchor="middle" font-size="10.5" font-weight="700" fill="#166534">450.00 DT</text>
+    </g>
+    <text x="570" y="133" text-anchor="middle" font-size="8.5" font-weight="600" fill="#166534">Résultat : N lignes condensées en 1 SEULE valeur de synthèse</text>
+  </svg>
+  <div class="diagram-caption">Figure 7.1 — Différence fondamentale : transformation individuelle (scalaire) versus calcul global (agrégation).</div>
+</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Fonction</th>
+              <th>Rôle</th>
+              <th>Comportement face à <code>NULL</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>COUNT(*)</code></td>
+              <td>Compte le nombre total de lignes.</td>
+              <td>Compte <strong>toutes</strong> les lignes (même si des champs sont <code>NULL</code>).</td>
+            </tr>
+            <tr>
+              <td><code>COUNT(col)</code></td>
+              <td>Compte les lignes où <code>col</code> est renseignée.</td>
+              <td><strong>Ignore</strong> les valeurs <code>NULL</code>.</td>
+            </tr>
+            <tr>
+              <td><code>COUNT(DISTINCT col)</code></td>
+              <td>Compte le nombre de valeurs différentes.</td>
+              <td>Ignore <code>NULL</code> et les doublons.</td>
+            </tr>
+            <tr>
+              <td><code>SUM(col)</code> / <code>AVG(col)</code></td>
+              <td>Somme / Moyenne d'une colonne numérique.</td>
+              <td>Ignore <code>NULL</code>.</td>
+            </tr>
+            <tr>
+              <td><code>MIN(col)</code> / <code>MAX(col)</code></td>
+              <td>Valeur minimale / maximale (nombres, dates ou textes).</td>
+              <td>Ignore <code>NULL</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase page-break">
+      <h2>
+        <span>3. TP guidé : 12 requêtes de calcul et de reporting sur « boutique_info »</span>
+        <span class="badge-time">40 min — Sur machine</span>
+      </h2>
+
+      <div class="schema-list">
+        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
+        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+      </div>
+
+      <p>Dans phpMyAdmin (base <code>boutique_info</code>), écrivez et exécutez les <strong>12 requêtes</strong> suivantes :</p>
+
+      <ol class="questions">
+        <li><strong>Calcul de TVA :</strong> Afficher la désignation, le prix HT (<code>prixUnit</code>) et le prix TTC arrondi à 3 décimales (TVA = 19%, alias <code>Prix_TTC</code>) de tous les produits.</li>
+        <li><strong>Valeur par article :</strong> Afficher la référence, la désignation et la valeur du stock (<code>prixUnit * qteStock</code>, alias <code>Valeur_Stock</code>) pour les produits disponibles (<code>qteStock &gt; 0</code>), triés par valeur décroissante.</li>
+        <li><strong>Chaînes (<code>CONCAT</code> + <code>UPPER</code>) :</strong> Afficher l'identifiant et le nom complet de chaque client sous la forme <code>BEN SALEM Sami</code> (nom en majuscules, espace, prénom), sous l'alias <code>Nom_Complet</code>.</li>
+        <li><strong>Chaînes (<code>SUBSTRING</code> + <code>UPPER</code>) :</strong> Générer un code court pour chaque client composé des <strong>3 premières lettres de sa ville en majuscules</strong> suivies d'un tiret et de son <code>idClt</code> (ex. : <code>SOU-1</code>), sous l'alias <code>Code_Client</code>.</li>
+        <li><strong>Chaînes (<code>LENGTH</code>) :</strong> Afficher les produits dont la désignation dépasse <code>25</code> caractères (afficher aussi la longueur sous l'alias <code>Nb_Car</code>).</li>
+        <li><strong>Dates (<code>YEAR</code>) :</strong> Afficher le nom, le prénom et la date d'inscription des clients inscrits durant l'année <code>2025</code>.</li>
+        <li><strong>Dates (<code>MONTH</code>) :</strong> Afficher toutes les commandes passées au mois de <strong>février 2026</strong>.</li>
+        <li><strong>Dates (<code>CURDATE</code> + <code>DATEDIFF</code>) :</strong> Afficher le nom, le prénom, la date d'inscription et le nombre de jours d'ancienneté (alias <code>Anciennete_Jours</code>) de chaque client à la date d'aujourd'hui.</li>
+        <li><strong>Agrégation (<code>COUNT</code>) :</strong> Afficher en une seule requête : le nombre total de clients (<code>Nb_Clients</code>), le nombre de clients ayant un téléphone (<code>Nb_Avec_Tel</code>) et le nombre de villes différentes (<code>Nb_Villes</code>).</li>
+        <li><strong>Agrégation (<code>MIN</code>, <code>MAX</code>, <code>AVG</code>) :</strong> Afficher le prix minimum, le prix maximum et le prix moyen (arrondi à 3 décimales) des produits du catalogue.</li>
+        <li><strong>Agrégation (<code>SUM</code>) :</strong> Afficher le nombre total d'articles en entrepôt (<code>Total_Unites</code>) et la valeur financière totale du stock de la boutique (<code>Valeur_Totale_DT</code>).</li>
+        <li><strong>Agrégation filtrée (<code>WHERE</code> + <code>SUM</code>) :</strong> Afficher le nombre total de produits commandés (somme de <code>qteCmd</code> dans <code>LigneCommande</code>) pour la référence <code>'P03'</code>.</li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Les 12 requêtes (Calculs, Fonctions et Agrégation)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Prix HT et Prix TTC (TVA 19%)</span>
+<span class="kw">SELECT</span> designation, prixUnit, <span class="fn">ROUND</span>(prixUnit * 1.19, 3) <span class="kw">AS</span> Prix_TTC
+<span class="kw">FROM</span> Produit;
+
+<span class="cm">-- 2. Valeur du stock par article disponible</span>
+<span class="kw">SELECT</span> refProd, designation, (prixUnit * qteStock) <span class="kw">AS</span> Valeur_Stock
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> qteStock &gt; 0
+<span class="kw">ORDER BY</span> Valeur_Stock <span class="kw">DESC</span>;
+
+<span class="cm">-- 3. Nom complet formaté (NOM Prénom)</span>
+<span class="kw">SELECT</span> idClt, <span class="fn">CONCAT</span>(<span class="fn">UPPER</span>(nom), <span class="str">' '</span>, prenom) <span class="kw">AS</span> Nom_Complet
+<span class="kw">FROM</span> Client;
+
+<span class="cm">-- 4. Code client (3 premières lettres de la ville + idClt)</span>
+<span class="kw">SELECT</span> idClt, <span class="fn">CONCAT</span>(<span class="fn">UPPER</span>(<span class="fn">SUBSTRING</span>(ville, 1, 3)), <span class="str">'-'</span>, idClt) <span class="kw">AS</span> Code_Client
+<span class="kw">FROM</span> Client;
+
+<span class="cm">-- 5. Désignations dépassant 25 caractères</span>
+<span class="kw">SELECT</span> refProd, designation, <span class="fn">CHAR_LENGTH</span>(designation) <span class="kw">AS</span> Nb_Car
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> <span class="fn">CHAR_LENGTH</span>(designation) &gt; 25;
+
+<span class="cm">-- 6. Clients inscrits en 2025 (3 lignes : Sami, Ines, Mehdi)</span>
+<span class="kw">SELECT</span> nom, prenom, dateInscr
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dateInscr) = 2025;
+
+<span class="cm">-- 7. Commandes de février 2026 (2 lignes : numCmd 2 et 3)</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> Commande
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dateCmd) = 2026 <span class="kw">AND</span> <span class="fn">MONTH</span>(dateCmd) = 2;
+
+<span class="cm">-- 8. Ancienneté des clients en jours</span>
+<span class="kw">SELECT</span> nom, prenom, dateInscr, <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), dateInscr) <span class="kw">AS</span> Anciennete_Jours
+<span class="kw">FROM</span> Client;
+
+<span class="cm">-- 9. Comptages sur Client (6 clients | 5 avec tél | 4 villes distinctes)</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Clients,
+       <span class="fn">COUNT</span>(tel) <span class="kw">AS</span> Nb_Avec_Tel,
+       <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> ville) <span class="kw">AS</span> Nb_Villes
+<span class="kw">FROM</span> Client;
+
+<span class="cm">-- 10. Statistiques de prix (MIN=38.000 | MAX=2450.000 | AVG=727.313)</span>
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(prixUnit) <span class="kw">AS</span> Prix_Min,
+       <span class="fn">MAX</span>(prixUnit) <span class="kw">AS</span> Prix_Max,
+       <span class="fn">ROUND</span>(<span class="fn">AVG</span>(prixUnit), 3) <span class="kw">AS</span> Prix_Moyen
+<span class="kw">FROM</span> Produit;
+
+<span class="cm">-- 11. Stock global (96 unités | 44432.500 DT)</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(qteStock) <span class="kw">AS</span> Total_Unites,
+       <span class="fn">SUM</span>(prixUnit * qteStock) <span class="kw">AS</span> Valeur_Totale_DT
+<span class="kw">FROM</span> Produit;
+
+<span class="cm">-- 12. Quantité totale commandée pour P03 (2 + 3 + 1 = 6)</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(qteCmd) <span class="kw">AS</span> Qte_Totale_P03
+<span class="kw">FROM</span> LigneCommande
+<span class="kw">WHERE</span> refProd = <span class="str">'P03'</span>;</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>4. Atelier « Chasse aux pièges »</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <div class="trap-card">
+        <h3>Piège 1 — Différence entre COUNT(*) et COUNT(tel)</h3>
+        <p>Sur la table <code>Client</code>, <code>SELECT COUNT(*) FROM Client;</code> renvoie <strong>6</strong>, alors que <code>SELECT COUNT(tel) FROM Client;</code> renvoie <strong>5</strong>. Pourquoi ces deux comptages donnent-ils un résultat différent ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 1</span>
+          La cliente <code>Aya Mansouri</code> a <code>tel = NULL</code>. <code>COUNT(*)</code> compte toutes les lignes de la table, tandis que <code>COUNT(colonne)</code> ignore les lignes où cette colonne vaut <code>NULL</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 2 — Résultat négatif avec DATEDIFF</h3>
+        <pre class="sql-block"><span class="kw">SELECT</span> nom, <span class="fn">DATEDIFF</span>(dateInscr, <span class="fn">CURDATE</span>()) <span class="kw">AS</span> Anciennete <span class="kw">FROM</span> Client;</pre>
+        <p><strong>Question :</strong> Pourquoi cette requête affiche-t-elle des nombres négatifs (ex. <code>-435</code>) ? Comment corriger ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 2</span>
+          <code>DATEDIFF(d1, d2)</code> calcule toujours <code>d1 - d2</code>. Si la date ancienne est placée en premier, le résultat est négatif. Il faut inverser : <code>DATEDIFF(CURDATE(), dateInscr)</code>.
+        </div>
+      </div>
+
+      <div class="trap-card">
+        <h3>Piège 3 — Fonction d'agrégation dans WHERE</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut afficher le produit le plus cher</span>
+<span class="kw">SELECT</span> designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> prixUnit = <span class="fn">MAX</span>(prixUnit);</pre>
+        <p><strong>Question :</strong> MariaDB rejette cette requête avec l'erreur <code>Invalid use of group function</code>. Pourquoi est-ce interdit dans <code>WHERE</code>, et comment obtenir le produit le plus cher avec ce que nous connaissons déjà ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 3</span>
+          La clause <code>WHERE</code> filtre ligne par ligne <em>avant</em> le calcul des agrégations : elle ne peut donc jamais contenir <code>MAX</code>, <code>MIN</code>, <code>AVG</code>, <code>SUM</code> ou <code>COUNT</code>.<br>
+          <strong>Solution simple (Séance 6) :</strong> <code>SELECT designation, prixUnit FROM Produit ORDER BY prixUnit DESC LIMIT 1;</code> (ou une sous-requête plus tard : <code>WHERE prixUnit = (SELECT MAX(prixUnit) FROM Produit)</code>).
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase">
+      <h2>
+        <span>5. Application en autonomie : Reporting express</span>
+        <span class="badge-time">15 min</span>
+      </h2>
+
+      <p>Écrivez sur feuille les <strong>4 requêtes SQL</strong> répondant aux demandes suivantes du gérant de TechStore :</p>
+      <ol class="questions">
+        <li>Afficher le prix moyen (arrondi à 2 décimales) uniquement pour les produits de la catégorie <code>'Ordinateur'</code>.</li>
+        <li>Afficher la date de la première commande (alias <code>Premiere_Cmd</code>) et la date de la dernière commande (alias <code>Derniere_Cmd</code>) enregistrées dans <code>Commande</code>.</li>
+        <li>Afficher les clients dont le nom de famille contient au moins <code>8</code> caractères, en affichant leur nom en majuscules et la longueur de leur nom.</li>
+        <li>Afficher le nombre de commandes passées par le client n°<code>1</code> durant le premier trimestre (mois 1, 2 ou 3) de l'année <code>2026</code>.</li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Requêtes en autonomie</span>
+        <pre class="sql-block"><span class="cm">-- 1. Prix moyen des ordinateurs (2170.00)</span>
+<span class="kw">SELECT</span> <span class="fn">ROUND</span>(<span class="fn">AVG</span>(prixUnit), 2) <span class="kw">AS</span> Prix_Moyen_PC
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> categorie = <span class="str">'Ordinateur'</span>;
+
+<span class="cm">-- 2. Première et dernière date de commande</span>
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(dateCmd) <span class="kw">AS</span> Premiere_Cmd,
+       <span class="fn">MAX</span>(dateCmd) <span class="kw">AS</span> Derniere_Cmd
+<span class="kw">FROM</span> Commande;
+
+<span class="cm">-- 3. Clients dont le nom comporte au moins 8 caractères</span>
+<span class="kw">SELECT</span> <span class="fn">UPPER</span>(nom) <span class="kw">AS</span> Nom_Maj, <span class="fn">CHAR_LENGTH</span>(nom) <span class="kw">AS</span> Longueur
+<span class="kw">FROM</span> Client
+<span class="kw">WHERE</span> <span class="fn">CHAR_LENGTH</span>(nom) &gt;= 8;
+
+<span class="cm">-- 4. Nombre de commandes du client 1 au T1 2026 (2 commandes : n°1 et n°3)</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Cmd_T1
+<span class="kw">FROM</span> Commande
+<span class="kw">WHERE</span> idClt = 1
+  <span class="kw">AND</span> <span class="fn">YEAR</span>(dateCmd) = 2026
+  <span class="kw">AND</span> <span class="fn">MONTH</span>(dateCmd) <span class="kw">IN</span> (1, 2, 3);</pre>
+      </div>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase">
+      <h2>
+        <span>6. Quiz éclair de clôture</span>
+        <span class="badge-time">10 min</span>
+      </h2>
+
+      <div class="quiz-item">
+        <strong>1. Indexation SQL :</strong> Que renvoie l'expression <code>SUBSTRING('TechStore', 5, 5)</code> ?
+        <div class="quiz-answer">Réponse : 'Store' — En SQL, les positions commencent à 1 (le 5e caractère est 'S', puis on prend 5 caractères).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>2. Agrégation et NULL :</strong> Si une table contient 4 notes : <code>10</code>, <code>14</code>, <code>18</code> et <code>NULL</code>, que renvoie <code>AVG(note)</code> : <code>10.5</code> ou <code>14</code> ?
+        <div class="quiz-answer">Réponse : 14 — AVG ignore la valeur NULL et divise la somme (42) par 3, pas par 4.</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>3. Comparaison de dates :</strong> Quelle fonction d'agrégation permet de trouver la date d'inscription la plus <strong>récente</strong> dans la table <code>Client</code> ?
+        <div class="quiz-answer">Réponse : MAX(dateInscr).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>4. Syntaxe :</strong> Peut-on utiliser un alias défini dans <code>SELECT</code> (ex. <code>Prix_TTC</code>) dans la clause <code>ORDER BY</code> ? Et dans la clause <code>WHERE</code> ?
+        <div class="quiz-answer">Réponse : Oui dans ORDER BY (exécuté après SELECT), mais Non dans WHERE (exécuté avant SELECT : il faut répéter le calcul dans WHERE).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>5. Transition vers la séance 8 :</strong> Aujourd'hui, <code>SELECT COUNT(*) FROM Produit;</code> nous donne le nombre total de produits. Que nous manque-t-il pour afficher le nombre de produits <em>par catégorie</em> en une seule requête ?
+        <div class="quiz-answer">Réponse : La clause GROUP BY (objet de la séance 8 !).</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>

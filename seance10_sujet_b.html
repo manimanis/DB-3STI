@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Séance 10 (Sujet B) — Évaluation Pratique de Synthèse : Bases de Données (3e Info)</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Barre d'outils enseignant -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a class="btn-back" href="index.html">← Sommaire</a>
+      <a class="btn-nav" href="seance09.html">← S9</a>
+      <span class="toolbar-title">3e Info (STI) — Séance 10 : Évaluation Pratique (Sujet B — TunisiTrip)</span>
+      <a class="btn-variant" href="seance10.html">Sujet A (FitZone) ⇄</a>
+      <a class="btn-sql" href="seance10_sujet_b_tunisitrip.sql" download>📥 Script tunisitrip_db.sql</a>
+    </div>
+    <div class="toolbar-actions">
+      <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; consignes prof</button>
+      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- En-tête -->
+    <header class="sheet-header">
+      <div class="meta-row">
+        <span>3e Année Sciences de l'Informatique (STI)</span>
+        <span>Devoir de Synthèse / TP Noté — Durée : 2 heures</span>
+      </div>
+      <h1>
+        <span>Évaluation Pratique — Agence d'Excursions « TunisiTrip »</span>
+        <span class="badge-variant">Sujet B</span>
+      </h1>
+      <p class="subtitle">Compétences évaluées : Modélisation relationnelle, LDD (CREATE / ALTER), LMD (INSERT / UPDATE / DELETE), agrégation (GROUP BY / HAVING) et jointures implicites via WHERE.</p>
+    </header>
+
+    <!-- Cartouche élève -->
+    <div class="student-box">
+      <div><strong>Nom &amp; Prénom :</strong> ......................................................</div>
+      <div><strong>Classe :</strong> 3e Info ......</div>
+      <div class="note-box">Note : .......... / 20</div>
+    </div>
+
+    <!-- Barème détaillé & organisation (visible si activé) -->
+    <section class="teacher-plan">
+      <h3 style="margin-top:0;">Barème détaillé (20 points) et déroulement conseillé (120 min) — Parallèle au Sujet A</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Partie</th>
+            <th>Durée conseillée</th>
+            <th>Détail du barème</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Partie 1 — Modélisation</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1 pt) + Q2 (1 pt) + Q3 (1,5 pt) + Q4 (0,5 pt)</td>
+            <td><strong>4 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 2 — LDD (SQL)</strong></td>
+            <td>30 min</td>
+            <td>Q1 (0,5 pt) + Q2 (1 pt) + Q3 (1,5 pt) + Q4 (1 pt) + Q5 (1 pt)</td>
+            <td><strong>5 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 3 — LMD (Manipulation)</strong></td>
+            <td>20 min</td>
+            <td>Q1 (1 pt) + Q2 (1 pt) + Q3 (1 pt)</td>
+            <td><strong>3 pts</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Partie 4 — Interrogation (SELECT)</strong></td>
+            <td>50 min</td>
+            <td>Q1 (0,5) + Q2 (0,5) + Q3 (1) + Q4 (1) + Q5 (1) + Q6 (1) + Q7 (1,5) + Q8 (1,5)</td>
+            <td><strong>8 pts</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;"><strong>TOTAL GÉNÉRAL</strong></td>
+            <td><strong>20 pts</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:0; font-size:0.88rem;"><strong>Conseil de passation sur machine :</strong> Faire enregistrer toutes les requêtes SQL des parties 2, 3 et 4 dans un seul fichier <code>nom_prenom_tunisitrip.sql</code> commenté et testé sous phpMyAdmin.</p>
+    </section>
+
+    <!-- CONTEXTE -->
+    <div class="diagram-wrap">
+  <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de tunisitrip_db">
+    <defs>
+      <marker id="arr-tt-1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arr-tt-2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f766e"/>
+      </marker>
+    </defs>
+
+    <!-- Table Guide -->
+    <g transform="translate(15, 12)">
+      <rect x="0" y="0" width="155" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="155" height="26" rx="6" fill="#eff6ff"/>
+      <text x="77" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Guide</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idGuide (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomGuide (VARCHAR)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">langue (VARCHAR)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">tel (VARCHAR 15)</text>
+    </g>
+
+    <!-- Table Excursion -->
+    <g transform="translate(200, 12)">
+      <rect x="0" y="0" width="160" height="115" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f0fdfa"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Excursion</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># codeExc (VARCHAR 10)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">titre (VARCHAR)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">tarif (DECIMAL)</text>
+      <text x="10" y="100" font-size="9" font-weight="700" fill="#1d4ed8">idGuide# (FK) ➔</text>
+    </g>
+
+    <!-- Table Reservation -->
+    <g transform="translate(390, 12)">
+      <rect x="0" y="0" width="165" height="115" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
+      <rect x="0" y="0" width="165" height="26" rx="6" fill="#fffbeb"/>
+      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">Reservation</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># idVoy# (FK)</text>
+      <text x="10" y="64" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># codeExc# (FK)</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">dateRes (DATE)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">montantPaye (DECIMAL)</text>
+    </g>
+
+    <!-- Table Voyageur -->
+    <g transform="translate(585, 12)">
+      <rect x="0" y="0" width="160" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f5f3ff"/>
+      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Voyageur</text>
+      <text x="10" y="44" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># idVoy (INT AUTO)</text>
+      <text x="10" y="64" font-size="8.5" fill="#334155">nomVoy, prenomVoy</text>
+      <text x="10" y="82" font-size="8.5" fill="#334155">dateNaiss (DATE)</text>
+      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR)</text>
+    </g>
+
+    <!-- Liens FK -->
+    <path d="M 200 100 C 185 100, 185 44, 175 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-tt-1)"/>
+    <path d="M 390 64 C 375 64, 375 44, 365 44" fill="none" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr-tt-2)"/>
+    <path d="M 555 44 C 565 44, 570 44, 580 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-tt-1)"/>
+
+    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">Schéma relationnel complet de tunisitrip_db : 4 tables reliées par 3 clés étrangères.</text>
+  </svg>
+  <div class="diagram-caption">Figure 10B.1 — Schéma Relationnel complet de la base TunisiTrip (Guide, Excursion, Reservation, Voyageur).</div>
+</div>
+<div class="context-box">
+      <strong>Présentation du domaine — Agence d'Excursions « TunisiTrip » :</strong><br>
+      L'agence de tourisme local <strong>TunisiTrip</strong> souhaite informatiser la gestion de ses <strong>guides</strong>, de ses <strong>excursions</strong>, de ses <strong>voyageurs</strong> et de leurs <strong>réservations</strong> selon les règles de gestion suivantes :
+      <ul style="margin:6px 0 0; padding-left:20px;">
+        <li>Chaque <strong>Guide</strong> possède un identifiant numérique auto-incrémenté (<code>idGuide</code>), un nom (<code>nomGuide</code>), une langue principale (<code>langue</code>) et un numéro de téléphone (<code>tel</code>).</li>
+        <li>Chaque <strong>Excursion</strong> est identifiée par un code (<code>codeExc</code>, ex. <code>EXC01</code>), possède un titre (<code>titre</code>), une destination (<code>destination</code>) et un prix par personne en DT (<code>prixPers</code>). Un guide peut encadrer <em>plusieurs</em> excursions, mais chaque excursion est encadrée par <em>un seul</em> guide.</li>
+        <li>Chaque <strong>Voyageur</strong> est identifié par un numéro auto-incrémenté (<code>idVoy</code>) et décrit par son nom, son prénom, sa ville, son téléphone (facultatif) et sa date de naissance (<code>dateNaiss</code>).</li>
+        <li>Un voyageur peut réserver <em>plusieurs</em> excursions, et une même excursion accueille <em>plusieurs</em> voyageurs. Chaque <strong>Réservation</strong> précise la date de réservation (<code>dateRes</code>) et le nombre de places réservées (<code>nbPlaces</code>).</li>
+      </ul>
+    </div>
+
+    <!-- PARTIE 1 -->
+    <section class="phase">
+      <h2>
+        <span>Partie 1 : Modélisation Relationnelle</span>
+        <span class="badge-pts">4 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Guide</strong> et <strong>Excursion</strong>, puis entre <strong>Voyageur</strong> et <strong>Excursion</strong>. Justifiez brièvement. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Un stagiaire propose d'ajouter la colonne <code>montantTotal</code> dans la table <code>Reservation</code> (en plus de <code>prixPers</code> et <code>nbPlaces</code>), et de regrouper la rue, le code postal et la ville dans un seul champ <code>adresseComplete</code>. Quelle erreur de conception commet-il dans chacun des deux cas ? <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Écrivez la <strong>représentation textuelle complète</strong> des <strong>4 tables</strong> de la base <code>tunisitrip_db</code> (<code>Guide</code>, <code>Excursion</code>, <code>Voyageur</code>, <code>Reservation</code>) en utilisant la notation <code>#clePrimaire</code> et <code>cleEtrangere#</code>. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          Dans quel ordre doit-on supprimer ces 4 tables avec <code>DROP TABLE</code> pour respecter l'intégrité référentielle ? <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 1 (4 pts)</span>
+        <p><strong>1. Types de liens (1 pt) :</strong><br>
+          • <code>Guide</code> — <code>Excursion</code> : <strong>1-N</strong> (un guide encadre plusieurs excursions, une excursion a un seul guide).<br>
+          • <code>Voyageur</code> — <code>Excursion</code> : <strong>N-N</strong> (un voyageur peut réserver plusieurs excursions, et réciproquement), d'où la table d'association <code>Reservation</code>.
+        </p>
+        <p><strong>2. Erreurs de conception (1 pt) :</strong><br>
+          • <code>montantTotal</code> est un <strong>attribut calculé (dérivé)</strong> à partir de <code>prixPers * nbPlaces</code> : il crée un risque d'incohérence si le tarif ou le nombre de places change.<br>
+          • <code>adresseComplete</code> viole la règle d'<strong>atomicité</strong> (attribut composé qui empêche de filtrer ou regrouper facilement par ville ou code postal).
+        </p>
+        <p><strong>3. Modèle relationnel (1,5 pt) :</strong></p>
+        <div class="schema-list">
+          <strong>Guide</strong> (<span class="pk">#idGuide</span>, nomGuide, langue, tel)<br>
+          <strong>Excursion</strong> (<span class="pk">#codeExc</span>, titre, destination, prixPers, <span class="fk">idGuide#</span>)<br>
+          <strong>Voyageur</strong> (<span class="pk">#idVoy</span>, nom, prenom, ville, tel, dateNaiss)<br>
+          <strong>Reservation</strong> (<span class="pk">#idVoy#</span>, <span class="pk">#codeExc#</span>, dateRes, nbPlaces)
+        </div>
+        <p style="margin-bottom:0;"><strong>4. Ordre de suppression (0,5 pt) :</strong> Filles avant mères : <code>Reservation</code> d'abord, puis <code>Excursion</code>, et enfin <code>Guide</code> et <code>Voyageur</code>.</p>
+      </div>
+    </section>
+
+    <!-- PARTIE 2 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Partie 2 : Langage de Définition de Données (LDD)</span>
+        <span class="badge-pts">5 points</span>
+      </h2>
+
+      <ol class="questions">
+        <li>
+          Créez la base de données <code>tunisitrip_db</code> (après suppression si elle existe déjà) et sélectionnez-la. <span class="q-pts">(0,5 pt)</span>
+        </li>
+        <li>
+          Créez les tables mères <code>Guide</code> et <code>Voyageur</code> : <span class="q-pts">(1 pt)</span>
+          <ul>
+            <li><code>Guide</code> : <code>idGuide</code> (entier auto-incrémenté, PK), <code>nomGuide</code> (VARCHAR 40, obligatoire), <code>langue</code> (VARCHAR 30, obligatoire), <code>tel</code> (VARCHAR 15, obligatoire et <strong>unique</strong>).</li>
+            <li><code>Voyageur</code> : <code>idVoy</code> (entier auto-incrémenté, PK), <code>nom</code> (VARCHAR 40, obligatoire), <code>prenom</code> (VARCHAR 40, obligatoire), <code>ville</code> (VARCHAR 30, obligatoire), <code>tel</code> (VARCHAR 15, facultatif), <code>dateNaiss</code> (DATE, obligatoire).</li>
+          </ul>
+        </li>
+        <li>
+          Créez la table <code>Excursion</code> : <code>codeExc</code> (VARCHAR 10, PK), <code>titre</code> (VARCHAR 50, obligatoire), <code>destination</code> (VARCHAR 30, obligatoire), <code>prixPers</code> (DECIMAL(8,3), obligatoire et <strong>strictement positif</strong>), <code>idGuide</code> (clé étrangère vers <code>Guide</code> avec <code>ON DELETE RESTRICT</code> et <code>ON UPDATE CASCADE</code>). <span class="q-pts">(1,5 pt)</span>
+        </li>
+        <li>
+          Créez la table <code>Reservation</code> : <code>idVoy</code>, <code>codeExc</code>, <code>dateRes</code> (DATE, obligatoire), <code>nbPlaces</code> (INT, valeur par défaut <code>1</code>, compris entre <code>1</code> et <code>10</code> inclus). Déclarez la <strong>clé primaire composée</strong> et les <strong>deux clés étrangères</strong> (avec <code>ON DELETE CASCADE</code> vers <code>Voyageur</code> et <code>ON DELETE RESTRICT</code> vers <code>Excursion</code>). <span class="q-pts">(1 pt)</span>
+        </li>
+        <li>
+          <strong>Évolution de structure (<code>ALTER TABLE</code>) :</strong> <span class="q-pts">(1 pt)</span>
+          <ul>
+            <li>Ajoutez à la table <code>Voyageur</code> une colonne <code>email</code> (<code>VARCHAR(80)</code>, facultative et unique).</li>
+            <li>Agrandissez la colonne <code>destination</code> de la table <code>Excursion</code> à <code>VARCHAR(50)</code> (toujours obligatoire).</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="answer-lines">
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+        <div class="answer-line"></div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 2 : Script LDD complet (5 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Base de données (0,5 pt)</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> tunisitrip_db;
+<span class="kw">CREATE DATABASE</span> tunisitrip_db <span class="kw">CHARACTER SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+<span class="kw">USE</span> tunisitrip_db;
+
+<span class="cm">-- 2. Tables mères Guide et Voyageur (1 pt)</span>
+<span class="kw">CREATE TABLE</span> Guide (
+    idGuide  <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    nomGuide <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    langue   <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel      <span class="ty">VARCHAR(15)</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_guide     <span class="kw">PRIMARY KEY</span> (idGuide),
+    <span class="kw">CONSTRAINT</span> uq_guide_tel <span class="kw">UNIQUE</span> (tel)
+);
+
+<span class="kw">CREATE TABLE</span> Voyageur (
+    idVoy     <span class="ty">INT</span> <span class="kw">AUTO_INCREMENT</span>,
+    nom       <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    prenom    <span class="ty">VARCHAR(40)</span> <span class="kw">NOT NULL</span>,
+    ville     <span class="ty">VARCHAR(30)</span> <span class="kw">NOT NULL</span>,
+    tel       <span class="ty">VARCHAR(15)</span> <span class="kw">NULL</span>,
+    dateNaiss <span class="ty">DATE</span>        <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_voyageur <span class="kw">PRIMARY KEY</span> (idVoy)
+);
+
+<span class="cm">-- 3. Table Excursion (1,5 pt)</span>
+<span class="kw">CREATE TABLE</span> Excursion (
+    codeExc     <span class="ty">VARCHAR(10)</span>,
+    titre       <span class="ty">VARCHAR(50)</span>  <span class="kw">NOT NULL</span>,
+    destination <span class="ty">VARCHAR(30)</span>  <span class="kw">NOT NULL</span>,
+    prixPers    <span class="ty">DECIMAL(8,3)</span> <span class="kw">NOT NULL</span>,
+    idGuide     <span class="ty">INT</span>          <span class="kw">NOT NULL</span>,
+    <span class="kw">CONSTRAINT</span> pk_excursion   <span class="kw">PRIMARY KEY</span> (codeExc),
+    <span class="kw">CONSTRAINT</span> chk_prix_pers  <span class="kw">CHECK</span> (prixPers &gt; 0),
+    <span class="kw">CONSTRAINT</span> fk_exc_guide   <span class="kw">FOREIGN KEY</span> (idGuide)
+        <span class="kw">REFERENCES</span> Guide(idGuide)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+);
+
+<span class="cm">-- 4. Table d'association Reservation (1 pt)</span>
+<span class="kw">CREATE TABLE</span> Reservation (
+    idVoy    <span class="ty">INT</span>,
+    codeExc  <span class="ty">VARCHAR(10)</span>,
+    dateRes  <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+    nbPlaces <span class="ty">INT</span>  <span class="kw">NOT NULL DEFAULT</span> 1,
+    <span class="kw">CONSTRAINT</span> pk_res        <span class="kw">PRIMARY KEY</span> (idVoy, codeExc),
+    <span class="kw">CONSTRAINT</span> chk_nb_places <span class="kw">CHECK</span> (nbPlaces <span class="kw">BETWEEN</span> 1 <span class="kw">AND</span> 10),
+    <span class="kw">CONSTRAINT</span> fk_res_voy    <span class="kw">FOREIGN KEY</span> (idVoy)
+        <span class="kw">REFERENCES</span> Voyageur(idVoy)
+        <span class="kw">ON DELETE CASCADE ON UPDATE CASCADE</span>,
+    <span class="kw">CONSTRAINT</span> fk_res_exc    <span class="kw">FOREIGN KEY</span> (codeExc)
+        <span class="kw">REFERENCES</span> Excursion(codeExc)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+);
+
+<span class="cm">-- 5. Évolutions ALTER TABLE (1 pt)</span>
+<span class="kw">ALTER TABLE</span> Voyageur  <span class="kw">ADD</span> email <span class="ty">VARCHAR(80)</span> <span class="kw">NULL UNIQUE</span>;
+<span class="kw">ALTER TABLE</span> Excursion <span class="kw">MODIFY</span> destination <span class="ty">VARCHAR(50)</span> <span class="kw">NOT NULL</span>;</pre>
+      </div>
+    </section>
+
+    <!-- JEU DE DONNEES DE REFERENCE -->
+    <section class="phase page-break">
+      <h2>
+        <span>Jeu de données de référence (tunisitrip_db)</span>
+        <span class="badge-pts">Pour les Parties 3 et 4</span>
+      </h2>
+
+      <div class="data-grid">
+        <div>
+          <strong>Table <code>Guide</code></strong>
+          <table>
+            <thead><tr><th>idGuide</th><th>nomGuide</th><th>langue</th><th>tel</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Ben Amor</td><td>Français</td><td>22110022</td></tr>
+              <tr><td>2</td><td>Sassi</td><td>Anglais</td><td>55330044</td></tr>
+              <tr><td>3</td><td>Mabrouk</td><td>Italien</td><td>98550066</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <strong>Table <code>Excursion</code></strong>
+          <table>
+            <thead><tr><th>codeExc</th><th>titre</th><th>destination</th><th>prixPers</th><th>idGuide</th></tr></thead>
+            <tbody>
+              <tr><td>EXC01</td><td>Désert et Oasis</td><td>Tozeur</td><td>180.000</td><td>1</td></tr>
+              <tr><td>EXC02</td><td>Circuit Médina</td><td>Kairouan</td><td>95.000</td><td>1</td></tr>
+              <tr><td>EXC03</td><td>Plongée et Mer</td><td>Tabarka</td><td>140.000</td><td>2</td></tr>
+              <tr><td>EXC04</td><td>Dunes du Sud</td><td>Douz</td><td>160.000</td><td>3</td></tr>
+              <tr><td>EXC05</td><td>Croisière Île</td><td>Djerba</td><td>210.000</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-grid">
+        <div>
+          <strong>Table <code>Voyageur</code></strong>
+          <table>
+            <thead><tr><th>idVoy</th><th>nom</th><th>prenom</th><th>ville</th><th>tel</th><th>dateNaiss</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Gharbi</td><td>Adam</td><td>Sousse</td><td>22887766</td><td>2008-04-12</td></tr>
+              <tr><td>2</td><td>Trabelsi</td><td>Nour</td><td>Tunis</td><td>55998877</td><td>2007-09-25</td></tr>
+              <tr><td>3</td><td>Khelifi</td><td>Rayen</td><td>Sousse</td><td><em>NULL</em></td><td>2009-01-18</td></tr>
+              <tr><td>4</td><td>Jaziri</td><td>Ines</td><td>Sfax</td><td>98223344</td><td>2008-06-05</td></tr>
+              <tr><td>5</td><td>Mansouri</td><td>Fares</td><td>Sousse</td><td>29445566</td><td>2007-12-03</td></tr>
+              <tr><td>6</td><td>Bouazizi</td><td>Yasmine</td><td>Tunis</td><td>50667788</td><td>2009-03-22</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <strong>Table <code>Reservation</code></strong>
+          <table>
+            <thead><tr><th>idVoy</th><th>codeExc</th><th>dateRes</th><th>nbPlaces</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>EXC01</td><td>2026-01-15</td><td>2</td></tr>
+              <tr><td>1</td><td>EXC03</td><td>2026-02-10</td><td>1</td></tr>
+              <tr><td>2</td><td>EXC04</td><td>2026-01-22</td><td>4</td></tr>
+              <tr><td>3</td><td>EXC01</td><td>2026-02-18</td><td>1</td></tr>
+              <tr><td>3</td><td>EXC02</td><td>2026-03-05</td><td>3</td></tr>
+              <tr><td>4</td><td>EXC05</td><td>2026-03-20</td><td>2</td></tr>
+              <tr><td>5</td><td>EXC01</td><td>2026-04-08</td><td>3</td></tr>
+              <tr><td>5</td><td>EXC04</td><td>2026-04-14</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="solution">
+        <span class="solution-label">Script de peuplement complet (pour l'enseignant / test machine)</span>
+        <pre class="sql-block"><span class="kw">INSERT INTO</span> Guide (nomGuide, langue, tel) <span class="kw">VALUES</span>
+(<span class="str">'Ben Amor'</span>, <span class="str">'Français'</span>, <span class="str">'22110022'</span>),
+(<span class="str">'Sassi'</span>,    <span class="str">'Anglais'</span>,  <span class="str">'55330044'</span>),
+(<span class="str">'Mabrouk'</span>,  <span class="str">'Italien'</span>,  <span class="str">'98550066'</span>);
+
+<span class="kw">INSERT INTO</span> Excursion (codeExc, titre, destination, prixPers, idGuide) <span class="kw">VALUES</span>
+(<span class="str">'EXC01'</span>, <span class="str">'Désert et Oasis'</span>, <span class="str">'Tozeur'</span>,   180.000, 1),
+(<span class="str">'EXC02'</span>, <span class="str">'Circuit Médina'</span>,  <span class="str">'Kairouan'</span>,  95.000, 1),
+(<span class="str">'EXC03'</span>, <span class="str">'Plongée et Mer'</span>,  <span class="str">'Tabarka'</span>,  140.000, 2),
+(<span class="str">'EXC04'</span>, <span class="str">'Dunes du Sud'</span>,    <span class="str">'Douz'</span>,     160.000, 3),
+(<span class="str">'EXC05'</span>, <span class="str">'Croisière Île'</span>,   <span class="str">'Djerba'</span>,   210.000, 2);
+
+<span class="kw">INSERT INTO</span> Voyageur (nom, prenom, ville, tel, dateNaiss) <span class="kw">VALUES</span>
+(<span class="str">'Gharbi'</span>,   <span class="str">'Adam'</span>,    <span class="str">'Sousse'</span>, <span class="str">'22887766'</span>, <span class="str">'2008-04-12'</span>),
+(<span class="str">'Trabelsi'</span>, <span class="str">'Nour'</span>,    <span class="str">'Tunis'</span>,  <span class="str">'55998877'</span>, <span class="str">'2007-09-25'</span>),
+(<span class="str">'Khelifi'</span>,  <span class="str">'Rayen'</span>,   <span class="str">'Sousse'</span>, <span class="kw">NULL</span>,       <span class="str">'2009-01-18'</span>),
+(<span class="str">'Jaziri'</span>,   <span class="str">'Ines'</span>,    <span class="str">'Sfax'</span>,   <span class="str">'98223344'</span>, <span class="str">'2008-06-05'</span>),
+(<span class="str">'Mansouri'</span>, <span class="str">'Fares'</span>,   <span class="str">'Sousse'</span>, <span class="str">'29445566'</span>, <span class="str">'2007-12-03'</span>),
+(<span class="str">'Bouazizi'</span>, <span class="str">'Yasmine'</span>, <span class="str">'Tunis'</span>,  <span class="str">'50667788'</span>, <span class="str">'2009-03-22'</span>);
+
+<span class="kw">INSERT INTO</span> Reservation (idVoy, codeExc, dateRes, nbPlaces) <span class="kw">VALUES</span>
+(1, <span class="str">'EXC01'</span>, <span class="str">'2026-01-15'</span>, 2), (1, <span class="str">'EXC03'</span>, <span class="str">'2026-02-10'</span>, 1),
+(2, <span class="str">'EXC04'</span>, <span class="str">'2026-01-22'</span>, 4), (3, <span class="str">'EXC01'</span>, <span class="str">'2026-02-18'</span>, 1),
+(3, <span class="str">'EXC02'</span>, <span class="str">'2026-03-05'</span>, 3), (4, <span class="str">'EXC05'</span>, <span class="str">'2026-03-20'</span>, 2),
+(5, <span class="str">'EXC01'</span>, <span class="str">'2026-04-08'</span>, 3), (5, <span class="str">'EXC04'</span>, <span class="str">'2026-04-14'</span>, 2);</pre>
+      </div>
+    </section>
+
+    <!-- PARTIE 3 -->
+    <section class="phase">
+      <h2>
+        <span>Partie 3 : Langage de Manipulation de Données (LMD)</span>
+        <span class="badge-pts">3 points</span>
+      </h2>
+
+      <div class="info-box">
+        <strong>Consigne :</strong> Écrivez les requêtes LMD ci-dessous à partir du jeu de données de référence. <em>(Si vous travaillez sur machine, annulez vos tests ou réimportez le jeu de données initial avant la Partie 4.)</em>
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Insertion (<code>INSERT INTO</code>) :</strong> Insérez en une seule requête d'insertion multiple les deux premiers guides (<code>Ben Amor</code> et <code>Sassi</code>), puis insérez la réservation de la voyageuse <code>Yasmine Bouazizi</code> (<code>idVoy = 6</code>) pour l'excursion <code>EXC03</code> à la date du <code>2026-05-04</code> pour <code>2</code> places. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Mise à jour (<code>UPDATE</code>) :</strong> Appliquez une remise de <code>15%</code> sur le prix par personne (<code>prixPers</code>) de toutes les excursions encadrées par le guide n°<code>2</code>, puis renseignez le téléphone <code>'52113355'</code> pour le voyageur <code>Rayen Khelifi</code> (<code>idVoy = 3</code>). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Suppression (<code>DELETE</code>) :</strong> Supprimez de la table <code>Reservation</code> la réservation du voyageur <code>3</code> pour l'excursion <code>'EXC01'</code>. Expliquez ensuite en une phrase ce qui se passerait si l'on exécutait <code>DELETE FROM Excursion WHERE codeExc = 'EXC01';</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 3 : LMD (3 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Insertions (1 pt)</span>
+<span class="kw">INSERT INTO</span> Guide (nomGuide, langue, tel) <span class="kw">VALUES</span>
+(<span class="str">'Ben Amor'</span>, <span class="str">'Français'</span>, <span class="str">'22110022'</span>),
+(<span class="str">'Sassi'</span>,    <span class="str">'Anglais'</span>,  <span class="str">'55330044'</span>);
+
+<span class="kw">INSERT INTO</span> Reservation (idVoy, codeExc, dateRes, nbPlaces)
+<span class="kw">VALUES</span> (6, <span class="str">'EXC03'</span>, <span class="str">'2026-05-04'</span>, 2);
+
+<span class="cm">-- 2. Mises à jour (1 pt)</span>
+<span class="kw">UPDATE</span> Excursion
+<span class="kw">SET</span> prixPers = prixPers * 0.85
+<span class="kw">WHERE</span> idGuide = 2;
+
+<span class="kw">UPDATE</span> Voyageur
+<span class="kw">SET</span> tel = <span class="str">'52113355'</span>
+<span class="kw">WHERE</span> idVoy = 3;
+
+<span class="cm">-- 3. Suppression ciblée (1 pt)</span>
+<span class="kw">DELETE FROM</span> Reservation
+<span class="kw">WHERE</span> idVoy = 3 <span class="kw">AND</span> codeExc = <span class="str">'EXC01'</span>;</pre>
+        <p style="margin-bottom:0;"><strong>Effet de <code>DELETE FROM Excursion WHERE codeExc = 'EXC01';</code> :</strong> La suppression est <strong>bloquée (refusée)</strong> grâce à la contrainte <code>ON DELETE RESTRICT</code> définie sur <code>fk_res_exc</code>, car l'excursion <code>EXC01</code> est encore référencée par d'autres réservations dans <code>Reservation</code> (voyageurs 1 et 5).</p>
+      </div>
+    </section>
+
+    <!-- PARTIE 4 -->
+    <section class="phase page-break">
+      <h2>
+        <span>Partie 4 : Interrogation de la Base (Requêtes SELECT)</span>
+        <span class="badge-pts">8 points</span>
+      </h2>
+
+      <div class="info-box">
+        <strong>Rappel méthodologique :</strong> Toutes les jointures doivent être rédigées sous forme de <strong>jointures implicites dans la clause <code>WHERE</code></strong> (<code>FROM T1, T2 WHERE T1.pk = T2.fk</code>) avec des alias de tables si nécessaire.
+      </div>
+
+      <ol class="questions">
+        <li>
+          <strong>Filtrage et <code>NULL</code> :</strong> Afficher l'identifiant, le nom et le prénom des voyageurs habitant à <code>'Sousse'</code> qui n'ont pas renseigné de numéro de téléphone. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Motifs et intervalles :</strong> Afficher le code, le titre et le prix par personne des excursions dont le prix est compris entre <code>100</code> et <code>200 DT</code> inclus et dont le titre contient le mot <code>'Désert'</code> ou <code>'Dunes'</code>, triés par prix décroissant. <span class="q-pts">(0,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Fonctions scalaires (chaînes et dates) :</strong> Afficher le nom complet formaté des voyageurs sous la forme <code>GHARBI Adam</code> (alias <code>Voyageur</code>) et leur année de naissance (alias <code>Annee_Naiss</code>), uniquement pour ceux nés en <code>2008</code> ou <code>2009</code>. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Regroupement et <code>HAVING</code> :</strong> Afficher pour chaque ville le nombre de voyageurs enregistrés (alias <code>Nb_Voyageurs</code>), en ne conservant que les villes qui comptent <strong>au moins 2 voyageurs</strong>, triées par effectif décroissant. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure implicite (2 tables) :</strong> Afficher le titre de chaque excursion, sa destination, son prix par personne ainsi que le nom (<code>nomGuide</code>) et la langue du guide qui l'encadre, triés par nom de guide croissant. <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure implicite (3 tables) et calcul :</strong> Afficher le détail complet des réservations réalisées au <strong>premier trimestre 2026</strong> (mois 1, 2 ou 3) : nom et prénom du voyageur, titre de l'excursion, date de réservation, nombre de places et <strong>montant payé</strong> (<code>prixPers * nbPlaces</code>, alias <code>Montant_DT</code>). <span class="q-pts">(1 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Jointure + <code>GROUP BY</code> :</strong> Afficher pour chaque excursion ayant enregistré au moins une réservation : son code, son titre, le nombre de réservations (<code>Nb_Res</code>) et la recette totale générée (<code>SUM(prixPers * nbPlaces)</code>, alias <code>Recette_DT</code>), triés par recette décroissante. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+        <li>
+          <strong>Synthèse (4 tables + <code>WHERE</code> + <code>GROUP BY</code> + <code>HAVING</code>) :</strong> En ne tenant compte que des voyageurs habitant à <code>'Sousse'</code>, afficher le nom de chaque guide (<code>nomGuide</code>) et le chiffre d'affaires total généré par ses excursions auprès des voyageurs soussiens (<code>CA_Sousse</code>), uniquement pour les guides dont ce chiffre d'affaires dépasse <code>500 DT</code>. <span class="q-pts">(1,5 pt)</span>
+          <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
+        </li>
+      </ol>
+
+      <div class="solution">
+        <span class="solution-label">Corrigé — Partie 4 : Requêtes SELECT (8 pts)</span>
+        <pre class="sql-block"><span class="cm">-- 1. Voyageurs de Sousse sans téléphone (0,5 pt) → 1 ligne : Rayen Khelifi</span>
+<span class="kw">SELECT</span> idVoy, nom, prenom
+<span class="kw">FROM</span> Voyageur
+<span class="kw">WHERE</span> ville = <span class="str">'Sousse'</span> <span class="kw">AND</span> tel <span class="kw">IS NULL</span>;
+
+<span class="cm">-- 2. Excursions entre 100 et 200 DT contenant Désert ou Dunes (0,5 pt) → EXC01 (180), EXC04 (160)</span>
+<span class="kw">SELECT</span> codeExc, titre, prixPers
+<span class="kw">FROM</span> Excursion
+<span class="kw">WHERE</span> prixPers <span class="kw">BETWEEN</span> 100 <span class="kw">AND</span> 200
+  <span class="kw">AND</span> (titre <span class="kw">LIKE</span> <span class="str">'%Désert%'</span> <span class="kw">OR</span> titre <span class="kw">LIKE</span> <span class="str">'%Dunes%'</span>)
+<span class="kw">ORDER BY</span> prixPers <span class="kw">DESC</span>;
+
+<span class="cm">-- 3. Nom complet formaté et année de naissance 2008/2009 (1 pt) → 4 lignes</span>
+<span class="kw">SELECT</span> <span class="fn">CONCAT</span>(<span class="fn">UPPER</span>(nom), <span class="str">' '</span>, prenom) <span class="kw">AS</span> Voyageur,
+       <span class="fn">YEAR</span>(dateNaiss) <span class="kw">AS</span> Annee_Naiss
+<span class="kw">FROM</span> Voyageur
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dateNaiss) <span class="kw">IN</span> (2008, 2009);
+
+<span class="cm">-- 4. Villes comptant au moins 2 voyageurs (1 pt) → Sousse (3), Tunis (2)</span>
+<span class="kw">SELECT</span> ville, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Voyageurs
+<span class="kw">FROM</span> Voyageur
+<span class="kw">GROUP BY</span> ville
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= 2
+<span class="kw">ORDER BY</span> Nb_Voyageurs <span class="kw">DESC</span>;
+
+<span class="cm">-- 5. Jointure implicite 2 tables : Excursion + Guide (1 pt) → 5 lignes</span>
+<span class="kw">SELECT</span> E.titre, E.destination, E.prixPers, G.nomGuide, G.langue
+<span class="kw">FROM</span> Excursion E, Guide G
+<span class="kw">WHERE</span> E.idGuide = G.idGuide
+<span class="kw">ORDER BY</span> G.nomGuide <span class="kw">ASC</span>;
+
+<span class="cm">-- 6. Jointure implicite 3 tables : T1 2026 + montant payé (1 pt) → 6 lignes</span>
+<span class="kw">SELECT</span> V.nom, V.prenom, E.titre, R.dateRes, R.nbPlaces,
+       (E.prixPers * R.nbPlaces) <span class="kw">AS</span> Montant_DT
+<span class="kw">FROM</span> Voyageur V, Reservation R, Excursion E
+<span class="kw">WHERE</span> V.idVoy = R.idVoy
+  <span class="kw">AND</span> R.codeExc = E.codeExc
+  <span class="kw">AND</span> <span class="fn">YEAR</span>(R.dateRes) = 2026
+  <span class="kw">AND</span> <span class="fn">MONTH</span>(R.dateRes) <span class="kw">IN</span> (1, 2, 3);
+
+<span class="cm">-- 7. Jointure + GROUP BY : Recette par excursion (1,5 pt)</span>
+<span class="cm">-- Résultats : EXC01 (3 res, 1080 DT), EXC04 (2, 960 DT), EXC05 (1, 420 DT), EXC02 (1, 285 DT), EXC03 (1, 140 DT)</span>
+<span class="kw">SELECT</span> E.codeExc, E.titre,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> Nb_Res,
+       <span class="fn">SUM</span>(E.prixPers * R.nbPlaces) <span class="kw">AS</span> Recette_DT
+<span class="kw">FROM</span> Excursion E, Reservation R
+<span class="kw">WHERE</span> E.codeExc = R.codeExc
+<span class="kw">GROUP BY</span> E.codeExc, E.titre
+<span class="kw">ORDER BY</span> Recette_DT <span class="kw">DESC</span>;
+
+<span class="cm">-- 8. Jointure 4 tables + WHERE + GROUP BY + HAVING (1,5 pt)</span>
+<span class="cm">-- Voyageurs de Sousse : Ben Amor (360+180+285+540 = 1365 DT > 500) ; Mabrouk (320 DT) ; Sassi (140 DT)</span>
+<span class="kw">SELECT</span> G.nomGuide,
+       <span class="fn">SUM</span>(E.prixPers * R.nbPlaces) <span class="kw">AS</span> CA_Sousse
+<span class="kw">FROM</span> Guide G, Excursion E, Reservation R, Voyageur V
+<span class="kw">WHERE</span> G.idGuide = E.idGuide
+  <span class="kw">AND</span> E.codeExc = R.codeExc
+  <span class="kw">AND</span> R.idVoy = V.idVoy
+  <span class="kw">AND</span> V.ville = <span class="str">'Sousse'</span>
+<span class="kw">GROUP BY</span> G.idGuide, G.nomGuide
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(E.prixPers * R.nbPlaces) &gt; 500;</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>
