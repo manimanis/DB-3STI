@@ -291,6 +291,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Gestion propre de l'impression : révéler toutes les phases
+  window.addEventListener("beforeprint", () => {
+    document.body.classList.remove("mode-single-phase");
+    phases.forEach((p) => p.classList.add("active-phase"));
+  });
+
+  window.addEventListener("afterprint", () => {
+    if (isSingleMode) {
+      document.body.classList.add("mode-single-phase");
+      phases.forEach((p, idx) => {
+        p.classList.toggle("active-phase", idx === currentIndex);
+      });
+    }
+  });
+
   // Hash URL au chargement
   const hash = window.location.hash;
   if (hash === "#toutes" || hash === "#all") {

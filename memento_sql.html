@@ -14,7 +14,8 @@
       <a href="index.html" style="color: #93c5fd; text-decoration: none; font-size: 0.86rem; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(147, 197, 253, 0.35); background: rgba(30, 58, 138, 0.35); display: inline-flex; align-items: center; gap: 5px;">← Sommaire</a>
       <div>
         <div class="toolbar-title">Mémento SQL — 3e Année Sciences de l'Informatique (STI)</div>
-      <div class="toolbar-hint">Format calibré : 1 feuille A4 recto-verso (activez « Graphiques d'arrière-plan » à l'impression)</div>
+        <div class="toolbar-hint">Format calibré : 1 feuille A4 recto-verso (activez « Graphiques d'arrière-plan » à l'impression)</div>
+      </div>
     </div>
     <button class="btn-print" type="button" onclick="window.print()">Imprimer Recto-Verso / PDF</button>
   </div>
@@ -212,7 +213,8 @@
             <tr><td><strong>Comparaison</strong></td><td><code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td></tr>
             <tr><td><strong>Logiques</strong></td><td><code>AND</code>, <code>OR</code>, <code>NOT</code> <em>(<code>AND</code> prioritaire → parenthèses !)</em></td></tr>
             <tr><td><strong>Intervalle</strong></td><td><code>[NOT] BETWEEN v1 AND v2</code> <em>(bornes incluses)</em></td></tr>
-            <tr><td><strong>Liste</strong></td><td><code>[NOT] IN (v1, v2, ...)</code></td></tr>
+            <tr><td><strong>Liste &amp; IN</strong></td><td><code>[NOT] IN (v1, v2, ...)</code></td></tr>
+            <tr><td><strong>Sous-requête ANY</strong></td><td><code>col OP ANY (SELECT ...)</code> : <strong>au moins 1</strong> val. (<code>= ANY</code> ≡ <code>IN</code>, <code>&gt; ANY</code> ≡ <code>&gt; MIN</code>)</td></tr>
             <tr><td><strong>Motif texte</strong></td><td><code>[NOT] LIKE 'motif'</code> : <code>%</code> = 0..n car. | <code>_</code> = 1 car.</td></tr>
             <tr><td><strong>Valeur NULL</strong></td><td><code>IS NULL</code> / <code>IS NOT NULL</code> <em>(jamais <code>= NULL</code>)</em></td></tr>
           </tbody>
@@ -312,7 +314,7 @@
 
     <!-- Bloc 11 : Pièges d'examen -->
     <div class="box box-warn">
-      <h2>11. Top 6 des Pièges à Éviter en Devoir</h2>
+      <h2>11. Top 7 des Pièges à Éviter en Devoir</h2>
       <ul class="checklist">
         <li><strong><code>= NULL</code> interdit :</strong> toujours écrire <code>IS NULL</code> ou <code>IS NOT NULL</code>.</li>
         <li><strong><code>AND</code> prioritaire sur <code>OR</code> :</strong> encadrer les <code>OR</code> par des <code>(...)</code>.</li>
@@ -320,6 +322,7 @@
         <li><strong>Oubli d'une jointure :</strong> provoque un produit cartésien (vérifier <em>N − 1</em> liens).</li>
         <li><strong><code>UPDATE</code> avec <code>AND</code> :</strong> dans <code>SET</code>, séparer les colonnes par une virgule <code>,</code>.</li>
         <li><strong>Alias dans <code>WHERE</code> :</strong> interdit (exécuté avant <code>SELECT</code>) ; autorisé dans <code>ORDER BY</code>.</li>
+        <li><strong>Opérateur <code>ANY</code> :</strong> <code>= ANY</code> équivaut à <code>IN</code> ; <code>&gt; ANY</code> = supérieur au <em>minimum</em> (au moins 1 val.).</li>
       </ul>
     </div>
 

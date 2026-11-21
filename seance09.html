@@ -140,6 +140,9 @@
               <li>4 tables → <strong>3</strong> conditions de jointure.</li>
             </ul>
           </li>
+          <li><strong>Alternative Jointure vs Sous-requête (IN / = ANY) :</strong> Pour filtrer une table en vérifiant l'existence dans une autre table sans projeter ses colonnes, une sous-requête avec <code>IN</code> ou <code>= ANY</code> est équivalente :<br>
+            <code>SELECT nom, prenom FROM Client WHERE idClt = ANY (SELECT idClt FROM Commande);</code>
+          </li>
         </ul>
 
         <h3>B. Carte des chemins de jointure dans « boutique_info » (4 tables → 3 liens)</h3>

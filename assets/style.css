@@ -577,7 +577,7 @@ tr:nth-child(even) td {
 
 .diagram-caption {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--muted);
   margin-top: 6px;
   font-style: italic;
   text-align: center;
@@ -956,6 +956,7 @@ footer.site-footer {
   width: 210mm;
   min-height: 297mm;
   background: #ffffff;
+  color: var(--text);
   margin: 16px auto;
   padding: 12mm 14mm;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
@@ -996,6 +997,7 @@ footer.site-footer {
 
 .box {
   background: #f8fafc;
+  color: #1e293b;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -1017,6 +1019,59 @@ footer.site-footer {
 
 .box-accent h2 { color: var(--accent); }
 .box-warn h2   { color: var(--warn); }
+
+.box ul, .box ol {
+  margin: 4px 0 6px 16px;
+  padding: 0;
+  color: #1e293b;
+}
+
+.box li {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin-bottom: 3px;
+  color: #1e293b;
+}
+
+.box strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.box em {
+  color: #334155;
+}
+
+.box p {
+  font-size: 0.80rem;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.box table {
+  font-size: 0.74rem;
+  margin: 4px 0 6px;
+  width: 100%;
+  color: #1e293b;
+}
+
+.box table th {
+  background: #f1f5f9;
+  color: #1e293b;
+  padding: 3px 6px;
+}
+
+.box table td {
+  padding: 3px 6px;
+  color: #1e293b;
+}
+
+.box pre {
+  padding: 7px 9px;
+  margin: 4px 0 6px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
 
 .pill-row {
   display: flex;
@@ -1332,6 +1387,11 @@ body.mode-single-phase .phase.active-phase .phase-footer {
    11. RÈGLES D'IMPRESSION (@media print)
    -------------------------------------------------------------------------- */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   /* Phase par phase masqué à l'impression */
   .phase-nav-container,
   .phase-footer {
@@ -1365,7 +1425,6 @@ body.mode-single-phase .phase.active-phase .phase-footer {
     border-bottom: 2px solid var(--primary) !important;
   }
 
-  section.phase,
   .trap-card,
   .course-box,
   .info-box,
@@ -1373,6 +1432,7 @@ body.mode-single-phase .phase.active-phase .phase-footer {
   .quiz-item,
   .student-box,
   .data-grid,
+  .diagram-wrap,
   table,
   pre.sql-block,
   pre {
@@ -1402,21 +1462,95 @@ body.mode-single-phase .phase.active-phase .phase-footer {
     box-shadow: none !important;
   }
 
-  /* Mémento A4 print */
+  /* ========================================================================
+     Mémento A4 Recto-Verso (calibré exactement pour 2 pages)
+     ======================================================================== */
   .sheet {
     width: 100% !important;
-    min-height: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
-    border-radius: 0 !important;
+    border: none !important;
   }
 
   .sheet-recto {
-    page-break-after: always;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .sheet-verso {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .sheet header.sheet-header {
+    margin: 0 0 4px !important;
+    padding: 0 0 2px !important;
+    border-bottom: 1.5px solid var(--primary) !important;
+  }
+
+  .sheet header.sheet-header h1 {
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+  }
+
+  .sheet header.sheet-header .face-tag {
+    font-size: 0.65rem !important;
+    padding: 1px 6px !important;
+  }
+
+  .sheet .box {
+    margin-bottom: 3px !important;
+    padding: 3px 6px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border-radius: 4px !important;
+  }
+
+  .sheet .box h2 {
+    font-size: 0.74rem !important;
+    margin: 0 0 2px !important;
+    padding-bottom: 1px !important;
+  }
+
+  .sheet .box ul, .sheet .box ol {
+    margin: 1px 0 2px 12px !important;
+    padding: 0 !important;
+  }
+
+  .sheet .box li {
+    font-size: 0.68rem !important;
+    line-height: 1.22 !important;
+    margin-bottom: 1px !important;
+  }
+
+  .sheet .box pre {
+    padding: 2px 5px !important;
+    margin: 2px 0 2px !important;
+    font-size: 0.61rem !important;
+    line-height: 1.18 !important;
+    border-radius: 3px !important;
+  }
+
+  .sheet .box table {
+    font-size: 0.63rem !important;
+    margin: 1px 0 2px !important;
+  }
+
+  .sheet .box table th, .sheet .box table td {
+    padding: 1px 3px !important;
+  }
+
+  .sheet .footer-note {
+    font-size: 0.60rem !important;
+    margin-top: 2px !important;
+    padding-top: 1px !important;
   }
 
   @page {
-    margin: 12mm 14mm;
+    size: A4 portrait;
+    margin: 6mm 7mm;
   }
 }

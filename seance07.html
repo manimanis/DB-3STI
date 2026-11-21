@@ -432,7 +432,10 @@
         <div class="solution">
           <span class="solution-label">Corrigé — Piège 3</span>
           La clause <code>WHERE</code> filtre ligne par ligne <em>avant</em> le calcul des agrégations : elle ne peut donc jamais contenir <code>MAX</code>, <code>MIN</code>, <code>AVG</code>, <code>SUM</code> ou <code>COUNT</code>.<br>
-          <strong>Solution simple (Séance 6) :</strong> <code>SELECT designation, prixUnit FROM Produit ORDER BY prixUnit DESC LIMIT 1;</code> (ou une sous-requête plus tard : <code>WHERE prixUnit = (SELECT MAX(prixUnit) FROM Produit)</code>).
+          <strong>Solution simple (Séance 6) :</strong> <code>SELECT designation, prixUnit FROM Produit ORDER BY prixUnit DESC LIMIT 1;</code><br>
+          <strong>Avec sous-requête &amp; agrégation :</strong> <code>WHERE prixUnit = (SELECT MAX(prixUnit) FROM Produit);</code><br>
+          <strong>Avec l'opérateur ALL :</strong> <code>WHERE prixUnit &gt;= ALL (SELECT prixUnit FROM Produit);</code> <em>(supérieur ou égal à toutes les valeurs)</em>.<br>
+          <em>Rappel ANY :</em> à l'opposé, <code>WHERE prixUnit &gt; ANY (SELECT ...)</code> signifie « supérieur à au moins un prix » (donc supérieur au prix minimum <code>&gt; MIN(...)</code>).
         </div>
       </div>
     </section>

@@ -273,8 +273,60 @@
               <td><code>IS NULL</code><br><code>IS NOT NULL</code></td>
               <td><code>tel IS NULL</code> (téléphone non renseigné).<br><strong>Jamais</strong> <code>tel = NULL</code> !</td>
             </tr>
+            <tr>
+              <td><strong>Ensemble &amp; Sous-requête</strong><br><span class="badge" style="background:#2563eb; color:#fff; font-size:10px; font-weight:700;">ANY / SOME</span></td>
+              <td><code>col OP ANY (SELECT ...)</code><br><code>col OP ALL (SELECT ...)</code></td>
+              <td>
+                <code>ANY</code> (synonyme : <code>SOME</code>) compare une valeur à <strong>au moins un</strong> résultat d'une sous-requête :<br>
+                • <code>= ANY (...)</code> : strictement équivalent à <code>IN (...)</code>.<br>
+                • <code>&gt; ANY (...)</code> : supérieur au <strong>minimum</strong> (supérieur à au moins une valeur).<br>
+                • <code>&lt; ANY (...)</code> : inférieur au <strong>maximum</strong> (inférieur à au moins une valeur).<br>
+                • <em>Distinction avec ALL :</em> <code>&gt; ALL (...)</code> exige d'être supérieur à <strong>toutes</strong> les valeurs (donc supérieur au maximum).
+              </td>
+            </tr>
           </tbody>
         </table>
+
+        <div class="diagram-wrap" style="margin-top:14px;">
+          <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fonctionnement de l'opérateur SQL ANY en comparaison avec IN et ALL">
+            <rect x="0" y="0" width="760" height="170" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="380" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">Comportement de l'opérateur SQL ANY face à une liste ou sous-requête (ex : prix Accessoires = [45 DT, 80 DT, 120 DT])</text>
+            <g transform="translate(15, 32)">
+              <rect x="0" y="0" width="230" height="125" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.2"/>
+              <text x="115" y="18" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8">1. Égalité : col = ANY (...)</text>
+              <text x="115" y="32" text-anchor="middle" font-size="8" fill="#475569">Strictement équivalent à IN</text>
+              <rect x="25" y="42" width="180" height="26" rx="4" fill="#ffffff" stroke="#93c5fd"/>
+              <text x="115" y="58" text-anchor="middle" font-size="8.5" fill="#1e293b">Valeurs : { 45, 80, 120 }</text>
+              <text x="25" y="85" font-size="8" fill="#1e293b">Test prix = 80 DT : <tspan font-weight="700" fill="#15803d">VRAI (trouvé)</tspan></text>
+              <text x="25" y="100" font-size="8" fill="#1e293b">Test prix = 60 DT : <tspan font-weight="700" fill="#b91c1c">FAUX (absent)</tspan></text>
+              <rect x="15" y="106" width="200" height="15" rx="3" fill="#dbeafe"/>
+              <text x="115" y="117" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1e40af">Équivaut à : prix IN (45, 80, 120)</text>
+            </g>
+            <g transform="translate(265, 32)">
+              <rect x="0" y="0" width="230" height="125" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.2"/>
+              <text x="115" y="18" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803d">2. Supérieur : col &gt; ANY (...)</text>
+              <text x="115" y="32" text-anchor="middle" font-size="8" fill="#475569">Vrai si supérieur à AU MOINS UNE valeur</text>
+              <rect x="25" y="42" width="180" height="26" rx="4" fill="#ffffff" stroke="#86efac"/>
+              <text x="115" y="58" text-anchor="middle" font-size="8.5" fill="#1e293b">{ <tspan font-weight="700" fill="#15803d">MIN = 45</tspan>, 80, 120 }</text>
+              <text x="25" y="85" font-size="8" fill="#1e293b">Test prix = 60 DT : <tspan font-weight="700" fill="#15803d">VRAI (car 60 &gt; 45)</tspan></text>
+              <text x="25" y="100" font-size="8" fill="#1e293b">Test prix = 40 DT : <tspan font-weight="700" fill="#b91c1c">FAUX (40 &lt;= 45)</tspan></text>
+              <rect x="15" y="106" width="200" height="15" rx="3" fill="#dcfce7"/>
+              <text x="115" y="117" text-anchor="middle" font-size="7.5" font-weight="600" fill="#166534">Équivaut à : prix &gt; MIN(45, 80, 120)</text>
+            </g>
+            <g transform="translate(515, 32)">
+              <rect x="0" y="0" width="230" height="125" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+              <text x="115" y="18" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b45309">3. Règle d'or : ANY vs ALL</text>
+              <text x="115" y="32" text-anchor="middle" font-size="8" fill="#475569">Au moins un vs Tous les éléments</text>
+              <rect x="15" y="42" width="200" height="34" rx="4" fill="#ffffff" stroke="#fde68a"/>
+              <text x="22" y="55" font-size="8" font-weight="600" fill="#15803d">• &gt; ANY (...) ➔ &gt; MIN(...)</text>
+              <text x="22" y="68" font-size="8" font-weight="600" fill="#2563eb">• &lt; ANY (...) ➔ &lt; MAX(...)</text>
+              <rect x="15" y="80" width="200" height="40" rx="4" fill="#ffffff" stroke="#fde68a"/>
+              <text x="22" y="94" font-size="8" font-weight="600" fill="#b45309">• &gt; ALL (...) ➔ &gt; MAX(...)</text>
+              <text x="22" y="107" font-size="8" font-weight="600" fill="#b45309">• &lt;&gt; ALL (...) ➔ NOT IN (...)</text>
+            </g>
+          </svg>
+          <div class="diagram-caption">Figure 6.2 — Sémantique de l'opérateur SQL ANY : comparaison multi-valeurs et correspondance avec MIN, MAX et IN.</div>
+        </div>
       </div>
     </section>
 
@@ -415,24 +467,42 @@
           Erreur de syntaxe : <code>WHERE</code> doit toujours être placé <strong>avant</strong> <code>ORDER BY</code> (ordre fixe : <code>SELECT</code> → <code>FROM</code> → <code>WHERE</code> → <code>ORDER BY</code> → <code>LIMIT</code>).
         </div>
       </div>
+
+      <div class="trap-card">
+        <h3>Piège 4 — Confondre ANY et ALL face à une sous-requête</h3>
+        <pre class="sql-block"><span class="cm">-- L'élève veut les produits plus chers qu'AU MOINS UN accessoire</span>
+<span class="kw">SELECT</span> designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> prixUnit &gt; <span class="kw">ALL</span> (<span class="kw">SELECT</span> prixUnit <span class="kw">FROM</span> Produit <span class="kw">WHERE</span> categorie = <span class="str">'Accessoire'</span>);</pre>
+        <p><strong>Question :</strong> Pourquoi cette requête avec <code>&gt; ALL</code> exclut-elle un produit à <code>65 DT</code> alors qu'il existe un accessoire à <code>45 DT</code> ? Comment corriger ?</p>
+        <div class="answer-lines"><div class="answer-line"></div></div>
+        <div class="solution">
+          <span class="solution-label">Corrigé — Piège 4</span>
+          <code>&gt; ALL</code> exige d'être supérieur à <strong>toutes</strong> les valeurs retournées (donc supérieur au prix maximum des accessoires : <code>&gt; 120 DT</code>). Pour être supérieur à <strong>au moins une</strong> valeur, il faut employer <code>ANY</code> (ou son synonyme <code>SOME</code>) :<br>
+          <code>WHERE prixUnit &gt; ANY (SELECT prixUnit FROM Produit WHERE categorie = 'Accessoire');</code><br>
+          <em>(Ce qui équivaut à être supérieur au prix minimum : <code>&gt; MIN(...)</code>).</em>
+        </div>
+      </div>
     </section>
 
     <!-- PHASE 5 -->
     <section class="phase">
       <h2>
-        <span>5. Application en autonomie : Requêtes sur « Client » et « Commande »</span>
+        <span>5. Application en autonomie : Requêtes sur « Client » et « Produit »</span>
         <span class="badge-time">15 min</span>
       </h2>
 
-      <p>Écrivez sur feuille les <strong>4 requêtes SQL</strong> correspondant aux demandes suivantes (sur <code>Client</code> et <code>Commande(#numCmd, dateCmd, idClt#)</code>) :</p>
+      <p>Écrivez sur feuille les <strong>5 requêtes SQL</strong> correspondant aux demandes suivantes (sur <code>Client</code>, <code>Produit</code> et <code>Commande</code>) :</p>
       <ol class="questions">
         <li>Afficher les numéros et dates des commandes passées entre le <code>1er février 2026</code> et le <code>31 mars 2026</code> inclus, triées de la plus récente à la plus ancienne.</li>
         <li>Afficher le nom, le prénom et la ville des clients qui n'habitent <strong>ni</strong> à <code>'Tunis'</code> <strong>ni</strong> à <code>'Sfax'</code>.</li>
         <li>Afficher tous les produits dont la désignation contient le mot <code>'USB'</code> ou <code>'SSD'</code>, et qui sont disponibles en stock (<code>qteStock &gt; 0</code>).</li>
         <li>Afficher le nom, le prénom et la date d'inscription des <strong>2 clients les plus anciens</strong> (premiers inscrits) disposant d'un numéro de téléphone.</li>
+        <li><strong>Opérateur ANY :</strong> Afficher la référence, la désignation et le prix des produits dont le prix unitaire est strictement supérieur à <strong>au moins un</strong> produit de la catégorie <code>'Périphérique'</code>.</li>
       </ol>
 
       <div class="answer-lines">
+        <div class="answer-line"></div>
         <div class="answer-line"></div>
         <div class="answer-line"></div>
         <div class="answer-line"></div>
@@ -463,7 +533,14 @@
 <span class="kw">FROM</span> Client
 <span class="kw">WHERE</span> tel <span class="kw">IS NOT NULL</span>
 <span class="kw">ORDER BY</span> dateInscr <span class="kw">ASC</span>
-<span class="kw">LIMIT</span> 2;</pre>
+<span class="kw">LIMIT</span> 2;
+
+<span class="cm">-- 5. Produits plus chers qu'au moins un périphérique (opérateur ANY)</span>
+<span class="kw">SELECT</span> refProd, designation, prixUnit
+<span class="kw">FROM</span> Produit
+<span class="kw">WHERE</span> prixUnit &gt; <span class="kw">ANY</span> (
+  <span class="kw">SELECT</span> prixUnit <span class="kw">FROM</span> Produit <span class="kw">WHERE</span> categorie = <span class="str">'Périphérique'</span>
+);</pre>
       </div>
     </section>
 
@@ -497,6 +574,11 @@
       <div class="quiz-item">
         <strong>5. Alias :</strong> Si je veux donner un alias contenant un espace (ex. <code>Prix Unitaire</code>), que dois-je ajouter autour de l'alias ?
         <div class="quiz-answer">Réponse : Des apostrophes ou guillemets (ex. AS 'Prix Unitaire'), ou remplacer l'espace par un underscore (AS Prix_Unitaire).</div>
+      </div>
+
+      <div class="quiz-item">
+        <strong>6. Opérateur ANY :</strong> Que signifie <code>WHERE prixUnit &gt; ANY (SELECT prixUnit FROM ...)</code> et quelle commande connue lui est strictement équivalente avec le signe <code>=</code> ?
+        <div class="quiz-answer">Réponse : <code>&gt; ANY</code> est vrai dès que la valeur est supérieure à <strong>au moins un</strong> élément de la liste (ce qui équivaut à <code>&gt; MIN(...)</code>). Avec l'égalité, <code>= ANY (SELECT ...)</code> est <strong>strictement équivalent à <code>IN (SELECT ...)</code></strong>.</div>
       </div>
     </section>
 
