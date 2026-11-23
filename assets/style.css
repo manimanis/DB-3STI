@@ -584,26 +584,16 @@ tr:nth-child(even) td {
 }
 
 /* --------------------------------------------------------------------------
-   8. CORRIGÉS PROF & DÉCOUPAGE HORAIRE
+   8. CORRIGÉS PROF & DÉCOUPAGE HORAIRE (ESPACE ENSEIGNANT SÉCURISÉ)
    -------------------------------------------------------------------------- */
-.teacher-plan {
-  display: none;
-  background: #f0fdf4;
-  border: 1.5px solid #86efac;
-  border-left: 5px solid var(--corr);
-  padding: 16px 20px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-}
-
-.solution {
-  display: none;
-  background: var(--corr-light);
-  border: 1px solid #bbf7d0;
-  border-left: 4px solid var(--corr);
-  padding: 14px 18px;
-  border-radius: 6px;
-  margin: 12px 0 18px;
+/* Par défaut pour les élèves : boutons et contenus enseignant STRICTEMENT MASQUÉS */
+#btnSolutions,
+#btnPlan,
+.teacher-only,
+.teacher-plan,
+.solution,
+.quiz-answer {
+  display: none !important;
 }
 
 .solution-label {
@@ -616,20 +606,111 @@ tr:nth-child(even) td {
   margin-bottom: 6px;
 }
 
-body.show-plan .teacher-plan {
-  display: block;
+.teacher-plan {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-left: 5px solid var(--corr);
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
 }
 
-body.show-solutions .solution {
-  display: block;
+.solution {
+  background: var(--corr-light);
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid var(--corr);
+  padding: 14px 18px;
+  border-radius: 6px;
+  margin: 12px 0 18px;
 }
 
-body.show-solutions .quiz-answer {
-  display: block;
+/* Visibilité UNIQUEMENT lorsque le mode Enseignant est authentifié */
+body.teacher-authenticated #btnSolutions,
+body.teacher-authenticated #btnPlan,
+body.teacher-authenticated .teacher-only {
+  display: inline-flex !important;
 }
 
-body.show-solutions .answer-lines {
+body.teacher-authenticated.show-plan .teacher-plan {
+  display: block !important;
+}
+
+body.teacher-authenticated.show-solutions .solution {
+  display: block !important;
+}
+
+body.teacher-authenticated.show-solutions .quiz-answer {
+  display: block !important;
+}
+
+body.teacher-authenticated.show-solutions .answer-lines {
+  display: none !important;
+}
+
+/* Éléments d'interface Enseignant */
+.badge-teacher {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #14532d;
+  color: #bbf7d0;
+  border: 1px solid #22c55e;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.btn-teacher-lock {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-teacher-lock:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.btn-teacher-logout {
+  background: rgba(185, 28, 28, 0.35);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-teacher-logout:hover {
+  background: rgba(185, 28, 28, 0.65);
+  color: #ffffff;
+}
+
+.teacher-banner-index {
   display: none;
+  background: #064e3b;
+  color: #a7f3d0;
+  border: 1px solid #059669;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-top: 14px;
+  font-size: 0.9rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.teacher-authenticated .teacher-banner-index {
+  display: flex !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -829,6 +910,29 @@ header.hero p {
   gap: 10px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
+}
+
+.card-thumb {
+  width: calc(100% + 40px);
+  margin: -18px -20px 4px -20px;
+  height: 145px;
+  overflow: hidden;
+  background: #0f172a;
+  position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-thumb img {
+  transform: scale(1.03);
 }
 
 .card:hover {
@@ -1395,6 +1499,14 @@ body.mode-single-phase .phase.active-phase .phase-footer {
   /* Phase par phase masqué à l'impression */
   .phase-nav-container,
   .phase-footer {
+    display: none !important;
+  }
+
+  /* Masquer systématiquement les corrigés et découpages si non authentifié */
+  body:not(.teacher-authenticated) .solution,
+  body:not(.teacher-authenticated) .teacher-plan,
+  body:not(.show-solutions) .solution,
+  body:not(.show-solutions) .quiz-answer {
     display: none !important;
   }
 

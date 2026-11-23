@@ -17,7 +17,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -131,7 +131,7 @@
 
     <rect x="418" y="40" width="95" height="36" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
     <text x="465" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Client</text>
-    <text x="465" y="68" text-anchor="middle" font-size="8" fill="#15803d">#idClt unique</text>
+    <text x="465" y="68" text-anchor="middle" font-size="8" fill="#15803d" text-decoration="underline">idClt unique</text>
 
     <line x1="513" y1="58" x2="538" y2="58" stroke="#0f766e" stroke-width="1.8"/>
     <polygon points="538,58 531,54 531,62" fill="#0f766e"/>
@@ -144,7 +144,7 @@
 
     <rect x="650" y="40" width="88" height="36" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
     <text x="694" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Produit</text>
-    <text x="694" y="68" text-anchor="middle" font-size="8" fill="#15803d">#refProd</text>
+    <text x="694" y="68" text-anchor="middle" font-size="8" fill="#15803d" text-decoration="underline">refProd</text>
 
     <text x="577" y="99" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">🔒 Avantages : Zéro redondance, Intégrité référentielle, Requêtes SQL</text>
     <text x="577" y="117" text-anchor="middle" font-size="8" fill="#14532d">Le SGBD centralise et protège la cohérence de la base en temps réel</text>
@@ -185,6 +185,12 @@
 
       <div class="context-box">
         « Je veux enregistrer mes <strong>joueurs</strong> habituels en gardant pour chacun un numéro d'inscription, son pseudo, sa date de naissance et son numéro de téléphone. Je veux aussi suivre mes <strong>postes de jeu</strong> : chacun porte un code (ex. <code>P01</code>), un type (<em>PC Gamer</em>, <em>PS5</em>, <em>Casque VR</em>), un tarif horaire en dinars et son état (<em>Disponible</em> ou <em>En panne</em>). Enfin, je veux tenir la liste des <strong>jeux vidéo</strong> disponibles dans la salle, avec pour chacun un code jeu, son titre, son genre (<em>Sport</em>, <em>FPS</em>, <em>Course</em>...) et l'âge minimum recommandé (PEGI). »
+      </div>
+
+      <!-- Illustration pédagogique d'aide au repérage des entités et attributs (Générée avec Gemini) -->
+      <div class="diagram-wrap" style="margin: 18px 0 24px;">
+        <img src="assets/images/pixel_zone_activite.jpg" alt="Illustration de l'activité Pixel Zone : les 3 entités (Joueur, Poste, Jeu), leurs attributs et leurs identifiants" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15); display: block; margin: 0 auto; border: 1px solid var(--border);">
+        <div class="diagram-caption">Figure 1.2 — Vue de la salle de jeux « Pixel Zone » : repérez les 3 entités (Joueur, Poste, Jeu) et les attributs visibles sur leurs cartes et étiquettes techniques.</div>
       </div>
 
       <ol class="questions">
@@ -271,7 +277,7 @@
     <rect x="15" y="12" width="225" height="130" rx="8" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.8"/>
     <rect x="15" y="12" width="225" height="30" rx="8" fill="#1d4ed8"/>
     <text x="127" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">ENTITÉ : Joueur</text>
-    <text x="30" y="60" font-size="10.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idJoueur (Identifiant unique)</text>
+    <text x="30" y="60" font-size="10.5" font-weight="700" fill="#1d4ed8" text-decoration="underline">idJoueur (Identifiant unique)</text>
     <text x="30" y="78" font-size="10" fill="#334155">• pseudo</text>
     <text x="30" y="95" font-size="10" fill="#334155">• email</text>
     <text x="30" y="112" font-size="10" fill="#334155">• ville</text>
@@ -290,7 +296,7 @@
       
       <!-- En-têtes -->
       <line x1="0" y1="48" x2="450" y2="48" stroke="#e2e8f0"/>
-      <text x="40" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">idJoueur #</text>
+      <text x="40" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8" text-decoration="underline">idJoueur</text>
       <text x="120" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">pseudo</text>
       <text x="225" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">email</text>
       <text x="325" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ville</text>
@@ -320,7 +326,7 @@
       <text x="405" y="116" text-anchor="middle" font-size="9" fill="#334155">20.0</text>
     </g>
   </svg>
-  <div class="diagram-caption">Figure 1.2 — Modélisation conceptuelle : l'Entité abstraite (attributs) et ses occurrences matérielles sous forme de lignes dans la table.</div>
+  <div class="diagram-caption">Figure 1.3 — Modélisation conceptuelle : l'Entité abstraite (attributs) et ses occurrences matérielles sous forme de lignes dans la table.</div>
 </div>
 
     </section>

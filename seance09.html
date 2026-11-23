@@ -18,7 +18,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -152,7 +152,7 @@
             <rect x="8" y="18" width="132" height="72" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
             <text x="74" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Client (C)</text>
             <line x1="8" y1="45" x2="140" y2="45" stroke="#bfdbfe"/>
-            <text x="74" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#idClt</text>
+            <text x="74" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">idClt</text>
             <text x="74" y="80" text-anchor="middle" font-size="10" fill="#475569">nom, prenom, ville</text>
 
             <!-- Lien 1 -->
@@ -164,7 +164,7 @@
             <rect x="205" y="18" width="142" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
             <text x="276" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Commande (Cmd)</text>
             <line x1="205" y1="45" x2="347" y2="45" stroke="#99f6e4"/>
-            <text x="276" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numCmd</text>
+            <text x="276" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">numCmd</text>
             <text x="276" y="80" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#0f766e">dateCmd, idClt#</text>
 
             <!-- Lien 2 -->
@@ -176,7 +176,7 @@
             <rect x="412" y="18" width="150" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
             <text x="487" y="37" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">LigneCommande (L)</text>
             <line x1="412" y1="45" x2="562" y2="45" stroke="#99f6e4"/>
-            <text x="487" y="63" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numCmd#, #refProd#</text>
+            <text x="487" y="63" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">numCmd#, refProd#</text>
             <text x="487" y="80" text-anchor="middle" font-size="10" font-family="Consolas, monospace" fill="#475569">qteCmd</text>
 
             <!-- Lien 3 -->
@@ -188,7 +188,7 @@
             <rect x="622" y="18" width="130" height="72" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
             <text x="687" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Produit (P)</text>
             <line x1="622" y1="45" x2="752" y2="45" stroke="#bfdbfe"/>
-            <text x="687" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#refProd</text>
+            <text x="687" y="63" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">refProd</text>
             <text x="687" y="80" text-anchor="middle" font-size="10" fill="#475569">designation, prixUnit</text>
           </svg>
         </div>
@@ -204,10 +204,10 @@
       </h2>
 
       <div class="schema-list">
-        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
-        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
-        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
-        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+        <strong>Client</strong> (<span class="pk"><u>idClt</u></span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk"><u>refProd</u></span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk"><u>numCmd</u></span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
+        <strong>LigneCommande</strong> (<span class="pk"><u>numCmd#</u></span>, <span class="pk"><u>refProd#</u></span>, qteCmd)
       </div>
 
       <p>Dans phpMyAdmin (base <code>boutique_info</code>), écrivez et testez les <strong>10 requêtes</strong> suivantes en utilisant exclusivement des <strong>jointures implicites dans la clause <code>WHERE</code></strong> :</p>

@@ -1,27 +1,153 @@
 /**
  * MODULE BASES DE DONNÉES — 3e ANNÉE SCIENCES DE L'INFORMATIQUE (STI)
- * Navigation phase par phase & Outils Enseignant
+ * Navigation phase par phase & Espace Enseignant Sécurisé
  */
 document.addEventListener("DOMContentLoaded", () => {
   // ------------------------------------------------------------------------
-  // 1. OUTILS ENSEIGNANT (Corrigés, Découpage horaire, Impression)
+  // 1. ESPACE ENSEIGNANT SÉCURISÉ (Authentification, Corrigés, Découpage)
   // ------------------------------------------------------------------------
+  const TEACHER_AUTH_KEY = "bd_3sti_teacher_authenticated";
+  const TEACHER_PASSWORDS = ["prof", "professeur", "sti", "sti2026"];
+
   const btnSolutions = document.getElementById("btnSolutions");
   const btnPlan = document.getElementById("btnPlan");
   const btnPrint = document.getElementById("btnPrint");
+  const toolbarActions = document.querySelector(".toolbar-actions");
 
+  function isTeacherAuthenticated() {
+    return localStorage.getItem(TEACHER_AUTH_KEY) === "1";
+  }
+
+  function setTeacherAuthenticated(state, notify = false) {
+    if (state) {
+      localStorage.setItem(TEACHER_AUTH_KEY, "1");
+      document.body.classList.add("teacher-authenticated");
+    } else {
+      localStorage.removeItem(TEACHER_AUTH_KEY);
+      document.body.classList.remove("teacher-authenticated");
+      document.body.classList.remove("show-solutions");
+      document.body.classList.remove("show-plan");
+      if (btnSolutions) {
+        btnSolutions.classList.remove("btn-active");
+        btnSolutions.textContent = "Afficher les corrigés";
+      }
+      if (btnPlan) {
+        btnPlan.classList.remove("btn-active");
+        btnPlan.textContent = "Afficher le découpage horaire";
+      }
+    }
+    updateTeacherUI(state);
+    if (notify) {
+      if (state) {
+        alert("🎓 Mode Enseignant ACTIVÉ.\nLes corrigés et le découpage horaire sont déverrouillés sur l'ensemble du module.");
+      } else {
+        alert("🔒 Mode Enseignant DÉSACTIVÉ.\nRetour au mode élève (les corrigés sont entièrement masqués).");
+      }
+    }
+  }
+
+  function promptTeacherPassword() {
+    const entered = window.prompt("Espace Enseignant STI — Saisir le code d'accès (ou 'sti2026') :");
+    if (entered === null) return;
+    const clean = entered.trim().toLowerCase();
+    if (TEACHER_PASSWORDS.includes(clean)) {
+      setTeacherAuthenticated(true, true);
+    } else {
+      alert("❌ Code d'accès incorrect. Accès réservé à l'enseignant.");
+    }
+  }
+
+  function updateTeacherUI(isAuth) {
+    // Gestion du bouton ou badge dans la toolbar
+    const existingBadge = document.getElementById("badgeTeacher");
+    const existingLockBtn = document.getElementById("btnTeacherAuth");
+    const existingLogoutBtn = document.getElementById("btnTeacherLogout");
+
+    if (existingBadge) existingBadge.remove();
+    if (existingLockBtn) existingLockBtn.remove();
+    if (existingLogoutBtn) existingLogoutBtn.remove();
+
+    if (toolbarActions) {
+      if (isAuth) {
+        // Badge enseignant
+        const badge = document.createElement("span");
+        badge.id = "badgeTeacher";
+        badge.className = "badge-teacher";
+        badge.innerHTML = "🎓 Enseignant";
+        toolbarActions.insertBefore(badge, toolbarActions.firstChild);
+
+        // Bouton Quitter
+        const btnLogout = document.createElement("button");
+        btnLogout.id = "btnTeacherLogout";
+        btnLogout.type = "button";
+        btnLogout.className = "btn btn-teacher-logout";
+        btnLogout.title = "Verrouiller et revenir au mode élève";
+        btnLogout.textContent = "🔒 Quitter";
+        btnLogout.addEventListener("click", () => {
+          setTeacherAuthenticated(false, true);
+        });
+        toolbarActions.appendChild(btnLogout);
+      } else {
+        // Cadenas discret
+        const btnLock = document.createElement("button");
+        btnLock.id = "btnTeacherAuth";
+        btnLock.type = "button";
+        btnLock.className = "btn btn-teacher-lock";
+        btnLock.title = "Accès Enseignant (Raccourci : Alt + P)";
+        btnLock.textContent = "🔒";
+        btnLock.addEventListener("click", promptTeacherPassword);
+        toolbarActions.appendChild(btnLock);
+      }
+    }
+
+    // Gestion de l'éventuelle bannière sur index.html
+    const indexBanner = document.getElementById("teacherBannerIndex");
+    if (indexBanner) {
+      indexBanner.style.display = isAuth ? "flex" : "none";
+    }
+  }
+
+  // Vérifier URL param (?prof ou ?eleve / ?logout)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("eleve") || urlParams.has("logout")) {
+    setTeacherAuthenticated(false);
+  } else if (urlParams.has("prof") || urlParams.has("teacher") || window.location.hash === "#prof") {
+    setTeacherAuthenticated(true);
+  } else {
+    setTeacherAuthenticated(isTeacherAuthenticated());
+  }
+
+  // Raccourci clavier secret : Alt + P ou Ctrl + Shift + P
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if ((e.altKey && (e.key === "p" || e.key === "P")) ||
+        (e.ctrlKey && e.shiftKey && (e.key === "p" || e.key === "P"))) {
+      e.preventDefault();
+      if (isTeacherAuthenticated()) {
+        const quit = confirm("Le Mode Professeur est actif.\nSouhaitez-vous le verrouiller et revenir en mode élève ?");
+        if (quit) setTeacherAuthenticated(false, true);
+      } else {
+        promptTeacherPassword();
+      }
+    }
+  });
+
+  // Liaison bouton Corrigés
   if (btnSolutions) {
     btnSolutions.addEventListener("click", () => {
+      if (!isTeacherAuthenticated()) return;
       const active = document.body.classList.toggle("show-solutions");
       btnSolutions.classList.toggle("btn-active", active);
       btnSolutions.textContent = active
-        ? "Mode Élève : Masquer les corrigés"
-        : "Mode Prof : Afficher les corrigés";
+        ? "Masquer les corrigés"
+        : "Afficher les corrigés";
     });
   }
 
+  // Liaison bouton Découpage horaire
   if (btnPlan) {
     btnPlan.addEventListener("click", () => {
+      if (!isTeacherAuthenticated()) return;
       const active = document.body.classList.toggle("show-plan");
       btnPlan.classList.toggle("btn-active", active);
       btnPlan.textContent = active
@@ -30,9 +156,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Impression
   if (btnPrint) {
     btnPrint.addEventListener("click", () => {
       window.print();
+    });
+  }
+
+  // Bouton déconnexion sur index.html
+  const btnIndexLogout = document.getElementById("btnIndexLogout");
+  if (btnIndexLogout) {
+    btnIndexLogout.addEventListener("click", () => {
+      setTeacherAuthenticated(false, true);
+    });
+  }
+  const btnFooterTeacher = document.getElementById("btnFooterTeacher");
+  if (btnFooterTeacher) {
+    btnFooterTeacher.addEventListener("click", () => {
+      if (isTeacherAuthenticated()) {
+        setTeacherAuthenticated(false, true);
+      } else {
+        promptTeacherPassword();
+      }
     });
   }
 

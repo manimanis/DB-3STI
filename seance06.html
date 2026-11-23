@@ -18,7 +18,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -339,8 +339,8 @@
 
       <p>Rappel des tables interrogées aujourd'hui :</p>
       <div class="schema-list">
-        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
-        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)
+        <strong>Client</strong> (<span class="pk"><u>idClt</u></span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk"><u>refProd</u></span>, designation, categorie, prixUnit, qteStock)
       </div>
 
       <p>Dans phpMyAdmin (base <code>boutique_info</code>, onglet <strong>SQL</strong>), écrivez et testez les <strong>12 requêtes</strong> suivantes en vérifiant à chaque fois le nombre de lignes obtenues :</p>

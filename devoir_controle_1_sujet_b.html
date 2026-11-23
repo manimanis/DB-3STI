@@ -18,7 +18,7 @@
     </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; minutage</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher le corrigé</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -136,8 +136,8 @@
         <li>
           <strong>Correction d'un schéma erroné :</strong> Dans un réseau urbain, une <strong>Trottinette</strong> est rattachée à une seule <strong>Station</strong> de recharge, et une <strong>Station</strong> accueille plusieurs trottinettes. Un élève a proposé : <span class="q-pts">(2 pts)</span>
           <div class="schema-list">
-            <strong>Trottinette</strong> (<span class="pk">#codeTrot</span>, modele, batterie)<br>
-            <strong>Station</strong> (<span class="pk">#idStat</span>, adresseComplete, <span class="fk">codeTrot#</span>)
+            <strong>Trottinette</strong> (<span class="pk"><u>codeTrot</u></span>, modele, batterie)<br>
+            <strong>Station</strong> (<span class="pk"><u>idStat</u></span>, adresseComplete, <span class="fk">codeTrot#</span>)
           </div>
           Identifiez les <strong>2 erreurs de conception</strong> commises dans ce schéma, puis réécrivez le schéma relationnel corrigé.
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
@@ -155,7 +155,7 @@
         <p style="margin-bottom:0;"><strong>2. Diagnostic et correction (2 pts) :</strong><br>
           • <strong>Erreur 1 (Atomicité — 0,5 pt) :</strong> <code>adresseComplete</code> est un attribut composé → à éclater (ex. <code>rue</code>, <code>codePostal</code>, <code>ville</code>).<br>
           • <strong>Erreur 2 (Sens de la FK — 0,5 pt) :</strong> Dans un lien <code>1-N</code> (<code>Station</code> → <code>Trottinette</code>), la clé étrangère doit migrer côté <code>N</code> (dans <code>Trottinette</code>, pas dans <code>Station</code>).<br>
-          • <strong>Schéma corrigé (1 pt) :</strong> <code>Station(#idStat, rue, codePostal, ville)</code> et <code>Trottinette(#codeTrot, modele, batterie, idStat#)</code>.
+          • <strong>Schéma corrigé (1 pt) :</strong> <code>Station(<u>idStat</u>, rue, codePostal, ville)</code> et <code>Trottinette(<u>codeTrot</u>, modele, batterie, idStat#)</code>.
         </p>
       </div>
     </section>
@@ -169,52 +169,60 @@
 
       <div class="context-box">
         <div class="diagram-wrap">
-  <svg viewBox="0 0 760 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de voltride_db">
+  <svg viewBox="0 0 820 185" width="100%" height="185" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel complet de voltride_db">
     <defs>
-      <marker id="arr-dc1b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      <marker id="arr-dc1b-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arr-dc1b-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#7c3aed"/>
       </marker>
     </defs>
 
     <!-- Table Trottinette -->
-    <g transform="translate(20, 15)">
-      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
-      <rect x="0" y="0" width="180" height="26" rx="6" fill="#eff6ff"/>
-      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Trottinette</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># codeTrot (VARCHAR 5)</text>
-      <text x="10" y="64" font-size="8.5" fill="#334155">modele (VARCHAR 30)</text>
-      <text x="10" y="82" font-size="8.5" fill="#334155">categorie (CHECK Urb./Tout-t.)</text>
-      <text x="10" y="100" font-size="8.5" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
+    <g transform="translate(25, 15)">
+      <rect x="0" y="0" width="195" height="130" rx="7" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="195" height="28" rx="7" fill="#eff6ff"/>
+      <text x="97" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Trottinette</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline">codeTrot (VARCHAR 5)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">modele (VARCHAR 30)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">categorie (CHECK Urb./Tout-t.)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
     </g>
 
     <!-- Table Location -->
-    <g transform="translate(285, 15)">
-      <rect x="0" y="0" width="190" height="125" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
-      <rect x="0" y="0" width="190" height="26" rx="6" fill="#f0fdfa"/>
-      <text x="95" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Location</text>
-      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># idLoc (INT AUTO)</text>
-      <text x="10" y="62" font-size="8.5" fill="#334155">dateLoc (DATE), heureDeb</text>
-      <text x="10" y="80" font-size="8.5" fill="#334155">dureeMin (CHECK BETWEEN 15 AND 300)</text>
-      <text x="10" y="98" font-size="9" font-weight="700" fill="#1d4ed8">codeTrot# (FK) ➔</text>
-      <text x="10" y="116" font-size="9" font-weight="700" fill="#7c3aed">idAb# (FK) ➔</text>
+    <g transform="translate(305, 15)">
+      <rect x="0" y="0" width="210" height="130" rx="7" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="210" height="28" rx="7" fill="#f0fdfa"/>
+      <text x="105" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Location</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline">numLoc (INT AUTO)</text>
+      <text x="12" y="69" font-size="9" fill="#334155">dateLoc (DATE), heureDeb</text>
+      <text x="12" y="87" font-size="9" fill="#334155">dureeH (CHECK BETWEEN 1 AND 5)</text>
+      <text x="12" y="106" font-size="9.5" font-weight="700" fill="#1d4ed8">codeTrot# (FK)</text>
+      <text x="12" y="123" font-size="9.5" font-weight="700" fill="#7c3aed">idAb# (FK)</text>
     </g>
 
     <!-- Table Abonne -->
-    <g transform="translate(560, 15)">
-      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
-      <rect x="0" y="0" width="180" height="26" rx="6" fill="#f5f3ff"/>
-      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Abonne</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># idAb (INT AUTO)</text>
-      <text x="10" y="64" font-size="8.5" fill="#334155">nomAb (VARCHAR 30)</text>
-      <text x="10" y="82" font-size="8.5" fill="#334155">tel (VARCHAR 15 UNIQUE)</text>
-      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR 30)</text>
+    <g transform="translate(600, 15)">
+      <rect x="0" y="0" width="195" height="130" rx="7" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="195" height="28" rx="7" fill="#f5f3ff"/>
+      <text x="97" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">Abonne</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline">idAb (INT AUTO)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">nomAb (VARCHAR 30)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">telAb (VARCHAR 15 UNIQUE)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">ville (VARCHAR 30)</text>
     </g>
 
-    <!-- Liens FK -->
-    <path d="M 285 98 C 240 98, 240 44, 205 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1b)"/>
-    <path d="M 475 116 C 515 116, 515 44, 555 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1b)"/>
+    <!-- Connecteurs d'intégrité référentielle (Point FK • ➔ Clé Primaire PK) -->
+    <!-- 1. Location.codeTrot# -> Trottinette.codeTrot -->
+    <circle cx="305" cy="121" r="3.5" fill="#1d4ed8"/>
+    <path d="M 305 121 C 260 121, 265 64, 220 64" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1b-b)"/>
 
-    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">voltride_db : La table Location relie une Trottinette mise à disposition à l'Abonné locataire.</text>
+    <!-- 2. Location.idAb# -> Abonne.idAb -->
+    <circle cx="515" cy="138" r="3.5" fill="#7c3aed"/>
+    <path d="M 515 138 C 560 138, 555 64, 600 64" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1b-p)"/>
+
+    <text x="410" y="170" text-anchor="middle" font-size="9.5" font-weight="600" fill="#475569">Légende : Le point • part de la Clé Étrangère (FK #) et la flèche ➔ pointe vers la Clé Primaire (PK soulignée) correspondante.</text>
   </svg>
   <div class="diagram-caption">Figure DC1B.1 — Schéma Relationnel de la base VoltRide (Trottinette, Location, Abonne).</div>
 </div>
@@ -230,7 +238,7 @@ La start-up de location de trottinettes électriques <strong>VoltRide</strong> s
         <li>Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Trottinette</strong> et <strong>Location</strong>, puis entre <strong>Abonné</strong> et <strong>Location</strong>. <span class="q-pts">(1 pt)</span>
           <div class="answer-lines"><div class="answer-line"></div></div>
         </li>
-        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Trottinette</code>, <code>Abonne</code>, <code>Location</code>) en indiquant les clés primaires (<code>#pk</code>) et les clés étrangères (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
+        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Trottinette</code>, <code>Abonne</code>, <code>Location</code>) en soulignant les clés primaires (<code><u>pk</u></code>) et en faisant suivre les clés étrangères du symbole <code>#</code> (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
         </li>
         <li>Indiquez dans quel ordre il faut <strong>insérer</strong> les données dans ces 3 tables, puis dans quel ordre il faudrait les <strong>supprimer</strong> avec <code>DROP TABLE</code>. <span class="q-pts">(1 pt)</span>
@@ -246,9 +254,9 @@ La start-up de location de trottinettes électriques <strong>VoltRide</strong> s
         <p><strong>1. Types de liens (1 pt) :</strong> <code>Trottinette</code> — <code>Location</code> : <strong>1-N</strong> (0,5 pt) | <code>Abonne</code> — <code>Location</code> : <strong>1-N</strong> (0,5 pt).</p>
         <p><strong>2. Modèle relationnel (2,5 pts) :</strong></p>
         <div class="schema-list">
-          <strong>Trottinette</strong> (<span class="pk">#codeTrot</span>, modele, categorie, tarifH)<br>
-          <strong>Abonne</strong> (<span class="pk">#idAb</span>, nomAb, telAb, ville)<br>
-          <strong>Location</strong> (<span class="pk">#numLoc</span>, dateLoc, heureDeb, dureeH, <span class="fk">codeTrot#</span>, <span class="fk">idAb#</span>)
+          <strong>Trottinette</strong> (<span class="pk"><u>codeTrot</u></span>, modele, categorie, tarifH)<br>
+          <strong>Abonne</strong> (<span class="pk"><u>idAb</u></span>, nomAb, telAb, ville)<br>
+          <strong>Location</strong> (<span class="pk"><u>numLoc</u></span>, dateLoc, heureDeb, dureeH, <span class="fk">codeTrot#</span>, <span class="fk">idAb#</span>)
         </div>
         <p><strong>3. Ordre (1 pt) :</strong> Insertion : <code>Trottinette</code> et <code>Abonne</code> d'abord, puis <code>Location</code> (0,5 pt). Suppression : <code>Location</code> d'abord, puis <code>Trottinette</code> et <code>Abonne</code> (0,5 pt).</p>
         <p style="margin-bottom:0;"><strong>4. Choix de clé primaire (0,5 pt) :</strong> Deux abonnés peuvent porter le même nom (risque d'homonymes), ce qui violerait la règle d'unicité de la clé primaire.</p>

@@ -18,7 +18,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -137,78 +137,86 @@
 
       <p>Rappel du schéma relationnel conçu à la séance 2 pour notre boutique informatique <strong>TechStore</strong> (base <code>boutique_info</code>) :</p>
 <div class="diagram-wrap">
-  <svg viewBox="0 0 760 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel complet de boutique_info">
+  <svg viewBox="0 0 910 200" width="100%" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel complet de boutique_info">
     <defs>
-      <marker id="arr-s3-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      <marker id="arr-s3-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1d4ed8"/>
       </marker>
-      <marker id="arr-s3-t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f766e"/>
+      <marker id="arr-s3-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#0f766e"/>
       </marker>
-      <marker id="arr-s3-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed"/>
+      <marker id="arr-s3-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#7c3aed"/>
       </marker>
     </defs>
 
     <!-- Table Client -->
-    <g transform="translate(15, 12)">
-      <rect x="0" y="0" width="160" height="135" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
-      <rect x="0" y="0" width="160" height="26" rx="6" fill="#eff6ff"/>
-      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Client</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># idClt (INT AUTO)</text>
-      <text x="10" y="64" font-size="9" fill="#334155">nomClt (VARCHAR 30)</text>
-      <text x="10" y="82" font-size="9" fill="#334155">prenomClt (VARCHAR 30)</text>
-      <text x="10" y="100" font-size="9" fill="#334155">villeClt (VARCHAR 30)</text>
-      <text x="10" y="118" font-size="9" fill="#334155">telClt (VARCHAR 15)</text>
+    <g transform="translate(20, 15)">
+      <rect x="0" y="0" width="175" height="145" rx="7" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="175" height="28" rx="7" fill="#eff6ff"/>
+      <text x="87" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Client</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline">idClt (INT AUTO)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">nomClt (VARCHAR 30)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">prenomClt (VARCHAR 30)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">villeClt (VARCHAR 30)</text>
+      <text x="12" y="130" font-size="9" fill="#334155">telClt (VARCHAR 15)</text>
     </g>
 
     <!-- Table Commande -->
-    <g transform="translate(205, 12)">
-      <rect x="0" y="0" width="165" height="110" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
-      <rect x="0" y="0" width="165" height="26" rx="6" fill="#f0fdfa"/>
-      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Commande</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline"># numCmd (INT)</text>
-      <text x="10" y="65" font-size="9" fill="#334155">dateCmd (DATE)</text>
-      <text x="10" y="88" font-size="9.5" font-weight="700" fill="#1d4ed8">idClt# (FK) ➔</text>
+    <g transform="translate(250, 15)">
+      <rect x="0" y="0" width="175" height="145" rx="7" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="175" height="28" rx="7" fill="#f0fdfa"/>
+      <text x="87" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Commande</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline">numCmd (INT)</text>
+      <text x="12" y="73" font-size="9" fill="#334155">dateCmd (DATE)</text>
+      <text x="12" y="97" font-size="9.5" font-weight="700" fill="#1d4ed8">idClt# (FK)</text>
     </g>
 
     <!-- Table LigneCommande -->
-    <g transform="translate(395, 12)">
-      <rect x="0" y="0" width="165" height="110" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
-      <rect x="0" y="0" width="165" height="26" rx="6" fill="#fffbeb"/>
-      <text x="82" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">LigneCommande</text>
-      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># numCmd# (FK)</text>
-      <text x="10" y="65" font-size="9" font-weight="700" fill="#7c3aed" text-decoration="underline"># refProd# (FK)</text>
-      <text x="10" y="88" font-size="9" fill="#334155">qteCmd (INT)</text>
+    <g transform="translate(480, 15)">
+      <rect x="0" y="0" width="180" height="145" rx="7" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
+      <rect x="0" y="0" width="180" height="28" rx="7" fill="#fffbeb"/>
+      <text x="90" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#b45309">LigneCommande</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline">numCmd# (FK)</text>
+      <text x="12" y="73" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline">refProd# (FK)</text>
+      <text x="12" y="97" font-size="9" fill="#334155">qteCmd (INT)</text>
     </g>
 
     <!-- Table Produit -->
-    <g transform="translate(585, 12)">
-      <rect x="0" y="0" width="160" height="135" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
-      <rect x="0" y="0" width="160" height="26" rx="6" fill="#f5f3ff"/>
-      <text x="80" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Produit</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># refProd (VARCHAR 10)</text>
-      <text x="10" y="64" font-size="9" fill="#334155">designation (VARCHAR 50)</text>
-      <text x="10" y="82" font-size="9" fill="#334155">prixUnitaire (DECIMAL 7,2)</text>
-      <text x="10" y="100" font-size="9" fill="#334155">qteStock (INT)</text>
-      <text x="10" y="118" font-size="9" fill="#334155">categorie (VARCHAR 30)</text>
+    <g transform="translate(715, 15)">
+      <rect x="0" y="0" width="175" height="145" rx="7" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="175" height="28" rx="7" fill="#f5f3ff"/>
+      <text x="87" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">Produit</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline">refProd (VARCHAR 10)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">designation (VARCHAR 50)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">prixUnitaire (DECIMAL 7,2)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">qteStock (INT)</text>
+      <text x="12" y="130" font-size="9" fill="#334155">categorie (VARCHAR 30)</text>
     </g>
 
-    <!-- Liens d'intégrité référentielle -->
-    <path d="M 205 88 C 185 88, 185 44, 175 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-s3-b)"/>
-    <path d="M 395 44 C 380 44, 380 44, 370 44" fill="none" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr-s3-t)"/>
-    <path d="M 560 65 C 570 65, 570 44, 585 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-s3-p)"/>
+    <!-- Connecteurs d'intégrité référentielle (Point FK • ➔ Clé Primaire PK) -->
+    <!-- 1. Commande.idClt# -> Client.idClt -->
+    <circle cx="250" cy="112" r="3.5" fill="#1d4ed8"/>
+    <path d="M 250 112 C 220 112, 225 64, 195 64" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-s3-b)"/>
 
-    <text x="380" y="158" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">Légende : Les flèches relient chaque Clé Étrangère (FK #) à la Clé Primaire (PK #) de la table mère correspondante.</text>
+    <!-- 2. LigneCommande.numCmd# -> Commande.numCmd -->
+    <circle cx="480" cy="64" r="3.5" fill="#0f766e"/>
+    <path d="M 480 64 L 425 64" fill="none" stroke="#0f766e" stroke-width="1.8" marker-end="url(#arr-s3-t)"/>
+
+    <!-- 3. LigneCommande.refProd# -> Produit.refProd -->
+    <circle cx="660" cy="88" r="3.5" fill="#7c3aed"/>
+    <path d="M 660 88 C 685 88, 690 64, 715 64" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-s3-p)"/>
+
+    <text x="455" y="182" text-anchor="middle" font-size="9.5" font-weight="600" fill="#475569">Légende : Le point • part de la Clé Étrangère (FK #) et la flèche ➔ pointe vers la Clé Primaire (PK soulignée) correspondante.</text>
   </svg>
   <div class="diagram-caption">Figure 3.1 — Schéma Relationnel complet de la base boutique_info avec ses 4 tables et contraintes référentielles.</div>
 </div>
 
       <div class="schema-list">
-        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr)<br>
-        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
-        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>)<br>
-        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+        <strong>Client</strong> (<span class="pk"><u>idClt</u></span>, nom, prenom, ville, tel, dateInscr)<br>
+        <strong>Produit</strong> (<span class="pk"><u>refProd</u></span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk"><u>numCmd</u></span>, dateCmd, <span class="fk">idClt#</span>)<br>
+        <strong>LigneCommande</strong> (<span class="pk"><u>numCmd#</u></span>, <span class="pk"><u>refProd#</u></span>, qteCmd)
       </div>
 
       <p><strong>Travail demandé :</strong> Complétez le tableau ci-dessous en choisissant pour chaque champ le type SQL le plus adapté et les contraintes nécessaires (<code>PK</code>, <code>FK</code>, <code>NOT NULL</code>, <code>NULL</code>, <code>AUTO_INCREMENT</code>, <code>DEFAULT</code>) :</p>

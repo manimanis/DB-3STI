@@ -18,7 +18,7 @@
     </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le barème &amp; minutage</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher le corrigé</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher le corrigé</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -133,8 +133,8 @@
         <li>
           <strong>Correction d'un schéma erroné :</strong> Dans un tournoi, un <strong>Joueur</strong> appartient à une seule <strong>Équipe</strong>, et une <strong>Équipe</strong> regroupe plusieurs joueurs. Un élève a proposé : <span class="q-pts">(2 pts)</span>
           <div class="schema-list">
-            <strong>Joueur</strong> (<span class="pk">#idJ</span>, nomComplet, tel)<br>
-            <strong>Equipe</strong> (<span class="pk">#idEq</span>, nomEq, <span class="fk">idJ#</span>)
+            <strong>Joueur</strong> (<span class="pk"><u>idJ</u></span>, nomComplet, tel)<br>
+            <strong>Equipe</strong> (<span class="pk"><u>idEq</u></span>, nomEq, <span class="fk">idJ#</span>)
           </div>
           Identifiez les <strong>2 erreurs de conception</strong> commises dans ce schéma, puis réécrivez le schéma relationnel corrigé.
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
@@ -152,7 +152,7 @@
         <p style="margin-bottom:0;"><strong>2. Diagnostic et correction (2 pts) :</strong><br>
           • <strong>Erreur 1 (Atomicité — 0,5 pt) :</strong> <code>nomComplet</code> est un attribut composé → à éclater en <code>nom</code> et <code>prenom</code>.<br>
           • <strong>Erreur 2 (Sens de la FK — 0,5 pt) :</strong> Dans un lien <code>1-N</code> (<code>Equipe</code> → <code>Joueur</code>), la clé étrangère doit migrer côté <code>N</code> (dans <code>Joueur</code>, pas dans <code>Equipe</code>).<br>
-          • <strong>Schéma corrigé (1 pt) :</strong> <code>Equipe(#idEq, nomEq)</code> et <code>Joueur(#idJ, nom, prenom, tel, idEq#)</code>.
+          • <strong>Schéma corrigé (1 pt) :</strong> <code>Equipe(<u>idEq</u>, nomEq)</code> et <code>Joueur(<u>idJ</u>, nom, prenom, tel, idEq#)</code>.
         </p>
       </div>
     </section>
@@ -166,52 +166,60 @@
 
       <div class="context-box">
         <div class="diagram-wrap">
-  <svg viewBox="0 0 760 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel de takwira_db">
+  <svg viewBox="0 0 820 185" width="100%" height="185" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma Relationnel complet de takwira_db">
     <defs>
-      <marker id="arr-dc1a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1d4ed8"/>
+      <marker id="arr-dc1a-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arr-dc1a-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#7c3aed"/>
       </marker>
     </defs>
 
     <!-- Table Terrain -->
-    <g transform="translate(20, 15)">
-      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
-      <rect x="0" y="0" width="180" height="26" rx="6" fill="#eff6ff"/>
-      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Terrain</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline"># codeTer (VARCHAR 5)</text>
-      <text x="10" y="64" font-size="8.5" fill="#334155">nomTer (VARCHAR 30)</text>
-      <text x="10" y="82" font-size="8.5" fill="#334155">typeGazon (CHECK Synt./Hyb.)</text>
-      <text x="10" y="100" font-size="8.5" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
+    <g transform="translate(25, 15)">
+      <rect x="0" y="0" width="195" height="130" rx="7" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+      <rect x="0" y="0" width="195" height="28" rx="7" fill="#eff6ff"/>
+      <text x="97" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Terrain</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#1d4ed8" text-decoration="underline">codeTer (VARCHAR 5)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">nomTer (VARCHAR 30)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">typeGazon (CHECK Synt./Hyb.)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">tarifH (DECIMAL 5,2 > 0)</text>
     </g>
 
     <!-- Table Reservation -->
-    <g transform="translate(285, 15)">
-      <rect x="0" y="0" width="190" height="125" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
-      <rect x="0" y="0" width="190" height="26" rx="6" fill="#f0fdfa"/>
-      <text x="95" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Reservation</text>
-      <text x="10" y="44" font-size="9" font-weight="700" fill="#0f766e" text-decoration="underline"># idRes (INT AUTO)</text>
-      <text x="10" y="62" font-size="8.5" fill="#334155">dateRes (DATE), heureDeb</text>
-      <text x="10" y="80" font-size="8.5" fill="#334155">dureeH (CHECK BETWEEN 1 AND 3)</text>
-      <text x="10" y="98" font-size="9" font-weight="700" fill="#1d4ed8">codeTer# (FK) ➔</text>
-      <text x="10" y="116" font-size="9" font-weight="700" fill="#7c3aed">idEq# (FK) ➔</text>
+    <g transform="translate(305, 15)">
+      <rect x="0" y="0" width="210" height="130" rx="7" fill="#ffffff" stroke="#0f766e" stroke-width="1.8"/>
+      <rect x="0" y="0" width="210" height="28" rx="7" fill="#f0fdfa"/>
+      <text x="105" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">Reservation</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#0f766e" text-decoration="underline">numRes (INT AUTO)</text>
+      <text x="12" y="69" font-size="9" fill="#334155">dateRes (DATE), heureDeb</text>
+      <text x="12" y="87" font-size="9" fill="#334155">dureeH (CHECK BETWEEN 1 AND 3)</text>
+      <text x="12" y="106" font-size="9.5" font-weight="700" fill="#1d4ed8">codeTer# (FK)</text>
+      <text x="12" y="123" font-size="9.5" font-weight="700" fill="#7c3aed">idEq# (FK)</text>
     </g>
 
     <!-- Table Equipe -->
-    <g transform="translate(560, 15)">
-      <rect x="0" y="0" width="180" height="115" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
-      <rect x="0" y="0" width="180" height="26" rx="6" fill="#f5f3ff"/>
-      <text x="90" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">Equipe</text>
-      <text x="10" y="44" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline"># idEq (INT AUTO)</text>
-      <text x="10" y="64" font-size="8.5" fill="#334155">nomEq (VARCHAR 30 UNIQUE)</text>
-      <text x="10" y="82" font-size="8.5" fill="#334155">telCapitaine (VARCHAR 15)</text>
-      <text x="10" y="100" font-size="8.5" fill="#334155">ville (VARCHAR 30)</text>
+    <g transform="translate(600, 15)">
+      <rect x="0" y="0" width="195" height="130" rx="7" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+      <rect x="0" y="0" width="195" height="28" rx="7" fill="#f5f3ff"/>
+      <text x="97" y="19" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">Equipe</text>
+      <text x="12" y="49" font-size="9.5" font-weight="700" fill="#7c3aed" text-decoration="underline">idEq (INT AUTO)</text>
+      <text x="12" y="70" font-size="9" fill="#334155">nomEq (VARCHAR 30 UNIQUE)</text>
+      <text x="12" y="90" font-size="9" fill="#334155">telCap (VARCHAR 15)</text>
+      <text x="12" y="110" font-size="9" fill="#334155">ville (VARCHAR 30)</text>
     </g>
 
-    <!-- Liens FK -->
-    <path d="M 285 98 C 240 98, 240 44, 205 44" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1a)"/>
-    <path d="M 475 116 C 515 116, 515 44, 555 44" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1a)"/>
+    <!-- Connecteurs d'intégrité référentielle (Point FK • ➔ Clé Primaire PK) -->
+    <!-- 1. Reservation.codeTer# -> Terrain.codeTer -->
+    <circle cx="305" cy="121" r="3.5" fill="#1d4ed8"/>
+    <path d="M 305 121 C 260 121, 265 64, 220 64" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#arr-dc1a-b)"/>
 
-    <text x="380" y="152" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">takwira_db : La table Reservation relie un Terrain loué à l'Équipe qui l'a réservé.</text>
+    <!-- 2. Reservation.idEq# -> Equipe.idEq -->
+    <circle cx="515" cy="138" r="3.5" fill="#7c3aed"/>
+    <path d="M 515 138 C 560 138, 555 64, 600 64" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arr-dc1a-p)"/>
+
+    <text x="410" y="170" text-anchor="middle" font-size="9.5" font-weight="600" fill="#475569">Légende : Le point • part de la Clé Étrangère (FK #) et la flèche ➔ pointe vers la Clé Primaire (PK soulignée) correspondante.</text>
   </svg>
   <div class="diagram-caption">Figure DC1A.1 — Schéma Relationnel de la base Takwira Arena (Terrain, Reservation, Equipe).</div>
 </div>
@@ -227,7 +235,7 @@ Le complexe de terrains de mini-foot <strong>Takwira Arena</strong> souhaite cr�
         <li>Précisez le type de lien (<code>1-N</code> ou <code>N-N</code>) entre <strong>Terrain</strong> et <strong>Réservation</strong>, puis entre <strong>Équipe</strong> et <strong>Réservation</strong>. <span class="q-pts">(1 pt)</span>
           <div class="answer-lines"><div class="answer-line"></div></div>
         </li>
-        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Terrain</code>, <code>Equipe</code>, <code>Reservation</code>) en indiquant les clés primaires (<code>#pk</code>) et les clés étrangères (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
+        <li>Écrivez la <strong>représentation textuelle complète</strong> des <strong>3 tables</strong> (<code>Terrain</code>, <code>Equipe</code>, <code>Reservation</code>) en soulignant les clés primaires (<code><u>pk</u></code>) et en faisant suivre les clés étrangères du symbole <code>#</code> (<code>fk#</code>). <span class="q-pts">(2,5 pts)</span>
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
         </li>
         <li>Indiquez dans quel ordre il faut <strong>créer</strong> ces 3 tables en SQL, puis dans quel ordre il faudrait les <strong>supprimer</strong> avec <code>DROP TABLE</code>. <span class="q-pts">(1 pt)</span>
@@ -243,9 +251,9 @@ Le complexe de terrains de mini-foot <strong>Takwira Arena</strong> souhaite cr�
         <p><strong>1. Types de liens (1 pt) :</strong> <code>Terrain</code> — <code>Reservation</code> : <strong>1-N</strong> (0,5 pt) | <code>Equipe</code> — <code>Reservation</code> : <strong>1-N</strong> (0,5 pt).</p>
         <p><strong>2. Modèle relationnel (2,5 pts) :</strong></p>
         <div class="schema-list">
-          <strong>Terrain</strong> (<span class="pk">#codeTer</span>, nomTer, typeGazon, tarifH)<br>
-          <strong>Equipe</strong> (<span class="pk">#idEq</span>, nomEq, telCap, ville)<br>
-          <strong>Reservation</strong> (<span class="pk">#numRes</span>, dateRes, heureDeb, dureeH, <span class="fk">codeTer#</span>, <span class="fk">idEq#</span>)
+          <strong>Terrain</strong> (<span class="pk"><u>codeTer</u></span>, nomTer, typeGazon, tarifH)<br>
+          <strong>Equipe</strong> (<span class="pk"><u>idEq</u></span>, nomEq, telCap, ville)<br>
+          <strong>Reservation</strong> (<span class="pk"><u>numRes</u></span>, dateRes, heureDeb, dureeH, <span class="fk">codeTer#</span>, <span class="fk">idEq#</span>)
         </div>
         <p><strong>3. Ordre (1 pt) :</strong> Création : <code>Terrain</code> et <code>Equipe</code> d'abord, puis <code>Reservation</code> (0,5 pt). Suppression : <code>Reservation</code> d'abord, puis <code>Terrain</code> et <code>Equipe</code> (0,5 pt).</p>
         <p style="margin-bottom:0;"><strong>4. Type de <code>telCap</code> (0,5 pt) :</strong> On ne fait pas de calculs arithmétiques sur un numéro de téléphone, et <code>INT</code> supprimerait les zéros initiaux ou interdirait le préfixe <code>+216</code>.</p>

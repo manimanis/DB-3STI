@@ -33,7 +33,7 @@
         <h2>1. Modèle Relationnel &amp; Intégrité</h2>
         <ul>
           <li><strong>Entité → Table</strong> | <strong>Attribut → Champ</strong> | <strong>Occurrence → Ligne</strong>.</li>
-          <li><strong>Clé primaire (PK)</strong> <code>#champ</code> : <strong>unique</strong> et <strong>non nulle</strong>.</li>
+          <li><strong>Clé primaire (PK) :</strong> <u>soulignée</u> (ex. <code><u>champ</u></code>), <strong>unique</strong> et <strong>non nulle</strong>.</li>
           <li><strong>Clé étrangère (FK)</strong> <code>champ#</code> : référence la PK d'une table mère (<strong>même type</strong> obligatoire).</li>
           <li><strong>Lien <code>1-N</code> :</strong> la PK côté <code>1</code> migre comme FK dans la table côté <code>N</code>.</li>
           <li><strong>Lien <code>N-N</code> :</strong> création d'une <strong>table d'association</strong> ayant une PK composée des deux FK + attributs propres.</li>
@@ -58,10 +58,10 @@
         </table>
         <div style="font-size:11px; color:#475569; margin-top:4px;">
           <strong>Schéma fil rouge (TechStore) :</strong><br>
-          <code>Client(#idClt, nom, prenom, ville, tel, dateInscr)</code><br>
-          <code>Produit(#refProd, designation, categorie, prixUnit, qteStock)</code><br>
-          <code>Commande(#numCmd, dateCmd, idClt#)</code><br>
-          <code>LigneCommande(#numCmd#, #refProd#, qteCmd)</code>
+          <code>Client(<u>idClt</u>, nom, prenom, ville, tel, dateInscr)</code><br>
+          <code>Produit(<u>refProd</u>, designation, categorie, prixUnit, qteStock)</code><br>
+          <code>Commande(<u>numCmd</u>, dateCmd, idClt#)</code><br>
+          <code>LigneCommande(<u>numCmd#</u>, <u>refProd#</u>, qteCmd)</code>
         </div>
       </div>
     </div>

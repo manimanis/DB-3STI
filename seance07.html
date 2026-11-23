@@ -18,7 +18,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -307,10 +307,10 @@
       </h2>
 
       <div class="schema-list">
-        <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr, email)<br>
-        <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
-        <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
-        <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+        <strong>Client</strong> (<span class="pk"><u>idClt</u></span>, nom, prenom, ville, tel, dateInscr, email)<br>
+        <strong>Produit</strong> (<span class="pk"><u>refProd</u></span>, designation, categorie, prixUnit, qteStock)<br>
+        <strong>Commande</strong> (<span class="pk"><u>numCmd</u></span>, dateCmd, <span class="fk">idClt#</span>) &nbsp;|&nbsp;
+        <strong>LigneCommande</strong> (<span class="pk"><u>numCmd#</u></span>, <span class="pk"><u>refProd#</u></span>, qteCmd)
       </div>
 
       <p>Dans phpMyAdmin (base <code>boutique_info</code>), écrivez et exécutez les <strong>12 requêtes</strong> suivantes :</p>

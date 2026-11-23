@@ -18,7 +18,7 @@
       </div>
     <div class="toolbar-actions">
       <button id="btnPlan" class="btn" type="button">Afficher le découpage horaire</button>
-      <button id="btnSolutions" class="btn" type="button">Mode Prof : Afficher les corrigés</button>
+      <button id="btnSolutions" class="btn" type="button">Afficher les corrigés</button>
       <button id="btnPrint" class="btn btn-print" type="button">Imprimer / Exporter PDF</button>
     </div>
   </div>
@@ -211,7 +211,7 @@
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div>
         </li>
         <li>
-          <strong>Écrire le schéma relationnel :</strong> Donnez la représentation textuelle complète des <strong>5 tables</strong> de la base <em>Pixel Zone</em> en notant <code>#clePrimaire</code> et <code>cleEtrangere#</code>.
+          <strong>Écrire le schéma relationnel :</strong> Donnez la représentation textuelle complète des <strong>5 tables</strong> de la base <em>Pixel Zone</em> en soulignant les clés primaires (<code><u>clé</u></code>) et en faisant suivre les clés étrangères du symbole <code>#</code> (<code>clé#</code>).
           <div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div>
         </li>
       </ol>
@@ -223,11 +223,11 @@
         <p><strong>3. Décomposition du lien N-N :</strong> Impossible de mettre 15 codes de jeux dans une seule cellule de <code>Poste</code>. On crée une <strong>table d'association</strong> <code>Installation</code> contenant les deux clés étrangères (formant ensemble la clé primaire composée) ainsi que l'attribut porté <code>dateInstall</code>.</p>
         <p><strong>4. Représentation textuelle des 5 tables :</strong></p>
         <div class="schema-list">
-          <strong>Joueur</strong> (<span class="pk">#numInscr</span>, pseudo, dateNaiss, tel)<br>
-          <strong>Poste</strong> (<span class="pk">#codePoste</span>, typePoste, tarifH, etat)<br>
-          <strong>Jeu</strong> (<span class="pk">#codeJeu</span>, titre, genre, ageMin)<br>
-          <strong>Session</strong> (<span class="pk">#numSess</span>, dateSess, dureeH, <span class="fk">numInscr#</span>, <span class="fk">codePoste#</span>)<br>
-          <strong>Installation</strong> (<span class="pk">#codePoste#</span>, <span class="pk">#codeJeu#</span>, dateInstall)
+          <strong>Joueur</strong> (<span class="pk"><u>numInscr</u></span>, pseudo, dateNaiss, tel)<br>
+          <strong>Poste</strong> (<span class="pk"><u>codePoste</u></span>, typePoste, tarifH, etat)<br>
+          <strong>Jeu</strong> (<span class="pk"><u>codeJeu</u></span>, titre, genre, ageMin)<br>
+          <strong>Session</strong> (<span class="pk"><u>numSess</u></span>, dateSess, dureeH, <span class="fk">numInscr#</span>, <span class="fk">codePoste#</span>)<br>
+          <strong>Installation</strong> (<span class="pk"><u>codePoste#</u></span>, <span class="pk"><u>codeJeu#</u></span>, dateInstall)
         </div>
       </div>
     </section>
@@ -267,8 +267,8 @@
             </tr>
             <tr>
               <td>Identifiant</td>
-              <td><strong>Clé primaire (PK)</strong> — notée <code>#champ</code> ou <u>soulignée</u></td>
-              <td><code>#numInscr</code>, <code>#codePoste</code></td>
+              <td><strong>Clé primaire (PK)</strong> — <u>soulignée</u></td>
+              <td><code><u>numInscr</u></code>, <code><u>codePoste</u></code></td>
             </tr>
             <tr>
               <td>Lien vers une autre table</td>
@@ -289,7 +289,7 @@
     <!-- Schéma E/A 1-N -->
     <rect x="22" y="54" width="75" height="34" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
     <text x="59" y="71" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Client</text>
-    <text x="59" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8">#idClt</text>
+    <text x="59" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8" text-decoration="underline">idClt</text>
 
     <line x1="97" y1="71" x2="135" y2="71" stroke="#64748b" stroke-width="1.5"/>
     <text x="116" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,N</text>
@@ -302,7 +302,7 @@
 
     <rect x="223" y="54" width="85" height="34" rx="4" fill="#ffffff" stroke="#1d4ed8"/>
     <text x="265" y="71" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Commande</text>
-    <text x="265" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8">#numCmd</text>
+    <text x="265" y="82" text-anchor="middle" font-size="7.5" fill="#1d4ed8" text-decoration="underline">numCmd</text>
 
     <!-- Résultat Relationnel 1-N -->
     <rect x="22" y="98" width="336" height="46" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
@@ -312,12 +312,12 @@
     <!-- Panneau Règle 2 : Cardinalité N-N -->
     <rect x="390" y="8" width="360" height="150" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
     <text x="570" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">RÈGLE 2 : Cardinalité (1,N) — (1,N) ➔ Table d'Association</text>
-    <text x="570" y="42" text-anchor="middle" font-size="8.5" fill="#475569">L'association devient une NOUVELLE TABLE avec clé composite (#, #)</text>
+    <text x="570" y="42" text-anchor="middle" font-size="8.5" fill="#475569">L'association devient une NOUVELLE TABLE avec clé composite soulignée (clé1#, clé2#)</text>
 
     <!-- Schéma E/A N-N -->
     <rect x="402" y="54" width="80" height="34" rx="4" fill="#ffffff" stroke="#0f766e"/>
     <text x="442" y="71" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f766e">Commande</text>
-    <text x="442" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e">#numCmd</text>
+    <text x="442" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e" text-decoration="underline">numCmd</text>
 
     <line x1="482" y1="71" x2="515" y2="71" stroke="#64748b" stroke-width="1.5"/>
     <text x="498" y="66" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">1,N</text>
@@ -330,7 +330,7 @@
 
     <rect x="598" y="54" width="75" height="34" rx="4" fill="#ffffff" stroke="#0f766e"/>
     <text x="635" y="71" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f766e">Produit</text>
-    <text x="635" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e">#refProd</text>
+    <text x="635" y="82" text-anchor="middle" font-size="7.5" fill="#0f766e" text-decoration="underline">refProd</text>
 
     <!-- Résultat Relationnel N-N -->
     <rect x="402" y="98" width="336" height="46" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
@@ -352,7 +352,7 @@
             <rect x="20" y="38" width="130" height="58" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
             <text x="85" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Joueur (Mère)</text>
             <line x1="20" y1="65" x2="150" y2="65" stroke="#bfdbfe"/>
-            <text x="85" y="83" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numInscr</text>
+            <text x="85" y="83" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">numInscr</text>
 
             <line x1="150" y1="67" x2="215" y2="67" stroke="#0f766e" stroke-width="2"/>
             <polygon points="215,67 207,62 207,72" fill="#0f766e"/>
@@ -362,7 +362,7 @@
             <rect x="218" y="38" width="142" height="72" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
             <text x="289" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Session (Fille)</text>
             <line x1="218" y1="65" x2="360" y2="65" stroke="#99f6e4"/>
-            <text x="289" y="82" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#numSess</text>
+            <text x="289" y="82" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">numSess</text>
             <text x="289" y="99" text-anchor="middle" font-size="11" font-family="Consolas, monospace" font-weight="700" fill="#0f766e">numInscr#</text>
 
             <!-- Séparateur -->
@@ -373,12 +373,12 @@
             <rect x="405" y="38" width="95" height="54" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
             <text x="452" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Poste</text>
             <line x1="405" y1="64" x2="500" y2="64" stroke="#bfdbfe"/>
-            <text x="452" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#codePoste</text>
+            <text x="452" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">codePoste</text>
 
             <rect x="650" y="38" width="95" height="54" rx="6" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
             <text x="697" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Jeu</text>
             <line x1="650" y1="64" x2="745" y2="64" stroke="#bfdbfe"/>
-            <text x="697" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">#codeJeu</text>
+            <text x="697" y="81" text-anchor="middle" font-size="11" font-family="Consolas, monospace" fill="#1d4ed8" text-decoration="underline">codeJeu</text>
 
             <line x1="500" y1="65" x2="528" y2="112" stroke="#0f766e" stroke-width="1.8"/>
             <line x1="650" y1="65" x2="622" y2="112" stroke="#0f766e" stroke-width="1.8"/>
@@ -386,7 +386,7 @@
             <rect x="502" y="92" width="146" height="68" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
             <text x="575" y="110" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1e293b">Installation</text>
             <line x1="502" y1="116" x2="648" y2="116" stroke="#99f6e4"/>
-            <text x="575" y="132" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" font-weight="700" fill="#1d4ed8" text-decoration="underline">#codePoste#, #codeJeu#</text>
+            <text x="575" y="132" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" font-weight="700" fill="#1d4ed8" text-decoration="underline">codePoste#, codeJeu#</text>
             <text x="575" y="149" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#334155">dateInstall</text>
           </svg>
         </div>
@@ -411,15 +411,15 @@
         <h3>Erreur 1 — Sens de la clé étrangère inversé</h3>
         <p>Dans un lycée, un <strong>Élève</strong> appartient à une seule <strong>Classe</strong>, et une <strong>Classe</strong> contient plusieurs élèves. Un étudiant propose :</p>
         <div class="schema-list">
-          <strong>Classe</strong> (<span class="pk">#codeCl</span>, niveau, <span class="fk">numEleve#</span>)<br>
-          <strong>Eleve</strong> (<span class="pk">#numEleve</span>, nom, prenom)
+          <strong>Classe</strong> (<span class="pk"><u>codeCl</u></span>, niveau, <span class="fk">numEleve#</span>)<br>
+          <strong>Eleve</strong> (<span class="pk"><u>numEleve</u></span>, nom, prenom)
         </div>
         <p><strong>Question :</strong> Pourquoi cette conception bloque-t-elle dès le deuxième élève d'une classe ? Proposez la correction.</p>
         <div class="answer-lines"><div class="answer-line"></div></div>
         <div class="solution">
           <span class="solution-label">Corrigé — Erreur 1</span>
           La clé étrangère a été placée du mauvais côté (côté <code>1</code> au lieu du côté <code>N</code>). Une ligne de <code>Classe</code> ne peut stocker qu'un seul <code>numEleve</code>. Correction :<br>
-          <code>Classe(#codeCl, niveau)</code> et <code>Eleve(#numEleve, nom, prenom, codeCl#)</code>.
+          <code>Classe(<u>codeCl</u>, niveau)</code> et <code>Eleve(<u>numEleve</u>, nom, prenom, codeCl#)</code>.
         </div>
       </div>
 
@@ -429,7 +429,7 @@
         <table>
           <thead>
             <tr>
-              <th>#numSess</th>
+              <th><u>numSess</u></th>
               <th>dateSess</th>
               <th>dureeH</th>
               <th>numInscr#</th>
@@ -476,7 +476,7 @@
         <div class="answer-lines"><div class="answer-line"></div></div>
         <div class="solution">
           <span class="solution-label">Corrigé — Erreur 3</span>
-          <strong>Non.</strong> C'est une relation <code>N-N</code>. Il faut créer une table d'association, par exemple : <code>Consultation(#idMed#, #idPat#, #dateCons, diagnostic)</code> (ou avec un identifiant propre <code>#numCons</code> si un patient peut voir le même médecin plusieurs fois).
+          <strong>Non.</strong> C'est une relation <code>N-N</code>. Il faut créer une table d'association, par exemple : <code>Consultation(<u>idMed#</u>, <u>idPat#</u>, <u>dateCons</u>, diagnostic)</code> (ou avec un clé primaire propre <code><u>numCons</u></code> si un patient peut voir le même médecin plusieurs fois).
         </div>
       </div>
     </section>
@@ -521,10 +521,10 @@
         <p><strong>2. Liens :</strong> <code>Client</code> — <code>Commande</code> : <strong>1-N</strong> | <code>Commande</code> — <code>Produit</code> : <strong>N-N</strong> (avec attribut porté <code>qteCmd</code>).</p>
         <p><strong>3. Modèle relationnel (4 tables) :</strong></p>
         <div class="schema-list">
-          <strong>Client</strong> (<span class="pk">#idClt</span>, nom, prenom, ville, tel, dateInscr)<br>
-          <strong>Produit</strong> (<span class="pk">#refProd</span>, designation, categorie, prixUnit, qteStock)<br>
-          <strong>Commande</strong> (<span class="pk">#numCmd</span>, dateCmd, <span class="fk">idClt#</span>)<br>
-          <strong>LigneCommande</strong> (<span class="pk">#numCmd#</span>, <span class="pk">#refProd#</span>, qteCmd)
+          <strong>Client</strong> (<span class="pk"><u>idClt</u></span>, nom, prenom, ville, tel, dateInscr)<br>
+          <strong>Produit</strong> (<span class="pk"><u>refProd</u></span>, designation, categorie, prixUnit, qteStock)<br>
+          <strong>Commande</strong> (<span class="pk"><u>numCmd</u></span>, dateCmd, <span class="fk">idClt#</span>)<br>
+          <strong>LigneCommande</strong> (<span class="pk"><u>numCmd#</u></span>, <span class="pk"><u>refProd#</u></span>, qteCmd)
         </div>
         <p style="margin-bottom:0;"><strong>4. Ordre de création / peuplement :</strong> D'abord les tables mères indépendantes (<code>Client</code> et <code>Produit</code>), puis <code>Commande</code> (qui référence <code>Client</code>), et enfin <code>LigneCommande</code> (qui référence <code>Commande</code> et <code>Produit</code>).</p>
       </div>
@@ -548,7 +548,7 @@
       </div>
 
       <div class="quiz-item">
-        <strong>3. Structure :</strong> Dans la table <code>LigneCommande(#numCmd#, #refProd#, qteCmd)</code>, pourquoi la clé primaire est-elle composée de deux champs ?
+        <strong>3. Structure :</strong> Dans la table <code>LigneCommande(<u>numCmd#</u>, <u>refProd#</u>, qteCmd)</code>, pourquoi la clé primaire est-elle composée de deux champs ?
         <div class="quiz-answer">Réponse : Parce qu'une même commande contient plusieurs produits différents, et un même produit apparaît dans plusieurs commandes. Seul le couple (numCmd, refProd) identifie une ligne de manière unique.</div>
       </div>
 
