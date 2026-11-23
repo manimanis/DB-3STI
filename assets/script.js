@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function promptTeacherPassword() {
-    const entered = window.prompt("Espace Enseignant STI — Saisir le code d'accès (ou 'sti2026') :");
+    const entered = window.prompt("Espace Enseignant STI — Saisir le code d'accès :");
     if (entered === null) return;
     const clean = entered.trim().toLowerCase();
     if (TEACHER_PASSWORDS.includes(clean)) {
